@@ -13,7 +13,7 @@ namespace Image_Generator.Models
 {
     class Downloader
     {
-        private const string LOCATION = @"C:\Users\lukas\source\repos\Image Generator\Image Generator\Models\Images\";
+        private const string LOCATION = @"..\..\Models\Images\";
 
         private string ApiKey { get; }
         private Flickr myFlickr { get; }
