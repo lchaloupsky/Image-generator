@@ -9,7 +9,7 @@ namespace Image_Generator
     static class Program
     {
         /// <summary>
-        /// Hlavní vstupní bod aplikace.
+        /// Main entry point of the application
         /// </summary>
         [STAThread]
         static void Main()

@@ -32,8 +32,8 @@
             this.generatedImage = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.generateButton = new System.Windows.Forms.Button();
-            this.sentenceBox = new System.Windows.Forms.TextBox();
             this.saveButton = new System.Windows.Forms.Button();
+            this.sentenceBox = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.generatedImage)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
@@ -91,15 +91,7 @@
             this.generateButton.TabIndex = 0;
             this.generateButton.Text = "Generate";
             this.generateButton.UseVisualStyleBackColor = true;
-            this.generateButton.Click += new System.EventHandler(this.generateButton_Click);
-            // 
-            // sentenceBox
-            // 
-            this.sentenceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.sentenceBox.Location = new System.Drawing.Point(3, 39);
-            this.sentenceBox.Name = "sentenceBox";
-            this.sentenceBox.Size = new System.Drawing.Size(408, 22);
-            this.sentenceBox.TabIndex = 2;
+            this.generateButton.Click += new System.EventHandler(this.GenerateButton_Click);
             // 
             // saveButton
             // 
@@ -110,7 +102,15 @@
             this.saveButton.TabIndex = 1;
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
+            // 
+            // sentenceBox
+            // 
+            this.sentenceBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.sentenceBox.Location = new System.Drawing.Point(3, 39);
+            this.sentenceBox.Name = "sentenceBox";
+            this.sentenceBox.Size = new System.Drawing.Size(408, 22);
+            this.sentenceBox.TabIndex = 2;
             // 
             // Form1
             // 
@@ -121,7 +121,6 @@
             this.MinimumSize = new System.Drawing.Size(852, 580);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.generatedImage)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);

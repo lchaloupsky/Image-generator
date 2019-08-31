@@ -11,19 +11,32 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models
 {
+    /// <summary>
+    /// Class to downloading images, that are not already stored
+    /// </summary>
     class Downloader
     {
+        // Where to save images
         private const string LOCATION = @"..\..\Models\Images\";
 
-        private string ApiKey { get; }
-        private Flickr myFlickr { get; }
+        // Flickr API for downloading images
+        private Flickr MyFlickr { get; }
 
+        /// <summary>
+        /// Constructor of Downloader
+        /// </summary>
+        /// <param name="apiKey">api key needed for access to Flickr</param>
+        /// <param name="secret">secret key needed for access to Flickr</param>
         public Downloader(string apiKey, string secret)
         {
-            this.ApiKey = apiKey;
-            this.myFlickr = new Flickr(this.ApiKey, secret);
+            this.MyFlickr = new Flickr(apiKey, secret);
         }
 
+        /// <summary>
+        /// Function for downloading multiple images
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns>List of newly dowloaded images</returns>
         public List<Image> DownloadImages(List<string> items)
         {
             var downloaded = new List<Image>();
@@ -35,9 +48,14 @@ namespace Image_Generator.Models
             return downloaded;
         }
 
+        /// <summary>
+        /// Function for downloading new image
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns>New downloaded image</returns>
         public Image DownloadImage(string imageName)
         {
-            var photos = this.myFlickr.PhotosSearch(new PhotoSearchOptions()
+            var photos = this.MyFlickr.PhotosSearch(new PhotoSearchOptions()
             {
                 SortOrder = PhotoSearchSortOrder.Relevance,
                 MediaType = MediaType.Photos,
@@ -55,13 +73,15 @@ namespace Image_Generator.Models
                     fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
                     client.DownloadFile(new Uri(photos[0].Medium640Url), LOCATION + fileName);
                 }
-                catch (WebException e)
+                catch (WebException)
                 {
+                    // TODO log here in future
                     Console.WriteLine("Network Error");
-                    Console.WriteLine(e.Message);
+                    throw;
                 }
             }
 
+            // Returning of newly dowloaded image
             return new Bitmap(LOCATION + fileName);
         }
     }
