@@ -14,3 +14,5 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Sec
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Permissions.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Principal.Windows.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CopyComplete
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.xml

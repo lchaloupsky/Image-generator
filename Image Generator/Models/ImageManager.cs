@@ -22,8 +22,10 @@ namespace Image_Generator.Models
 
         public ImageManager()
         {
-            this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"]);
-            this.MyManager = new FileManager(@"..\..\Models\Images\");
+            string location = System.IO.Path.Combine("..", "..", "Models", "Images");
+
+            this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
+            this.MyManager = new FileManager(location);
             this.Cache = new Dictionary<string, Image>();
         }
 
@@ -103,6 +105,7 @@ namespace Image_Generator.Models
                     throw new ArgumentException();
             }
 
+            // Saving the image itself
             image.Save(newLocation, format);
         }
     }

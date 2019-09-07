@@ -36,6 +36,9 @@
     <Reference Include="FlickrNet, Version=3.26.0.0, Culture=neutral, PublicKeyToken=2491df59efa5d132, processorArchitecture=MSIL">
       <HintPath>..\packages\FlickrNet.3.26.0\lib\net20\FlickrNet.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.ConfigurationManager, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -73,9 +76,14 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Downloader.cs" />
+    <Compile Include="Models\Drawable.cs" />
     <Compile Include="Models\FileManager.cs" />
     <Compile Include="Models\ImageManager.cs" />
+    <Compile Include="Models\Interfaces\IDrawable.cs" />
+    <Compile Include="Models\Parts of speech\Noun.cs" />
+    <Compile Include="Models\Parts of speech\PartOfSpeech.cs" />
     <Compile Include="Models\Renderer.cs" />
+    <Compile Include="Models\UDPipeParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">

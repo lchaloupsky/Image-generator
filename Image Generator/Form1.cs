@@ -11,6 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Image_Generator.Models.Parts_of_speech;
 
 namespace Image_Generator
 {
@@ -20,14 +21,16 @@ namespace Image_Generator
     public partial class Form1 : Form
     {
         private ImageManager Manager { get; }
-        private Renderer MyRenderer { get;}
+        private Renderer MyRenderer { get; }
         private Bitmap MyBitmap { get; set; }
-    
+        private UDPipeParser MyParser { get; }
+
         public Form1()
         {
             InitializeComponent();
             this.MyRenderer = new Renderer(this.generatedImage.Width, this.generatedImage.Height);
             this.Manager = new ImageManager();
+            this.MyParser = new UDPipeParser("english-ud-1.2-160523", this.Manager);
         }
 
         //Temporary func to check sentence
@@ -35,7 +38,10 @@ namespace Image_Generator
         {
             //TODO Check then by response from REST API
             if (this.sentenceBox.Text == "")
+            {
+                ShowErrorMessage("You have to write sentence first");
                 return false;
+            }
 
             return true;
         }
@@ -47,21 +53,35 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void GenerateButton_Click(object sender, EventArgs e)
         {
+            // Check some basic info about text
             if (!CheckSentence())
-            {
-                ShowErrorMessage("You have to write sentence first");
                 return;
-            }
 
-            //Catch there or catch in the original function and then return new Exception???
+            // Catch there or catch in the original function and then return new Exception???
             try
             {
+                // Parsing given text
+                var result = this.MyParser.ParseText(this.sentenceBox.Text);
+
+                // There will be given text processed
+                // ----------------------------------
+                // ----------------------------------
+
+                // In the future do some Drawable Manager, to avoid drawing some pictures again?
+                // Getting final images to draw
+                var imagesToDraw = new List<Image>();
+                foreach (var noun in result.SelectMany(x => x).ToList())
+                    imagesToDraw.Add(((Noun)noun).GetImage(this.Manager));
+
+                // Drawing picture from processed input text
+                // In the future pass renderer to Drawable manager to each drawable draws itself 
                 this.MyRenderer.DrawPicture(
-                    this.Manager.GetImages(this.sentenceBox.Text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)), 
-                    this.generatedImage.Width, 
+                    imagesToDraw,
+                    this.generatedImage.Width,
                     this.generatedImage.Height
                     );
 
+                // Get drawn image bitmap to show in form
                 this.generatedImage.Image = MyRenderer.GetImage();
             }
             catch (Exception ex)
@@ -71,7 +91,7 @@ namespace Image_Generator
                 else if (ex is IOException)
                     ShowErrorMessage("IO error");
                 else
-                    ShowErrorMessage("Unknown exception");
+                    ShowErrorMessage("Unknown exception\n" + ex.ToString());
             }
         }
 
@@ -102,7 +122,7 @@ namespace Image_Generator
         /// <summary>
         /// Return new configured SaveFileDialog
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Configured SaveFileDialog</returns>
         private SaveFileDialog ReturnConfiguredSaveFileDialog()
         {
             return new SaveFileDialog()
@@ -119,10 +139,21 @@ namespace Image_Generator
         /// <summary>
         /// Function to showing error messages
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="message">Message to show</param>
         private void ShowErrorMessage(string message)
         {
             MessageBox.Show(message, "Image Generator", MessageBoxButtons.OK);
+        }
+
+        /// <summary>
+        /// Only calls generate function when Enter key is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">Pressed key</param>
+        private void SentenceBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+                GenerateButton_Click(sender, e);
         }
     }
 }

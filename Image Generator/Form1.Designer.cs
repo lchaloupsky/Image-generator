@@ -111,6 +111,7 @@
             this.sentenceBox.Name = "sentenceBox";
             this.sentenceBox.Size = new System.Drawing.Size(408, 22);
             this.sentenceBox.TabIndex = 2;
+            this.sentenceBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.SentenceBox_KeyUp);
             // 
             // Form1
             // 

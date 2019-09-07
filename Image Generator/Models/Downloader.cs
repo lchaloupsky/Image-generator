@@ -17,7 +17,7 @@ namespace Image_Generator.Models
     class Downloader
     {
         // Where to save images
-        private const string LOCATION = @"..\..\Models\Images\";
+        private string Location { get; }
 
         // Flickr API for downloading images
         private Flickr MyFlickr { get; }
@@ -27,13 +27,15 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="apiKey">api key needed for access to Flickr</param>
         /// <param name="secret">secret key needed for access to Flickr</param>
-        public Downloader(string apiKey, string secret)
+        /// <param name="location">Location where to store downloaded images</param>
+        public Downloader(string apiKey, string secret, string location)
         {
             this.MyFlickr = new Flickr(apiKey, secret);
+            this.Location = location;
         }
 
         /// <summary>
-        /// Function for downloading multiple images
+        /// Method for downloading multiple images
         /// </summary>
         /// <param name="items"></param>
         /// <returns>List of newly dowloaded images</returns>
@@ -49,29 +51,25 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Function for downloading new image
+        /// Method for downloading new image
         /// </summary>
         /// <param name="imageName"></param>
         /// <returns>New downloaded image</returns>
         public Image DownloadImage(string imageName)
         {
-            var photos = this.MyFlickr.PhotosSearch(new PhotoSearchOptions()
-            {
-                SortOrder = PhotoSearchSortOrder.Relevance,
-                MediaType = MediaType.Photos,
-                PerPage = 1,
-                Tags = imageName +", single",
-                Page = 1,
-                ContentType = ContentTypeSearch.PhotosOnly
-            });
-
             string fileName = "";
+            var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageName));
+
             using (WebClient client = new WebClient())
             {
                 try
                 {
-                    fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
-                    client.DownloadFile(new Uri(photos[0].Medium640Url), LOCATION + fileName);
+                    fileName = imageName
+                               .ToLower() + photos[0]
+                               .Medium640Url
+                               .Substring(photos[0].Medium640Url.LastIndexOf('.'));
+
+                    client.DownloadFile(new Uri(photos[0].Medium640Url), ReturnImageAdress(fileName));
                 }
                 catch (WebException)
                 {
@@ -81,8 +79,36 @@ namespace Image_Generator.Models
                 }
             }
 
-            // Returning of newly dowloaded image
-            return new Bitmap(LOCATION + fileName);
+            // Return newly dowloaded image
+            return new Bitmap(ReturnImageAdress(fileName));
+        }
+
+        /// <summary>
+        /// Auxiliary method for creating image adress to store
+        /// </summary>
+        /// <param name="fileName">Name of an image to download</param>
+        /// <returns>Created image adress</returns>
+        private string ReturnImageAdress(string fileName)
+        {
+            return Location + System.IO.Path.DirectorySeparatorChar + fileName;
+        }
+
+        /// <summary>
+        /// Auxiliary method to configure photo search options
+        /// </summary>
+        /// <param name="imageName">name to search for</param>
+        /// <returns>Configured PhotoSearchOptions</returns>
+        private PhotoSearchOptions ConfigurePhotoSearchOptions(string imageName)
+        {
+            return new PhotoSearchOptions()
+            {
+                SortOrder = PhotoSearchSortOrder.Relevance,
+                MediaType = MediaType.Photos,
+                PerPage = 1,
+                Text = imageName,
+                Page = 1,
+                ContentType = ContentTypeSearch.PhotosOnly
+            };
         }
     }
 }
