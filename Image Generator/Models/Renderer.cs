@@ -36,22 +36,6 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Function for checking size of current draw field and form field sizes
-        /// </summary>
-        /// <param name="width">Current width of form draw field</param>
-        /// <param name="height">Current height of form draw field</param>
-        public void CheckSizes(int width, int height)
-        {
-            if (this.DrawField.Width != width || this.DrawField.Height != height)
-            {
-                this.DrawField = new Bitmap(width, height);
-                this.MyGraphics = Graphics.FromImage(DrawField);
-            }
-            else
-                ResetImage();
-        }
-
-        /// <summary>
         /// Return actual draw field
         /// </summary>
         /// <returns>Drawn image</returns>
@@ -60,35 +44,22 @@ namespace Image_Generator.Models
             return this.DrawField;
         }
 
-        /// <summary>
-        /// Draws whole new picture from images
-        /// </summary>
-        /// <param name="images">List of images to draw</param>
-        /// <param name="width">Width of form draw field</param>
-        /// <param name="height">Height of form draw field</param>
-        public void DrawPicture(IEnumerable<Image> images, int width, int height)
+        public void UpdateSizes(int newWidth, int newHeight)
         {
-            CheckSizes(width, height);
-            DrawImages(images);
+            this.DrawField = new Bitmap(newWidth, newHeight);
+            this.MyGraphics = Graphics.FromImage(DrawField);
         }
 
-        /// <summary>
-        /// Function for drawing multiple images to current draw field
-        /// </summary>
-        /// <param name="images">List of images to draw</param>
-        public void DrawImages(IEnumerable<Image> images)
+        public void DrawImage(Image image)
         {
-            foreach (var image in images)
-            {
-                DrawImage(image);
-            }
+            DrawImage(image, LastX, LastY);
         }
 
         /// <summary>
         /// Function to draw single image to current draw field
         /// </summary>
         /// <param name="image">Image to draw</param>
-        public void DrawImage(Image image)
+        public void DrawImage(Image image, int x, int y)
         {
             int finalW = MAX_IMAGE_WIDTH,
                 finalH = MAX_IMAGE_HEIGHT;
@@ -108,15 +79,16 @@ namespace Image_Generator.Models
             }
 
             // Shift to next row of images if current row is fully drawn
-            if (LastX + finalW > this.DrawField.Width)
+            if (x + finalW > this.DrawField.Width)
             {
-                LastX = 0;
-                LastY += MAX_IMAGE_HEIGHT;
+                x = 0;
+                y += MAX_IMAGE_HEIGHT;
             }
 
             // Finally drawing of the current image
-            this.MyGraphics.DrawImage(image, LastX, LastY, finalW, finalH);
-            LastX += finalW;
+            this.MyGraphics.DrawImage(image, x, y, finalW, finalH);
+            LastX = x + finalW;
+            LastY = y;
         }
 
         /// <summary>

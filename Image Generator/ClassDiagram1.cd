@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Image_Generator.Form1" Collapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BABCAAAQACAAAAABAACAQAADAAAoBwAASAAAAAAAACA=</HashCode>
+      <FileName>Form1.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Manager" />
+      <Property Name="MyRenderer" />
+      <Property Name="MyParser" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Image_Generator.Models.Downloader" Collapsed="true">
+    <Position X="6" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAgIAAAAEAAAAAAAAAAAAAAQIAAA=</HashCode>
+      <FileName>Models\Downloader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Image_Generator.Models.Drawable" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAAAAAAAgAAAAAAAAAAAYAA=</HashCode>
+      <FileName>Models\Drawable.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Image_Generator.Models.FileManager" Collapsed="true">
+    <Position X="1.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAAAAAACAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Models\FileManager.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Image_Generator.Models.ImageManager" Collapsed="true">
+    <Position X="3.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAgAAAAAAAAAAAAAAAQAAACAAAAAAAAAAAAABA=</HashCode>
+      <FileName>Models\ImageManager.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyDownloader" />
+      <Property Name="MyManager" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Image_Generator.Models.Renderer" Collapsed="true">
+    <Position X="6" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAABAAIAAAAAAAwAACACAAQCAAAAAAAAAAAAAJIAAA=</HashCode>
+      <FileName>Models\Renderer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Image_Generator.Models.UDPipeParser" Collapsed="true">
+    <Position X="1.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAACQAAAAAAAAAABQAABQgAAQBAAAA=</HashCode>
+      <FileName>Models\UDPipeParser.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Manager" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Image_Generator.Models.Text_elements.TextElement" Collapsed="true">
+    <Position X="2.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAHAAAAAAAAAgAAEAAAAAAAAAAAAAQEAAAAAAAAEAAA=</HashCode>
+      <FileName>Models\Text elements\TextElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Image_Generator.Models.Text_elements.Element" Collapsed="true">
+    <Position X="2.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAQAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Text elements\Element.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MyDrawable" />
+    </ShowAsAssociation>
+  </Class>
+  <Interface Name="Image_Generator.Models.Interfaces.IDrawable" Collapsed="true">
+    <Position X="5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAAAAAAAAAAAAgAAAAAAAAAAAYAA=</HashCode>
+      <FileName>Models\Interfaces\IDrawable.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

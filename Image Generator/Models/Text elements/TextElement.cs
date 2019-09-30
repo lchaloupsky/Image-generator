@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Image_Generator.Models.Parts_of_speech
+namespace Image_Generator.Models.Text_elements
 {
     /// <summary>
     /// Abstract class for parts of speech
     /// </summary>
-    abstract class PartOfSpeech
+    class TextElement
     {
         // Word form in text
         public string Word { get; protected set; }
@@ -20,10 +21,13 @@ namespace Image_Generator.Models.Parts_of_speech
         // Word ID in the text
         public int ID { get; }
 
+        // Drawable element of the sentence
+        public Drawable MyDrawable { get; set; }
+
         // TODO some needed properties?
         // TODO in FUTURE some links to other parts?
 
-        public PartOfSpeech(string word, string lemma, int id)
+        public TextElement(string word, string lemma, int id)
         {
             this.Word = word;
             this.Lemma = lemma;
@@ -39,16 +43,29 @@ namespace Image_Generator.Models.Parts_of_speech
                             , this.Word, this.Lemma);
         }
 
-        // Preliminarily methods that will be maybe helpful
+        /// <summary>
+        /// Method to get image of a Noun after all text processing
+        /// (In the future will be return value void)
+        /// </summary>
+        /// <param name="manager">Manager to get image</param>
+        /// <returns>Image for that Noun</returns>
+        public Image GetImage(ImageManager manager)
+        {
+            MyDrawable = new Drawable(manager.GetImage(this.Word));
+            return MyDrawable.MyImage;
+        }
 
-        abstract public void Merge(List<PartOfSpeech> parts);
+        public void Draw(Renderer renderer)
+        {
+            this.MyDrawable.Draw(renderer);
+        }
 
-        protected void AddWordToBeginning(string word)
+        private void AddWordToBeginning(string word)
         {
             this.Word = word + " " + this.Word;
         }
 
-        protected void AddWordToEnd(string word)
+        private void AddWordToEnd(string word)
         {
             this.Word += " " + word;
         }

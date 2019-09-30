@@ -28,7 +28,7 @@ namespace Image_Generator.Models
         /// <returns>Truth value if image is already stored in the current location</returns>
         public bool CheckImageExistence(string imageName)
         {
-            return Directory.EnumerateFiles(this.Location, imageName + "*").Any();
+            return Directory.EnumerateFiles(this.Location, imageName + "." + "*").Any();
         }
 
         /// <summary>

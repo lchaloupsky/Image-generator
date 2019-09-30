@@ -122,6 +122,7 @@
             this.MinimumSize = new System.Drawing.Size(852, 580);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.generatedImage)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);

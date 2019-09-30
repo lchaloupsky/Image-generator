@@ -16,6 +16,6 @@ namespace Image_Generator.Models.Interfaces
         int X { get; set; }
         int Y { get; set; }
 
-        Image Draw(); //TODO in future pass renderer, because object will have coordinates?
+        void Draw(Renderer renderer);
     }
 }

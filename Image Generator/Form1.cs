@@ -11,7 +11,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Image_Generator.Models.Parts_of_speech;
+using Image_Generator.Models.Text_elements;
 
 namespace Image_Generator
 {
@@ -67,19 +67,17 @@ namespace Image_Generator
                 // ----------------------------------
                 // ----------------------------------
 
+                // Clear draw field
+                this.MyRenderer.ResetImage();
+
                 // In the future do some Drawable Manager, to avoid drawing some pictures again?
                 // Getting final images to draw
                 var imagesToDraw = new List<Image>();
                 foreach (var noun in result.SelectMany(x => x).ToList())
-                    imagesToDraw.Add(((Noun)noun).GetImage(this.Manager));
-
-                // Drawing picture from processed input text
-                // In the future pass renderer to Drawable manager to each drawable draws itself 
-                this.MyRenderer.DrawPicture(
-                    imagesToDraw,
-                    this.generatedImage.Width,
-                    this.generatedImage.Height
-                    );
+                {
+                    noun.GetImage(this.Manager);
+                    noun.Draw(this.MyRenderer);
+                }
 
                 // Get drawn image bitmap to show in form
                 this.generatedImage.Image = MyRenderer.GetImage();
@@ -154,6 +152,12 @@ namespace Image_Generator
         {
             if (e.KeyCode == Keys.Enter)
                 GenerateButton_Click(sender, e);
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            if (this.MyRenderer != null && this.generatedImage != null)
+                this.MyRenderer.UpdateSizes(this.generatedImage.Width, this.generatedImage.Height);
         }
     }
 }

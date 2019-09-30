@@ -1,4 +1,4 @@
-﻿using Image_Generator.Models.Parts_of_speech;
+﻿using Image_Generator.Models.Text_elements;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -32,9 +32,9 @@ namespace Image_Generator.Models
         /// Creates for each word in sentence class that correspondonds to its part of speech
         /// </summary>
         /// <param name="text">Sentence given by user</param>
-        public List<List<PartOfSpeech>> ParseText(string text)
+        public List<List<TextElement>> ParseText(string text)
         {
-            var parts = new List<List<PartOfSpeech>>();
+            var parts = new List<List<TextElement>>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 parts.Add(ParseSentence(line));
@@ -48,14 +48,14 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="sentence">Sentence to parse</param>
         /// <returns>List of parsed elements</returns>
-        public List<PartOfSpeech> ParseSentence(string sentence)
+        public List<TextElement> ParseSentence(string sentence)
         {
             string json;
             using (WebClient client = new WebClient())
                 json = client.DownloadString(ConstructURL(sentence));
 
             var JsonObject = JObject.Parse(json);
-            var parts = new List<PartOfSpeech>();
+            var parts = new List<TextElement>();
             foreach (string line in JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if (line[0].Equals('#'))
@@ -76,7 +76,7 @@ namespace Image_Generator.Models
         /// Creates corresponding class to part of speech of the word.
         /// </summary>
         /// <param name="line">Line to parse</param>
-        private PartOfSpeech ParseJSONResponseLine(string line)
+        private TextElement ParseJSONResponseLine(string line)
         {
             // FUTURE --> there create classes by a factory ?
             var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
@@ -85,13 +85,13 @@ namespace Image_Generator.Models
                 return null;
 
             // In the future make elements here via Factory?
-            PartOfSpeech part = null;
+            TextElement part = null;
             int pendingID = int.Parse(parts[6]);
             switch (parts[3])
             {
                 case "NOUN":
                 case "PROPN":
-                    part = new Noun(parts[1], parts[2], int.Parse(parts[0]));
+                    part = new TextElement(parts[1], parts[2], int.Parse(parts[0]));
                     break;
                 default:
                     break;

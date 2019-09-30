@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Image_Generator.Models.Interfaces;
 
 namespace Image_Generator.Models
 {
@@ -36,9 +37,9 @@ namespace Image_Generator.Models
         /// Function to draw
         /// </summary>
         /// <returns>Image to be drawn</returns>
-        public Image Draw()
+        public void Draw(Renderer renderer)
         {
-            return this.MyImage;
+            renderer.DrawImage(this.MyImage);
         }
     }
 }
