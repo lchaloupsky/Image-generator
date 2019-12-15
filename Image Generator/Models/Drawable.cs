@@ -11,7 +11,7 @@ namespace Image_Generator.Models
     /// <summary>
     /// Class that represents drawable element in sentence
     /// </summary>
-    class Drawable : Interfaces.IDrawable
+    class Drawable
     {
         // Image to draw
         public Image MyImage { get; }

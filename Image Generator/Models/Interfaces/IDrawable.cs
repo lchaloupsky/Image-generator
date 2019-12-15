@@ -12,10 +12,11 @@ namespace Image_Generator.Models.Interfaces
     /// </summary>
     interface IDrawable
     {
-        Image MyImage { get; }
         int X { get; set; }
         int Y { get; set; }
+        int Width { get; set; }
+        int Height { get; set; }
 
-        void Draw(Renderer renderer);
+        void Draw(Renderer renderer, ImageManager manager);
     }
 }

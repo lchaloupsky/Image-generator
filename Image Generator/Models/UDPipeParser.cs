@@ -1,4 +1,5 @@
-﻿using Image_Generator.Models.Text_elements;
+﻿using Image_Generator.Models.Interfaces;
+using Image_Generator.Models.Text_elements;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,10 +22,12 @@ namespace Image_Generator.Models
 
         private string Model { get; }
         private ImageManager Manager { get; }
+        private ElementFactory Factory { get; }
 
         public UDPipeParser(string model, ImageManager manager)
         {
             this.Model = model;
+            this.Factory = new ElementFactory();
         }
 
         /// <summary>
@@ -32,9 +35,9 @@ namespace Image_Generator.Models
         /// Creates for each word in sentence class that correspondonds to its part of speech
         /// </summary>
         /// <param name="text">Sentence given by user</param>
-        public List<List<TextElement>> ParseText(string text)
+        public List<IProcessable> ParseText(string text)
         {
-            var parts = new List<List<TextElement>>();
+            var parts = new List<IProcessable>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 parts.Add(ParseSentence(line));
@@ -48,27 +51,63 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="sentence">Sentence to parse</param>
         /// <returns>List of parsed elements</returns>
-        public List<TextElement> ParseSentence(string sentence)
+        public IProcessable ParseSentence(string sentence)
         {
             string json;
+            Dictionary<int, List<IProcessable>> dependencyTree; // Field of fields --> REDO
+
             using (WebClient client = new WebClient())
                 json = client.DownloadString(ConstructURL(sentence));
 
             var JsonObject = JObject.Parse(json);
             var parts = new List<TextElement>();
-            foreach (string line in JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+            var validLines = JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(line => !line[0].Equals('#'));
+            dependencyTree = GetDependencyTree(validLines);
+
+            return CompressDependencyTree(dependencyTree, new Root());
+        }
+
+        public Dictionary<int, List<IProcessable>> GetDependencyTree(IEnumerable<string> validLines)
+        {
+            int index;
+            string[] parts;
+            Element element;
+            Dictionary<int, List<IProcessable>> tree = new Dictionary<int, List<IProcessable>>();
+
+            foreach (string line in validLines)
             {
-                if (line[0].Equals('#'))
+                parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+                index = int.Parse(parts[6]);
+                element = this.Factory.CreateElement(parts);
+
+                if (element == null)
                     continue;
 
-                var result = ParseJSONResponseLine(line);
-                if (result is null)
-                    continue;
+                AddDependencyIntoTree(tree, element, index);
+            }             
 
-                parts.Add(result);
+            return tree;
+        }
+
+        public void AddDependencyIntoTree(Dictionary<int, List<IProcessable>> tree, IProcessable element, int index)
+        {
+            if (!tree.ContainsKey(index))
+                tree.Add(index, new List<IProcessable>());
+
+            tree[index].Add(element);
+        }
+
+        public IProcessable CompressDependencyTree(Dictionary<int, List<IProcessable>> tree, IProcessable element)
+        {
+            if (!tree.ContainsKey(element.Id))
+                return element;
+
+            foreach(var vertex in tree[element.Id])
+            {
+                element = element.Process(CompressDependencyTree(tree, vertex));
             }
 
-            return parts;
+            return element;
         }
 
         /// <summary>
@@ -76,28 +115,28 @@ namespace Image_Generator.Models
         /// Creates corresponding class to part of speech of the word.
         /// </summary>
         /// <param name="line">Line to parse</param>
-        private TextElement ParseJSONResponseLine(string line)
+        private void ParseJSONResponseLine(string line)
         {
             // FUTURE --> there create classes by a factory ?
             var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
 
             if (!int.TryParse(parts[0], out int wordID))
-                return null;
+                return;
 
             // In the future make elements here via Factory?
-            TextElement part = null;
+            IProcessable part = null;
             int pendingID = int.Parse(parts[6]);
             switch (parts[3])
             {
                 case "NOUN":
-                case "PROPN":
-                    part = new TextElement(parts[1], parts[2], int.Parse(parts[0]));
+                    part = new Noun(int.Parse(parts[0]), parts[2], parts[7]);
+                    break;
+                case "ADJ":
+                    part = new Adjective(int.Parse(parts[0]), parts[2], parts[7]);
                     break;
                 default:
-                    break;
+                    return;
             }
-
-            return part;
         }
 
         /// <summary>

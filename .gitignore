@@ -1,1 +1,8 @@
+# visual studio folder
 .vs/
+
+# all images
+Image Generator/Models/Images/*
+
+# empty secret file, just to folder can be commited to repo
+!Image Generator/Models/Images/.gitkeep.txt

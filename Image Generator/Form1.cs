@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Image_Generator.Models.Text_elements;
+using Image_Generator.Models.Interfaces;
 
 namespace Image_Generator
 {
@@ -73,10 +74,11 @@ namespace Image_Generator
                 // In the future do some Drawable Manager, to avoid drawing some pictures again?
                 // Getting final images to draw
                 var imagesToDraw = new List<Image>();
-                foreach (var noun in result.SelectMany(x => x).ToList())
+                foreach (var root in result)
                 {
-                    noun.GetImage(this.Manager);
-                    noun.Draw(this.MyRenderer);
+                    ((IDrawable)root).Draw(this.MyRenderer, this.Manager);
+                    //noun.GetImage(this.Manager);
+                    //noun.Draw(this.MyRenderer);
                 }
 
                 // Get drawn image bitmap to show in form

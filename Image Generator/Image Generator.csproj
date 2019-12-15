@@ -77,9 +77,17 @@
     </Compile>
     <Compile Include="Models\Downloader.cs" />
     <Compile Include="Models\Drawable.cs" />
+    <Compile Include="Models\Edges\DefaultEdge.cs" />
+    <Compile Include="Models\ElementFactory.cs" />
     <Compile Include="Models\FileManager.cs" />
     <Compile Include="Models\ImageManager.cs" />
     <Compile Include="Models\Interfaces\IDrawable.cs" />
+    <Compile Include="Models\Interfaces\IProcessable.cs" />
+    <Compile Include="Models\Text elements\Adjective.cs" />
+    <Compile Include="Models\Text elements\Element.cs" />
+    <Compile Include="Models\Text elements\Noun.cs" />
+    <Compile Include="Models\Text elements\NounSet.cs" />
+    <Compile Include="Models\Text elements\Root.cs" />
     <Compile Include="Models\Text elements\TextElement.cs" />
     <Compile Include="Models\Renderer.cs" />
     <Compile Include="Models\UDPipeParser.cs" />
