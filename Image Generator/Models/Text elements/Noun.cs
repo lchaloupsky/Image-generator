@@ -20,6 +20,9 @@ namespace Image_Generator.Models.Text_elements
         // Tree dependencies of this noun
         public List<DefaultEdge> Dependencies { get; }
 
+        // List of adpositions belonging to this noun
+        private List<Adposition> Adpositions { get; }
+
         // Number of instances of this noun, if its plural
         public int Number { get; set; } = NUMBER_OF_INSTANCES;
 
@@ -39,6 +42,7 @@ namespace Image_Generator.Models.Text_elements
         {
             this.Extensions = new List<Element>();
             this.Dependencies = new List<DefaultEdge>();
+            this.Adpositions = new List<Adposition>();
         }
 
         public Noun(int Id, string Lemma, string Dependency, int Number) : this(Id, Lemma, Dependency)
@@ -83,6 +87,9 @@ namespace Image_Generator.Models.Text_elements
                     break;
                 case NounSet nounSet:
                     this.Dependencies.Add(new DefaultEdge(this, nounSet));
+                    break;
+                case Adposition adp:
+                    this.Adpositions.Add(adp);
                     break;
                 default:
                     break;
