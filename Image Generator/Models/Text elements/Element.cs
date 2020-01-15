@@ -11,9 +11,9 @@ namespace Image_Generator.Models.Text_elements
     {
         public int Id { get; }
 
-        protected string Lemma { get; set; }
+        public string Lemma { get; set; }
 
-        public string DependencyType { get; set; }
+        public string DependencyType { get; private set; }
 
         public Element(int Id, string Lemma, string DependencyType)
         {
@@ -22,11 +22,11 @@ namespace Image_Generator.Models.Text_elements
             this.DependencyType = DependencyType;
         }
 
-        public Element(int Id)
+        public Element(int Id) : this(Id, "", "") { }
+
+        public override string ToString()
         {
-            this.Id = Id;
-            this.Lemma = "";
-            this.DependencyType = "";
+            return this.Lemma;
         }
 
         public abstract IProcessable Process(IProcessable element);

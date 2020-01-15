@@ -1,8 +1,10 @@
-﻿using Image_Generator.Models.Interfaces;
+﻿using Image_Generator.Models.Factories;
+using Image_Generator.Models.Interfaces;
 using Image_Generator.Models.Text_elements;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -22,12 +24,14 @@ namespace Image_Generator.Models
 
         private string Model { get; }
         private ImageManager Manager { get; }
-        private ElementFactory Factory { get; }
+        private ElementFactory ElementFactory { get; }
+        private IComparer<IProcessable> Comparer { get; }
 
         public UDPipeParser(string model, ImageManager manager)
         {
             this.Model = model;
-            this.Factory = new ElementFactory();
+            this.ElementFactory = new ElementFactory(new Root());
+            this.Comparer = new ElementComparer();
         }
 
         /// <summary>
@@ -35,13 +39,12 @@ namespace Image_Generator.Models
         /// Creates for each word in sentence class that correspondonds to its part of speech
         /// </summary>
         /// <param name="text">Sentence given by user</param>
-        public List<IProcessable> ParseText(string text)
+        public List<IProcessable> ParseText(string text, int width, int height)
         {
+            this.ElementFactory.Root.SetSizes(width, height);
             var parts = new List<IProcessable>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
-            {
                 parts.Add(ParseSentence(line));
-            }
 
             return parts;
         }
@@ -60,25 +63,25 @@ namespace Image_Generator.Models
                 json = client.DownloadString(ConstructURL(sentence));
 
             var JsonObject = JObject.Parse(json);
-            var parts = new List<TextElement>();
+            var parts = new List<Element>();
             var validLines = JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(line => !line[0].Equals('#'));
             dependencyTree = GetDependencyTree(validLines);
 
-            return CompressDependencyTree(dependencyTree, new Root());
+            return CompressDependencyTree(dependencyTree, this.ElementFactory.Root);
         }
 
         public Dictionary<int, List<IProcessable>> GetDependencyTree(IEnumerable<string> validLines)
         {
             int index;
             string[] parts;
-            Element element;
+            IProcessable element;
             Dictionary<int, List<IProcessable>> tree = new Dictionary<int, List<IProcessable>>();
 
             foreach (string line in validLines)
             {
                 parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
                 index = int.Parse(parts[6]);
-                element = this.Factory.CreateElement(parts);
+                element = this.ElementFactory.Create(parts);
 
                 if (element == null)
                     continue;
@@ -102,41 +105,11 @@ namespace Image_Generator.Models
             if (!tree.ContainsKey(element.Id))
                 return element;
 
-            foreach(var vertex in tree[element.Id])
-            {
+            tree[element.Id].Sort(this.Comparer);
+            foreach (var vertex in tree[element.Id])
                 element = element.Process(CompressDependencyTree(tree, vertex));
-            }
 
             return element;
-        }
-
-        /// <summary>
-        /// Parses line from REST API JSON response.
-        /// Creates corresponding class to part of speech of the word.
-        /// </summary>
-        /// <param name="line">Line to parse</param>
-        private void ParseJSONResponseLine(string line)
-        {
-            // FUTURE --> there create classes by a factory ?
-            var parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
-
-            if (!int.TryParse(parts[0], out int wordID))
-                return;
-
-            // In the future make elements here via Factory?
-            IProcessable part = null;
-            int pendingID = int.Parse(parts[6]);
-            switch (parts[3])
-            {
-                case "NOUN":
-                    part = new Noun(int.Parse(parts[0]), parts[2], parts[7]);
-                    break;
-                case "ADJ":
-                    part = new Adjective(int.Parse(parts[0]), parts[2], parts[7]);
-                    break;
-                default:
-                    return;
-            }
         }
 
         /// <summary>
@@ -150,6 +123,14 @@ namespace Image_Generator.Models
                    MODEL_PARAM + Model +
                    CONST_PARAMS +
                    DATA_PARAM + sentence;
+        }
+
+        private class ElementComparer : IComparer<IProcessable>
+        {
+            public int Compare(IProcessable x, IProcessable y)
+            {
+                return x is Adposition ? -1 : (y is Adposition ? 1 : (x.Id < y.Id ? -1 : 1));
+            }
         }
     }
 }

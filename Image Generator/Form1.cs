@@ -55,14 +55,14 @@ namespace Image_Generator
         private void GenerateButton_Click(object sender, EventArgs e)
         {
             // Check some basic info about text
-            if (!CheckSentence())
+            if (!this.CheckSentence())
                 return;
 
             // Catch there or catch in the original function and then return new Exception???
             try
             {
                 // Parsing given text
-                var result = this.MyParser.ParseText(this.sentenceBox.Text);
+                var result = this.MyParser.ParseText(this.sentenceBox.Text, this.generatedImage.Width, this.generatedImage.Height);
 
                 // There will be given text processed
                 // ----------------------------------
@@ -76,6 +76,7 @@ namespace Image_Generator
                 var imagesToDraw = new List<Image>();
                 foreach (var root in result)
                 {
+                    ((IDrawable)root).Positionate();
                     ((IDrawable)root).Draw(this.MyRenderer, this.Manager);
                     //noun.GetImage(this.Manager);
                     //noun.Draw(this.MyRenderer);

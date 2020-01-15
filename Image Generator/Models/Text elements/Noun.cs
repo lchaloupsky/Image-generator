@@ -1,4 +1,5 @@
 ﻿using Image_Generator.Models.Edges;
+using Image_Generator.Models.Factories;
 using Image_Generator.Models.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -18,19 +19,25 @@ namespace Image_Generator.Models.Text_elements
         private List<Element> Extensions { get; }
 
         // Tree dependencies of this noun
-        public List<DefaultEdge> Dependencies { get; }
+        public List<Edge> Dependencies { get; }
 
         // List of adpositions belonging to this noun
-        private List<Adposition> Adpositions { get; }
+        public List<Adposition> Adpositions { get; set; }
 
         // Number of instances of this noun, if its plural
-        public int Number { get; set; } = NUMBER_OF_INSTANCES;
+        public int Number { get; set; }
 
         // Flag idicating if noun is plural or not
         private bool Plural { get; } = false;
 
         // Drawable of this noun
-        private Drawable MyDrawable { get; set; }
+        private Image MyDrawable { get; set; }
+        
+        // Factory for creating edges
+        private EdgeFactory EdgeFactory { get; } 
+
+        // Factory for creating elements
+        private ElementFactory ElementFactory { get; }
 
         // IDrawable inteface properties
         public int X { get; set; }
@@ -38,73 +45,136 @@ namespace Image_Generator.Models.Text_elements
         public int Width { get; set; }
         public int Height { get; set; }
 
-        public Noun(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<Element>();
-            this.Dependencies = new List<DefaultEdge>();
+            this.Dependencies = new List<Edge>();
             this.Adpositions = new List<Adposition>();
+            this.EdgeFactory = factory;
+            this.ElementFactory = elementFactory;
+            this.Width = width;
+            this.Height = height;
         }
 
-        public Noun(int Id, string Lemma, string Dependency, int Number) : this(Id, Lemma, Dependency)
-        {
-            this.Number = Number;
-            this.Plural = true;
-        }
-
-        public Noun(int Id, string Lemma, string Dependecy, bool Plural) : this(Id, Lemma, Dependecy)
+        public Noun(int Id, string Lemma, string Dependecy, bool Plural, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : this(Id, Lemma, Dependecy, factory, elementFactory, width, height)
         {
             this.Plural = Plural;
+            this.Number = NUMBER_OF_INSTANCES;
         }
 
         public void Draw(Renderer renderer, ImageManager manager)
         {
             this.Dependencies.ForEach(edge =>
             {
-                if (edge.Right is IDrawable)
-                    ((IDrawable)(edge.Right)).Draw(renderer, manager);
+                if (edge.Left != this)
+                    edge.Left.Draw(renderer, manager);
+                else if(edge.Right != this)
+                    edge.Right.Draw(renderer, manager);
             });
 
-            renderer.DrawImage(this.GetImage(manager).MyImage);
+            renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
         }
 
-        private Drawable GetImage(ImageManager manager)
+        public IEnumerable<Adposition> GetAdpositions()
         {
-            return (this.MyDrawable = new Drawable(manager.GetImage(this.GetFinalWordSequence())));
+            return this.Adpositions.SelectMany(x => x.GetAdpositions());
         }
 
+        public void ClearAdpositions()
+        {
+            this.Adpositions.Clear();
+        }
+
+        #region Processing depending elements
         public override IProcessable Process(IProcessable element)
         {
             switch (element)
             {
-                case Adjective adj:
-                    this.Extensions.Add(adj);
-                    break;
-                case Noun noun:
-                    if (noun.DependencyType == "conj")
-                        return new NounSet(this, noun);
-                    else
-                        this.Dependencies.Add(new DefaultEdge(this, noun));
-                    break;
-                case NounSet nounSet:
-                    this.Dependencies.Add(new DefaultEdge(this, nounSet));
-                    break;
-                case Adposition adp:
-                    this.Adpositions.Add(adp);
-                    break;
-                default:
-                    break;
+                case Adjective adj: return this.ProcessElement(adj);
+                case Noun noun: return this.ProcessElement(noun);
+                case NounSet nounSet: return this.ProcessElement(nounSet);
+                case Adposition adp: return this.ProcessElement(adp);
+                default: break;
             }
 
             return this;
         }
 
+        private IProcessable ProcessElement(Adposition adp)
+        {
+            this.Adpositions.Insert(0, adp);
+            return this;
+        }
+
+        private IProcessable ProcessElement(Adjective adj)
+        {
+            this.Extensions.Add(adj);
+            return this;
+        }
+
+        private IProcessable ProcessElement(Noun noun)
+        {
+            if (noun.DependencyType == "conj")
+                return this.ElementFactory.Create(this, noun);
+
+            this.Adpositions = this.GetAdpositions().Concat(noun.GetAdpositions()).ToList();
+            this.Dependencies.Add(this.EdgeFactory.Create(this, noun, this.Adpositions));
+            this.ClearAdpositions();
+
+            return this;
+        }
+
+        private IProcessable ProcessElement(NounSet nounSet)
+        {
+            // TODO: NOUNSET + NOUN / NOUNSET + NOUNSET etc.
+            //if (nounSet.DependencyType == "conj")
+            //    return this.ElementFactory.Create(this, nounSet);
+
+            this.Adpositions = this.GetAdpositions().Concat(nounSet.GetAdpositions()).ToList();
+            this.Dependencies.Add(this.EdgeFactory.Create(this, nounSet, this.Adpositions));
+            this.ClearAdpositions();
+
+            return this;
+        }
+        #endregion
+
+        #region Possitoning
+        public void Positionate()
+        {
+            this.PositionateOutcoming(this.Dependencies.Where(dependency => dependency.Left == this));
+            this.PositionateIncoming(this.Dependencies.Where(dependency => dependency.Right == this));
+        }
+
+        private void PositionateIncoming(IEnumerable<Edge> incoming)
+        {
+            foreach (var edge in incoming)
+            {
+                edge.Left.Positionate();
+                edge.Positionate(this.ElementFactory.Root.Width, this.ElementFactory.Root.Height);
+            }
+        }
+
+        private void PositionateOutcoming(IEnumerable<Edge> outcoming)
+        {
+            foreach (var edge in outcoming)
+            {
+                edge.Right.Positionate();
+                edge.Positionate(this.ElementFactory.Root.Width, this.ElementFactory.Root.Height);
+            }
+        }
+        #endregion
+
+        private Image GetImage(ImageManager manager)
+        {
+            return (this.MyDrawable = manager.GetImage(this.GetFinalWordSequence()));
+        }
+
         private string GetFinalWordSequence()
         {
-            string finalWordSequence = "";
-            foreach (var ext in this.Extensions)
-                finalWordSequence += $" {ext}";
+            if (this.Extensions.Count == 0)
+                return base.ToString();
 
-            return $"{finalWordSequence} {this.Lemma}";
+            return $"{string.Join(" ", this.Extensions)} {this.Lemma}";
         }
 
         public override string ToString()

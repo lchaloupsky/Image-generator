@@ -76,19 +76,26 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Downloader.cs" />
-    <Compile Include="Models\Drawable.cs" />
     <Compile Include="Models\Edges\DefaultEdge.cs" />
-    <Compile Include="Models\ElementFactory.cs" />
+    <Compile Include="Models\Edges\Edge.cs" />
+    <Compile Include="Models\Edges\InEdge.cs" />
+    <Compile Include="Models\Edges\AtEdge.cs" />
+    <Compile Include="Models\Edges\OnTopEdge.cs" />
+    <Compile Include="Models\Edges\UnderEdge.cs" />
+    <Compile Include="Models\Edges\OnEdge.cs" />
+    <Compile Include="Models\Factories\EdgeFactory.cs" />
+    <Compile Include="Models\Factories\ElementFactory.cs" />
     <Compile Include="Models\FileManager.cs" />
     <Compile Include="Models\ImageManager.cs" />
     <Compile Include="Models\Interfaces\IDrawable.cs" />
+    <Compile Include="Models\Interfaces\IPositionate.cs" />
     <Compile Include="Models\Interfaces\IProcessable.cs" />
     <Compile Include="Models\Text elements\Adjective.cs" />
+    <Compile Include="Models\Text elements\Adposition.cs" />
     <Compile Include="Models\Text elements\Element.cs" />
     <Compile Include="Models\Text elements\Noun.cs" />
     <Compile Include="Models\Text elements\NounSet.cs" />
     <Compile Include="Models\Text elements\Root.cs" />
-    <Compile Include="Models\Text elements\TextElement.cs" />
     <Compile Include="Models\Renderer.cs" />
     <Compile Include="Models\UDPipeParser.cs" />
     <Compile Include="Program.cs" />

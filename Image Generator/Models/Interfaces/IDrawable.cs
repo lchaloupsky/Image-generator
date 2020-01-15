@@ -18,5 +18,6 @@ namespace Image_Generator.Models.Interfaces
         int Height { get; set; }
 
         void Draw(Renderer renderer, ImageManager manager);
+        void Positionate(); //Add somehow list of vertices
     }
 }

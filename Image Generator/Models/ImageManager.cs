@@ -23,7 +23,6 @@ namespace Image_Generator.Models
         public ImageManager()
         {
             string location = System.IO.Path.Combine("..", "..", "Models", "Images");
-
             this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.MyManager = new FileManager(location);
             this.Cache = new Dictionary<string, Image>();

@@ -12,17 +12,13 @@ namespace Image_Generator.Models
     /// </summary>
     class Renderer
     {
-        // Max image width and height for drawing
-        private const int MAX_IMAGE_WIDTH = 240;
-        private const int MAX_IMAGE_HEIGHT = 120;
-
         // Field for drawing
         private Bitmap DrawField { get; set; }
         private Graphics MyGraphics { get; set; }
 
-        // Coordinates for new image draw
-        private int LastX { get; set; } = 0;
-        private int LastY { get; set; } = 0;
+        // Coordinates for new image to draw
+        public int LastX { get; set; } = 0;
+        public int LastY { get; set; } = 0;
 
         /// <summary>
         /// Constructor for Renderer
@@ -50,45 +46,54 @@ namespace Image_Generator.Models
             this.MyGraphics = Graphics.FromImage(DrawField);
         }
 
-        public void DrawImage(Image image)
-        {
-            DrawImage(image, LastX, LastY);
-        }
-
         /// <summary>
         /// Function to draw single image to current draw field
         /// </summary>
         /// <param name="image">Image to draw</param>
-        public void DrawImage(Image image, int x, int y)
+        public void DrawImage(Image image, int x, int y, int width, int height)
         {
-            int finalW = MAX_IMAGE_WIDTH,
-                finalH = MAX_IMAGE_HEIGHT;
-
-            // Resizing image dimension if image is larger than max width/height
-            if (image.Width > MAX_IMAGE_WIDTH)
-            {
-                double ratio = MAX_IMAGE_WIDTH * 1d / image.Width;
-                finalW = MAX_IMAGE_WIDTH;
-                finalH = (int)(image.Height * ratio);
-            }
-            if (finalH > MAX_IMAGE_HEIGHT)
-            {
-                double ratio = MAX_IMAGE_HEIGHT * 1d / finalH;
-                finalH = MAX_IMAGE_HEIGHT;
-                finalW = (int)(finalW * ratio);
-            }
+            var dimensions = this.GetProportionalDimensions(image, width, height);
 
             // Shift to next row of images if current row is fully drawn
-            if (x + finalW > this.DrawField.Width)
+            if (x + dimensions.Item2 > this.DrawField.Width)
             {
                 x = 0;
-                y += MAX_IMAGE_HEIGHT;
+                y += height;
             }
 
             // Finally drawing of the current image
-            this.MyGraphics.DrawImage(image, x, y, finalW, finalH);
-            LastX = x + finalW;
+            this.MyGraphics.DrawImage(image, x, y, dimensions.Item1, dimensions.Item2);
+            LastX = x + dimensions.Item1;
             LastY = y;
+        }
+
+        /// <summary>
+        /// Resizes given image dimensions to be correctly proportional 
+        /// </summary>
+        /// <param name="image">image to be resized</param>
+        /// <param name="width">width of an object</param>
+        /// <param name="height">height of an object</param>
+        /// <returns>Resized dimensions as Tuple</returns>
+        public Tuple<int, int> GetProportionalDimensions(Image image, int width, int height)
+        {
+            int finalW = width,
+                finalH = height;
+            
+            // Resizing image dimension if image is larger than max width/height
+            if (image.Width > width)
+            {
+                double ratio = width * 1d / image.Width;
+                finalW = width;
+                finalH = (int)(image.Height * ratio);
+            }
+            if (finalH > height)
+            {
+                double ratio = height * 1d / finalH;
+                finalH = height;
+                finalW = (int)(finalW * ratio);
+            }
+
+            return Tuple.Create(finalW, finalH);
         }
 
         /// <summary>

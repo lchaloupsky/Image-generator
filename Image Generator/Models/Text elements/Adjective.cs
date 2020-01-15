@@ -9,26 +9,35 @@ namespace Image_Generator.Models.Text_elements
 {
     class Adjective : Element
     {
-        public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency){}
+        public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
         public override IProcessable Process(IProcessable element)
         {
             switch (element)
             {
-                case Noun noun:
-                    return noun.Process(this);
-                case NounSet nounSet:
-                    return nounSet.Process(this);
-                default:
-                    break;
+                case Noun noun: return this.ProcessElement(noun);
+                case NounSet nounSet: return this.ProcessElement(nounSet);
+                default: break;
             }
 
             return this;
         }
 
-        public override string ToString()
+        private IProcessable ProcessElement(Noun noun)
         {
-            return this.Lemma;
+            return noun.Process(this);
+        }
+
+        private IProcessable ProcessElement(NounSet nounSet)
+        {
+            return nounSet.Process(this);
+        }
+
+        //Maybe redo with list?
+        private IProcessable ProcessElement(Adjective adj)
+        {
+            this.Lemma += $" {adj}";
+            return this;
         }
     }
 }

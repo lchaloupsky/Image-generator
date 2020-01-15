@@ -10,6 +10,7 @@ namespace Image_Generator.Models.Interfaces
     interface IProcessable
     {
         int Id { get; }
+        string DependencyType { get; }
 
         IProcessable Process(IProcessable element);
     }
