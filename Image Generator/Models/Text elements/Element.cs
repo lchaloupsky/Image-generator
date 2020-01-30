@@ -11,7 +11,7 @@ namespace Image_Generator.Models.Text_elements
     {
         public int Id { get; }
 
-        public string Lemma { get; set; }
+        public string Lemma { get; protected set; }
 
         public string DependencyType { get; private set; }
 
@@ -29,6 +29,11 @@ namespace Image_Generator.Models.Text_elements
             return this.Lemma;
         }
 
-        public abstract IProcessable Process(IProcessable element);
+        public virtual IProcessable FinalizeProcessing(SentenceGraph graph)
+        {
+            return this;
+        }
+
+        public abstract IProcessable Process(IProcessable element, SentenceGraph graph);
     }
 }

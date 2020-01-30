@@ -23,11 +23,10 @@ namespace Image_Generator.Models
         private const string DATA_PARAM = "data=";
 
         private string Model { get; }
-        private ImageManager Manager { get; }
         private ElementFactory ElementFactory { get; }
         private IComparer<IProcessable> Comparer { get; }
 
-        public UDPipeParser(string model, ImageManager manager)
+        public UDPipeParser(string model)
         {
             this.Model = model;
             this.ElementFactory = new ElementFactory(new Root());
@@ -39,10 +38,10 @@ namespace Image_Generator.Models
         /// Creates for each word in sentence class that correspondonds to its part of speech
         /// </summary>
         /// <param name="text">Sentence given by user</param>
-        public List<IProcessable> ParseText(string text, int width, int height)
+        public List<SentenceGraph> ParseText(string text, int width, int height)
         {
             this.ElementFactory.Root.SetSizes(width, height);
-            var parts = new List<IProcessable>();
+            var parts = new List<SentenceGraph>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
                 parts.Add(ParseSentence(line));
 
@@ -54,23 +53,36 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="sentence">Sentence to parse</param>
         /// <returns>List of parsed elements</returns>
-        public IProcessable ParseSentence(string sentence)
+        public SentenceGraph ParseSentence(string sentence)
         {
             string json;
             Dictionary<int, List<IProcessable>> dependencyTree; // Field of fields --> REDO
+            SentenceGraph graph = new SentenceGraph();
 
+            // RESTAPI call with given text
             using (WebClient client = new WebClient())
                 json = client.DownloadString(ConstructURL(sentence));
 
+            // recreating dependency tree given as RESTAPI reponse from UDPipe
             var JsonObject = JObject.Parse(json);
-            var parts = new List<Element>();
             var validLines = JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(line => !line[0].Equals('#'));
             dependencyTree = GetDependencyTree(validLines);
 
-            return CompressDependencyTree(dependencyTree, this.ElementFactory.Root);
+            // compressing dependency tree into graph
+            IProcessable element = CompressDependencyTree(dependencyTree, graph, this.ElementFactory.Root);
+            if (element is IDrawable)
+                graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
+
+            this.FinalizeGraph(graph);
+            return graph;
         }
 
-        public Dictionary<int, List<IProcessable>> GetDependencyTree(IEnumerable<string> validLines)
+        /// <summary>
+        /// Function for creating dependency tree
+        /// </summary>
+        /// <param name="validLines"></param>
+        /// <returns>Dependency tree</returns>
+        private Dictionary<int, List<IProcessable>> GetDependencyTree(IEnumerable<string> validLines)
         {
             int index;
             string[] parts;
@@ -92,7 +104,13 @@ namespace Image_Generator.Models
             return tree;
         }
 
-        public void AddDependencyIntoTree(Dictionary<int, List<IProcessable>> tree, IProcessable element, int index)
+        /// <summary>
+        /// Helping function for adding dependency into dependency tree
+        /// </summary>
+        /// <param name="tree">tree to add</param>
+        /// <param name="element">element to be added</param>
+        /// <param name="index">index where element should be added</param>
+        private void AddDependencyIntoTree(Dictionary<int, List<IProcessable>> tree, IProcessable element, int index)
         {
             if (!tree.ContainsKey(index))
                 tree.Add(index, new List<IProcessable>());
@@ -100,16 +118,36 @@ namespace Image_Generator.Models
             tree[index].Add(element);
         }
 
-        public IProcessable CompressDependencyTree(Dictionary<int, List<IProcessable>> tree, IProcessable element)
+        /// <summary>
+        /// Function for compressing dependency tree edges into other representation
+        /// </summary>
+        /// <param name="tree">tree to be compressed</param>
+        /// <param name="graph">new graph to be created</param>
+        /// <param name="element">actual processed element</param>
+        /// <returns>Element with processed its dependencies</returns>
+        private IProcessable CompressDependencyTree(Dictionary<int, List<IProcessable>> tree, SentenceGraph graph, IProcessable element)
         {
             if (!tree.ContainsKey(element.Id))
                 return element;
 
+            // sorting dependencies before they are processed
             tree[element.Id].Sort(this.Comparer);
+
+            // processing each dependency
             foreach (var vertex in tree[element.Id])
-                element = element.Process(CompressDependencyTree(tree, vertex));
+                element = element.Process(CompressDependencyTree(tree, graph, vertex), graph);
 
             return element;
+        }
+
+        /// <summary>
+        /// Finalizes edges that relates to root(image itself)
+        /// </summary>
+        /// <param name="graph"></param>
+        private void FinalizeGraph(SentenceGraph graph)
+        {
+            foreach (var vertex in graph.Vertices)
+                ((IProcessable)vertex).FinalizeProcessing(graph);
         }
 
         /// <summary>
@@ -125,6 +163,9 @@ namespace Image_Generator.Models
                    DATA_PARAM + sentence;
         }
 
+        /// <summary>
+        /// Help comparer class for sorting dependencies before they are processed
+        /// </summary>
         private class ElementComparer : IComparer<IProcessable>
         {
             public int Compare(IProcessable x, IProcessable y)

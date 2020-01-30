@@ -19,7 +19,7 @@ namespace Image_Generator.Models.Text_elements
         private List<Element> Extensions { get; }
 
         // Tree dependencies of this noun
-        public List<Edge> Dependencies { get; }
+        public List<IPositionateEdge> Dependencies { get; }
 
         // List of adpositions belonging to this noun
         public List<Adposition> Adpositions { get; set; }
@@ -44,11 +44,12 @@ namespace Image_Generator.Models.Text_elements
         public int Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
+        public bool IsPositioned { get; set; } = false;
 
         public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<Element>();
-            this.Dependencies = new List<Edge>();
+            this.Dependencies = new List<IPositionateEdge>();
             this.Adpositions = new List<Adposition>();
             this.EdgeFactory = factory;
             this.ElementFactory = elementFactory;
@@ -64,14 +65,6 @@ namespace Image_Generator.Models.Text_elements
 
         public void Draw(Renderer renderer, ImageManager manager)
         {
-            this.Dependencies.ForEach(edge =>
-            {
-                if (edge.Left != this)
-                    edge.Left.Draw(renderer, manager);
-                else if(edge.Right != this)
-                    edge.Right.Draw(renderer, manager);
-            });
-
             renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
         }
 
@@ -79,52 +72,53 @@ namespace Image_Generator.Models.Text_elements
         {
             return this.Adpositions.SelectMany(x => x.GetAdpositions());
         }
-
+         
         public void ClearAdpositions()
         {
             this.Adpositions.Clear();
         }
 
         #region Processing depending elements
-        public override IProcessable Process(IProcessable element)
+        public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
-                case Adjective adj: return this.ProcessElement(adj);
-                case Noun noun: return this.ProcessElement(noun);
-                case NounSet nounSet: return this.ProcessElement(nounSet);
-                case Adposition adp: return this.ProcessElement(adp);
+                case Adjective adj: return this.ProcessElement(adj, graph);
+                case Noun noun: return this.ProcessElement(noun, graph);
+                case NounSet nounSet: return this.ProcessElement(nounSet, graph);
+                case Adposition adp: return this.ProcessElement(adp, graph);
                 default: break;
             }
 
             return this;
         }
 
-        private IProcessable ProcessElement(Adposition adp)
+        private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
         {
             this.Adpositions.Insert(0, adp);
             return this;
         }
 
-        private IProcessable ProcessElement(Adjective adj)
+        private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
             this.Extensions.Add(adj);
             return this;
         }
 
-        private IProcessable ProcessElement(Noun noun)
+        private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
             if (noun.DependencyType == "conj")
                 return this.ElementFactory.Create(this, noun);
-
+    
             this.Adpositions = this.GetAdpositions().Concat(noun.GetAdpositions()).ToList();
-            this.Dependencies.Add(this.EdgeFactory.Create(this, noun, this.Adpositions));
+            //TODO Adposition combinations
+            graph.AddEdge(this.EdgeFactory.Create(this, noun, this.Adpositions));
             this.ClearAdpositions();
 
             return this;
         }
 
-        private IProcessable ProcessElement(NounSet nounSet)
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
             // TODO: NOUNSET + NOUN / NOUNSET + NOUNSET etc.
             //if (nounSet.DependencyType == "conj")
@@ -136,31 +130,14 @@ namespace Image_Generator.Models.Text_elements
 
             return this;
         }
-        #endregion
 
-        #region Possitoning
-        public void Positionate()
+        public override IProcessable FinalizeProcessing(SentenceGraph graph)
         {
-            this.PositionateOutcoming(this.Dependencies.Where(dependency => dependency.Left == this));
-            this.PositionateIncoming(this.Dependencies.Where(dependency => dependency.Right == this));
-        }
+            IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.GetAdpositions().ToList());
+            if (!(newEdge is DefaultEdge))
+                graph.AddEdge(newEdge);
 
-        private void PositionateIncoming(IEnumerable<Edge> incoming)
-        {
-            foreach (var edge in incoming)
-            {
-                edge.Left.Positionate();
-                edge.Positionate(this.ElementFactory.Root.Width, this.ElementFactory.Root.Height);
-            }
-        }
-
-        private void PositionateOutcoming(IEnumerable<Edge> outcoming)
-        {
-            foreach (var edge in outcoming)
-            {
-                edge.Right.Positionate();
-                edge.Positionate(this.ElementFactory.Root.Width, this.ElementFactory.Root.Height);
-            }
+            return this;
         }
         #endregion
 

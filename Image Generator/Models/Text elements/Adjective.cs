@@ -11,30 +11,30 @@ namespace Image_Generator.Models.Text_elements
     {
         public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
-        public override IProcessable Process(IProcessable element)
+        public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
-                case Noun noun: return this.ProcessElement(noun);
-                case NounSet nounSet: return this.ProcessElement(nounSet);
+                case Noun noun: return this.ProcessElement(noun, graph);
+                case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 default: break;
             }
 
             return this;
         }
 
-        private IProcessable ProcessElement(Noun noun)
+        private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
-            return noun.Process(this);
+            return noun.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(NounSet nounSet)
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
-            return nounSet.Process(this);
+            return nounSet.Process(this, graph);
         }
 
         //Maybe redo with list?
-        private IProcessable ProcessElement(Adjective adj)
+        private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
             this.Lemma += $" {adj}";
             return this;

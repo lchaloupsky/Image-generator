@@ -88,8 +88,11 @@
     <Compile Include="Models\FileManager.cs" />
     <Compile Include="Models\ImageManager.cs" />
     <Compile Include="Models\Interfaces\IDrawable.cs" />
-    <Compile Include="Models\Interfaces\IPositionate.cs" />
+    <Compile Include="Models\Interfaces\IPositionable.cs" />
+    <Compile Include="Models\Interfaces\IPositionateEdge.cs" />
     <Compile Include="Models\Interfaces\IProcessable.cs" />
+    <Compile Include="Models\Positioner.cs" />
+    <Compile Include="Models\SentenceGraph.cs" />
     <Compile Include="Models\Text elements\Adjective.cs" />
     <Compile Include="Models\Text elements\Adposition.cs" />
     <Compile Include="Models\Text elements\Element.cs" />

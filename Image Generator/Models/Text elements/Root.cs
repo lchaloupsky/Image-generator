@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Text_elements
 {
-    class Root : Element, IDrawable
+    class Root : Element, IDrawable //In future throw away IDrawable
     {
         public int X { get; set; } = 0;
         public int Y { get; set; } = 0;
         public int Width { get; set; }
         public int Height { get; set; }
+        public bool IsPositioned { get; set; } = false;
 
         public Root() : base(0) { }
 
@@ -24,11 +25,9 @@ namespace Image_Generator.Models.Text_elements
 
         public void Draw(Renderer renderer, ImageManager manager) { }
 
-        public void Positionate() { return; }
-
-        public override IProcessable Process(IProcessable element)
+        public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
-            return element;
+            return element is IDrawable ? element : this;
         }
     }
 }

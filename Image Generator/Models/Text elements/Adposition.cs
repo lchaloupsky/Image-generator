@@ -18,33 +18,33 @@ namespace Image_Generator.Models.Text_elements
             return this.DependingAdposition == null ? new List<Adposition>() { this } : new List<Adposition>() { DependingAdposition, this };
         }
 
-        public override IProcessable Process(IProcessable element)
+        public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
-                case Noun noun: return this.ProcessElement(noun);
-                case NounSet nounSet: return this.ProcessElement(nounSet);
-                case Adposition adp: return this.ProcessElement(adp);
+                case Noun noun: return this.ProcessElement(noun, graph);
+                case NounSet nounSet: return this.ProcessElement(nounSet, graph);
+                case Adposition adp: return this.ProcessElement(adp, graph);
                 default: break;
             }
 
             return this;
         }
 
-        private IProcessable ProcessElement(Adposition adp)
+        private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
         {
             this.DependingAdposition = adp;
             return this;
         }
 
-        private IProcessable ProcessElement(Noun noun)
+        private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
-            return noun.Process(this);
+            return noun.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(NounSet nounSet)
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
-            return nounSet.Process(this);
+            return nounSet.Process(this, graph);
         }
     }
 }

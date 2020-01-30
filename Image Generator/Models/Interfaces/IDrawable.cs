@@ -10,14 +10,8 @@ namespace Image_Generator.Models.Interfaces
     /// <summary>
     /// Interface for Drawable objects
     /// </summary>
-    interface IDrawable
+    interface IDrawable : IPositionable
     {
-        int X { get; set; }
-        int Y { get; set; }
-        int Width { get; set; }
-        int Height { get; set; }
-
         void Draw(Renderer renderer, ImageManager manager);
-        void Positionate(); //Add somehow list of vertices
     }
 }

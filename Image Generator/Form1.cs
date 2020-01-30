@@ -25,13 +25,15 @@ namespace Image_Generator
         private Renderer MyRenderer { get; }
         private Bitmap MyBitmap { get; set; }
         private UDPipeParser MyParser { get; }
+        private Positioner MyPositioner { get; }
 
         public Form1()
         {
             InitializeComponent();
             this.MyRenderer = new Renderer(this.generatedImage.Width, this.generatedImage.Height);
             this.Manager = new ImageManager();
-            this.MyParser = new UDPipeParser("english-ud-1.2-160523", this.Manager);
+            this.MyParser = new UDPipeParser("english-ud-1.2-160523");
+            this.MyPositioner = new Positioner();
         }
 
         //Temporary func to check sentence
@@ -64,25 +66,21 @@ namespace Image_Generator
                 // Parsing given text
                 var result = this.MyParser.ParseText(this.sentenceBox.Text, this.generatedImage.Width, this.generatedImage.Height);
 
-                // There will be given text processed
-                // ----------------------------------
-                // ----------------------------------
-
                 // Clear draw field
                 this.MyRenderer.ResetImage();
 
-                // In the future do some Drawable Manager, to avoid drawing some pictures again?
-                // Getting final images to draw
-                var imagesToDraw = new List<Image>();
-                foreach (var root in result)
+                // positioning and drawing phase of generation
+                foreach (var graph in result)
                 {
-                    ((IDrawable)root).Positionate();
-                    ((IDrawable)root).Draw(this.MyRenderer, this.Manager);
-                    //noun.GetImage(this.Manager);
-                    //noun.Draw(this.MyRenderer);
+                    // positioning given sentence graph with given with and height
+                    this.MyPositioner.Positionate(graph, this.generatedImage.Width, this.generatedImage.Height);
+
+                    // drawing each vertex of graph
+                    foreach (var vertex in graph.Vertices)
+                        vertex.Draw(this.MyRenderer, this.Manager);
                 }
 
-                // Get drawn image bitmap to show in form
+                // Get drawn image bitmap to show it in form window
                 this.generatedImage.Image = MyRenderer.GetImage();
             }
             catch (Exception ex)

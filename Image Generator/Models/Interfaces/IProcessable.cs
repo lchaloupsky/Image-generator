@@ -12,6 +12,7 @@ namespace Image_Generator.Models.Interfaces
         int Id { get; }
         string DependencyType { get; }
 
-        IProcessable Process(IProcessable element);
+        IProcessable Process(IProcessable element, SentenceGraph graph);
+        IProcessable FinalizeProcessing(SentenceGraph graph);
     }
 }

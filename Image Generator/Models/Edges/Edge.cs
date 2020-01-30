@@ -11,7 +11,7 @@ namespace Image_Generator.Models.Edges
     /// <summary>
     /// Abstract edge as base class for all edges
     /// </summary>
-    abstract class Edge : IPositionate
+    abstract class Edge : IPositionateEdge
     {
         public IDrawable Left { get; set; }
         public IDrawable Right { get; set; }
