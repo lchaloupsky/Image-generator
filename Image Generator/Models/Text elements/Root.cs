@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,13 +10,16 @@ namespace Image_Generator.Models.Text_elements
 {
     class Root : Element, IDrawable //In future throw away IDrawable
     {
-        public int X { get; set; } = 0;
-        public int Y { get; set; } = 0;
+        public Vector2? Position { get; set; }
+        public int ZIndex { get; set; } = 0;
         public int Width { get; set; }
         public int Height { get; set; }
-        public bool IsPositioned { get; set; } = false;
+        public bool IsPositioned { get; } = true;
 
-        public Root() : base(0) { }
+        public Root() : base(0)
+        {
+            this.Position = new Vector2(0, 0);
+        }
 
         public void SetSizes(int width, int height)
         {

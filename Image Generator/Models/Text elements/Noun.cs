@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,13 +39,13 @@ namespace Image_Generator.Models.Text_elements
 
         // Factory for creating elements
         private ElementFactory ElementFactory { get; }
-
+    
         // IDrawable inteface properties
-        public int X { get; set; }
-        public int Y { get; set; }
+        public Vector2? Position { get; set; }
+        public int ZIndex { get; set; } = 0;
         public int Width { get; set; }
         public int Height { get; set; }
-        public bool IsPositioned { get; set; } = false;
+        public bool IsPositioned => this.Position != null;
 
         public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : base(Id, Lemma, Dependency)
         {
@@ -65,17 +66,8 @@ namespace Image_Generator.Models.Text_elements
 
         public void Draw(Renderer renderer, ImageManager manager)
         {
-            renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
-        }
-
-        public IEnumerable<Adposition> GetAdpositions()
-        {
-            return this.Adpositions.SelectMany(x => x.GetAdpositions());
-        }
-         
-        public void ClearAdpositions()
-        {
-            this.Adpositions.Clear();
+            //renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
+            renderer.DrawImage(this.GetImage(manager), (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
         #region Processing depending elements
@@ -109,31 +101,32 @@ namespace Image_Generator.Models.Text_elements
         {
             if (noun.DependencyType == "conj")
                 return this.ElementFactory.Create(this, noun);
-    
-            this.Adpositions = this.GetAdpositions().Concat(noun.GetAdpositions()).ToList();
-            //TODO Adposition combinations
-            graph.AddEdge(this.EdgeFactory.Create(this, noun, this.Adpositions));
-            this.ClearAdpositions();
 
+            // Get adpositions from adpositions combinations
+            graph.AddEdge(this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions));
+
+            // Finalize processed noun
+            noun.FinalizeProcessing(graph);
             return this;
         }
 
+        // REDO
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
             // TODO: NOUNSET + NOUN / NOUNSET + NOUNSET etc.
             //if (nounSet.DependencyType == "conj")
             //    return this.ElementFactory.Create(this, nounSet);
 
-            this.Adpositions = this.GetAdpositions().Concat(nounSet.GetAdpositions()).ToList();
+            this.Adpositions = this.Adpositions.SelectMany(x => x.GetAdpositions()).Concat(nounSet.Adpositions.SelectMany(x => x.GetAdpositions())).ToList();
             this.Dependencies.Add(this.EdgeFactory.Create(this, nounSet, this.Adpositions));
-            this.ClearAdpositions();
+            this.Adpositions.Clear();
 
             return this;
         }
 
         public override IProcessable FinalizeProcessing(SentenceGraph graph)
         {
-            IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.GetAdpositions().ToList());
+            IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.Adpositions);
             if (!(newEdge is DefaultEdge))
                 graph.AddEdge(newEdge);
 

@@ -25,7 +25,7 @@ namespace Image_Generator.Models
             if (!this.Graph.ContainsKey(edge.Left))
                 this.Graph.Add(edge.Left, new List<IPositionateEdge>());
 
-            if (!this.Graph.ContainsKey(edge.Right))
+            if (edge.Right != null && !this.Graph.ContainsKey(edge.Right))
                 this.Graph.Add(edge.Right, new List<IPositionateEdge>());
 
             this.Graph[edge.Left].Add(edge);

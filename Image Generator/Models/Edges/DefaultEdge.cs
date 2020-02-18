@@ -3,6 +3,7 @@ using Image_Generator.Models.Text_elements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,9 +14,19 @@ namespace Image_Generator.Models.Edges
     /// </summary>
     class DefaultEdge : Edge
     {
-        public override void Positionate(int maxWidth, int maxHeight)
+        protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            Console.WriteLine("Default edge --> positioning: \n    Left: {0} \n    Right: {1}", this.Left, this.Right);
+            this.Right.Position = this.Left.Position + new Vector2(this.Left.Width, 0);
+        }
+
+        protected override void PositionateLeft(int maxWidth, int maxHeight)
+        {
+            this.Left.Position = this.Right.Position - new Vector2(this.Right.Width, 0);
+        }
+
+        protected override bool CheckConcretePosition()
+        {
+            return true;
         }
     }
 }

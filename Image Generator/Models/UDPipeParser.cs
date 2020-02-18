@@ -24,12 +24,12 @@ namespace Image_Generator.Models
 
         private string Model { get; }
         private ElementFactory ElementFactory { get; }
-        private IComparer<IProcessable> Comparer { get; }
+        private ElementComparer Comparer { get; }
 
         public UDPipeParser(string model)
         {
             this.Model = model;
-            this.ElementFactory = new ElementFactory(new Root());
+            this.ElementFactory = new ElementFactory();
             this.Comparer = new ElementComparer();
         }
 
@@ -40,7 +40,6 @@ namespace Image_Generator.Models
         /// <param name="text">Sentence given by user</param>
         public List<SentenceGraph> ParseText(string text, int width, int height)
         {
-            this.ElementFactory.Root.SetSizes(width, height);
             var parts = new List<SentenceGraph>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
                 parts.Add(ParseSentence(line));
@@ -69,11 +68,11 @@ namespace Image_Generator.Models
             dependencyTree = GetDependencyTree(validLines);
 
             // compressing dependency tree into graph
-            IProcessable element = CompressDependencyTree(dependencyTree, graph, this.ElementFactory.Root);
+            this.Comparer.Tree = dependencyTree;
+            IProcessable element = CompressDependencyTree(dependencyTree, graph, new Root()).FinalizeProcessing(graph);
             if (element is IDrawable)
                 graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
 
-            this.FinalizeGraph(graph);
             return graph;
         }
 
@@ -141,16 +140,6 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Finalizes edges that relates to root(image itself)
-        /// </summary>
-        /// <param name="graph"></param>
-        private void FinalizeGraph(SentenceGraph graph)
-        {
-            foreach (var vertex in graph.Vertices)
-                ((IProcessable)vertex).FinalizeProcessing(graph);
-        }
-
-        /// <summary>
         /// Construcs adress for calling
         /// </summary>
         /// <param name="sentence">Sentence data param</param>
@@ -168,9 +157,12 @@ namespace Image_Generator.Models
         /// </summary>
         private class ElementComparer : IComparer<IProcessable>
         {
+            public Dictionary<int, List<IProcessable>> Tree { get; set; }
+
             public int Compare(IProcessable x, IProcessable y)
             {
-                return x is Adposition ? -1 : (y is Adposition ? 1 : (x.Id < y.Id ? -1 : 1));
+                // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
+                return x is Adposition ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) : (y is Adposition ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) : (x.Id < y.Id ? -1 : 1));
             }
         }
     }

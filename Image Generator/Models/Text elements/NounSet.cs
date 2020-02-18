@@ -4,25 +4,28 @@ using Image_Generator.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Text_elements
 {
-    class NounSet : IProcessable, IDrawable
+    class NounSet : IDrawable, IProcessable
     {
         // IDrawable inteface properties
-        public int X { get; set; }
-        public int Y { get; set; }
+        public Vector2? Position { get; set; }
+        public int ZIndex { get; set; } = 0;
         public int Width { get; set; }
         public int Height { get; set; }
-        public bool IsPositioned { get; set; } = false;
+        public bool IsPositioned => this.Position != null;
 
         public string DependencyType { get; private set; }
 
         private List<Noun> Nouns { get; }
 
         private List<IPositionateEdge> Dependencies { get; }
+
+        public List<Adposition> Adpositions { get; set; }
 
         private EdgeFactory EdgeFactory { get; }
 
@@ -49,16 +52,6 @@ namespace Image_Generator.Models.Text_elements
             }
         }
 
-        public List<Adposition> GetAdpositions()
-        {
-            return this.Nouns.SelectMany(x => x.GetAdpositions()).ToList();
-        }
-
-        public void ClearAdpositions()
-        {
-            this.Nouns.ForEach(noun => noun.ClearAdpositions());
-        }
-
         public IProcessable Process(IProcessable element, SentenceGraph graph)
         {
             switch (element)
@@ -77,8 +70,10 @@ namespace Image_Generator.Models.Text_elements
                 this.Nouns.Add(noun);
             else
             {
-                this.Dependencies.Add(this.EdgeFactory.Create(this, noun, GetAdpositions()));
-                this.ClearAdpositions();
+                //REDO
+                //this.Dependencies.Add(this.EdgeFactory.Create(this, noun, GetAdpositions()));
+                //this.ClearAdpositions();
+                Console.WriteLine();
             }
 
             return this;

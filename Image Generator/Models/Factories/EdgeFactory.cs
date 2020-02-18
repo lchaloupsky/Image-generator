@@ -11,19 +11,44 @@ namespace Image_Generator.Models.Factories
 {
     class EdgeFactory
     {
-        private Root Root { get; }
-
-        public EdgeFactory(Root Root)
+        public Edge Create<T1>(T1 left, List<Adposition> adpositions) where T1 : IDrawable, IProcessable
         {
-            this.Root = Root;
+            return GetEdge(string.Join(" ", adpositions.SelectMany(x => x.GetAdpositions())).ToLower()).Add(left, null);
         }
 
-        public Edge Create(IDrawable left, List<Adposition> adpositions)
+        public Edge Create<T1, T2>(T1 left, T2 right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions)
+            where T1 : IDrawable, IProcessable
+            where T2 : IDrawable, IProcessable
         {
-            return GetEdge(string.Join(" ", adpositions).ToLower()).Add(left, this.Root);
+            var leftAll = leftAdpositions.SelectMany(x => x.GetAdpositions()).ToList();
+            var rightAll = rightAdpositions.SelectMany(x => x.GetAdpositions()).ToList();
+
+            Edge edge = this.Create(left, right, leftAll.Concat(rightAll).ToList());
+            if (edge is DefaultEdge)
+            {
+                if (this.CheckIfParameterIsSubject(right))
+                {
+                    edge = this.Create(left, right, leftAll);
+                    leftAdpositions.Clear();
+                }
+                else
+                {
+                    edge = this.Create(left, right, rightAll);
+                    rightAdpositions.Clear();
+                }
+            }
+            else
+            {
+                leftAdpositions.Clear();
+                rightAdpositions.Clear();
+            }
+
+            return edge;
         }
 
-        public Edge Create(IDrawable left, IDrawable right, List<Adposition> adpositions)
+        public Edge Create<T1, T2>(T1 left, T2 right, List<Adposition> adpositions) 
+            where T1 : IDrawable, IProcessable 
+            where T2 : IDrawable, IProcessable
         {
             Edge edge = GetEdge(string.Join(" ", adpositions).ToLower());
             if (this.CheckIfParameterIsSubject(right))
@@ -46,9 +71,9 @@ namespace Image_Generator.Models.Factories
             }
         }
 
-        private bool CheckIfParameterIsSubject(IDrawable parameter)
+        private bool CheckIfParameterIsSubject<T1>(T1 parameter) where T1 : IDrawable, IProcessable
         {
-            return ((IProcessable)parameter).DependencyType == "nsubj";
+            return parameter.DependencyType == "nsubj";
         }
     } 
 }

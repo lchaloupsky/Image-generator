@@ -76,7 +76,7 @@ namespace Image_Generator
                     this.MyPositioner.Positionate(graph, this.generatedImage.Width, this.generatedImage.Height);
 
                     // drawing each vertex of graph
-                    foreach (var vertex in graph.Vertices)
+                    foreach (var vertex in graph.Vertices.OrderBy(v => v.ZIndex))
                         vertex.Draw(this.MyRenderer, this.Manager);
                 }
 
