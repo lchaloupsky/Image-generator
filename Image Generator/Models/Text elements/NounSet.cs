@@ -3,6 +3,7 @@ using Image_Generator.Models.Factories;
 using Image_Generator.Models.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -20,6 +21,10 @@ namespace Image_Generator.Models.Text_elements
         public bool IsPositioned => this.Position != null;
 
         public string DependencyType { get; private set; }
+
+        public Image Image { get; }
+
+        public IDrawable Group { get; set; }
 
         private List<Noun> Nouns { get; }
 
@@ -91,6 +96,11 @@ namespace Image_Generator.Models.Text_elements
         {
             this.Nouns.ForEach(noun => noun.FinalizeProcessing(graph));
             return this.Nouns.First();
+        }
+
+        public void CombineIntoGroup(IDrawable drawable)
+        {
+            //TODO
         }
 
         public void Draw(Renderer renderer, ImageManager manager)

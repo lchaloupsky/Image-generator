@@ -26,10 +26,10 @@ namespace Image_Generator.Models
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
 
-        public UDPipeParser(string model)
+        public UDPipeParser(string model, ImageManager manager)
         {
             this.Model = model;
-            this.ElementFactory = new ElementFactory();
+            this.ElementFactory = new ElementFactory(manager);
             this.Comparer = new ElementComparer();
         }
 

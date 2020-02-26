@@ -1,6 +1,7 @@
 ﻿using Image_Generator.Models.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -16,6 +17,9 @@ namespace Image_Generator.Models.Text_elements
         public int Height { get; set; }
         public bool IsPositioned { get; } = true;
 
+        public IDrawable Group { get; set; }
+        public Image Image { get; set; }
+
         public Root() : base(0)
         {
             this.Position = new Vector2(0, 0);
@@ -28,6 +32,11 @@ namespace Image_Generator.Models.Text_elements
         }
 
         public void Draw(Renderer renderer, ImageManager manager) { }
+
+        public void CombineIntoGroup(IDrawable drawable)
+        {
+            return;
+        }
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {

@@ -27,8 +27,7 @@ namespace Image_Generator.Models
         /// <param name="height">New draw field height</param>
         public Renderer(int width, int height)
         {
-            this.DrawField = new Bitmap(width, height);
-            this.MyGraphics = Graphics.FromImage(DrawField);
+            this.SetResolution(width, height);
         }
 
         /// <summary>
@@ -40,12 +39,6 @@ namespace Image_Generator.Models
             return this.DrawField;
         }
 
-        public void UpdateSizes(int newWidth, int newHeight)
-        {
-            this.DrawField = new Bitmap(newWidth, newHeight);
-            this.MyGraphics = Graphics.FromImage(DrawField);
-        }
-
         /// <summary>
         /// Function to draw single image to current draw field
         /// </summary>
@@ -55,7 +48,7 @@ namespace Image_Generator.Models
             var dimensions = this.GetProportionalDimensions(image, width, height);
 
             // Shift to next row of images if current row is fully drawn
-            if (x + dimensions.Item2 > this.DrawField.Width)
+            if (x + dimensions.Item1 > this.DrawField.Width)
             {
                 x = 0;
                 y += height;
@@ -94,6 +87,12 @@ namespace Image_Generator.Models
             }
 
             return Tuple.Create(finalW, finalH);
+        }
+
+        public void SetResolution(int width, int height)
+        {
+            this.DrawField = new Bitmap(width, height);
+            this.MyGraphics = Graphics.FromImage(DrawField);
         }
 
         /// <summary>

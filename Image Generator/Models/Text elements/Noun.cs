@@ -32,14 +32,18 @@ namespace Image_Generator.Models.Text_elements
         private bool Plural { get; } = false;
 
         // Drawable of this noun
-        private Image MyDrawable { get; set; }
-        
+        public Image Image { get; set; }
+
+        public IDrawable Group { get; set; }
+
         // Factory for creating edges
-        private EdgeFactory EdgeFactory { get; } 
+        private EdgeFactory EdgeFactory { get; }
 
         // Factory for creating elements
         private ElementFactory ElementFactory { get; }
-    
+
+        private ImageManager Manager { get; }
+
         // IDrawable inteface properties
         public Vector2? Position { get; set; }
         public int ZIndex { get; set; } = 0;
@@ -47,18 +51,19 @@ namespace Image_Generator.Models.Text_elements
         public int Height { get; set; }
         public bool IsPositioned => this.Position != null;
 
-        public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : base(Id, Lemma, Dependency)
+        public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<Element>();
             this.Dependencies = new List<IPositionateEdge>();
             this.Adpositions = new List<Adposition>();
             this.EdgeFactory = factory;
             this.ElementFactory = elementFactory;
+            this.Manager = manager;
             this.Width = width;
             this.Height = height;
         }
 
-        public Noun(int Id, string Lemma, string Dependecy, bool Plural, EdgeFactory factory, ElementFactory elementFactory, int width, int height) : this(Id, Lemma, Dependecy, factory, elementFactory, width, height)
+        public Noun(int Id, string Lemma, string Dependecy, bool Plural, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : this(Id, Lemma, Dependecy, factory, elementFactory, manager, width, height)
         {
             this.Plural = Plural;
             this.Number = NUMBER_OF_INSTANCES;
@@ -67,7 +72,7 @@ namespace Image_Generator.Models.Text_elements
         public void Draw(Renderer renderer, ImageManager manager)
         {
             //renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
-            renderer.DrawImage(this.GetImage(manager), (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
+            renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
         #region Processing depending elements
@@ -103,10 +108,15 @@ namespace Image_Generator.Models.Text_elements
                 return this.ElementFactory.Create(this, noun);
 
             // Get adpositions from adpositions combinations
-            graph.AddEdge(this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions));
+            IPositionateEdge edge = this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions);
+            if (edge != null)
+                graph.AddEdge(edge);
+            else
+                graph.AddVertex(noun);
 
             // Finalize processed noun
             noun.FinalizeProcessing(graph);
+
             return this;
         }
 
@@ -127,16 +137,39 @@ namespace Image_Generator.Models.Text_elements
         public override IProcessable FinalizeProcessing(SentenceGraph graph)
         {
             IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.Adpositions);
-            if (!(newEdge is DefaultEdge))
+            if (newEdge != null)
                 graph.AddEdge(newEdge);
+
+            if (this.Image == null)
+                this.GetImage();
 
             return this;
         }
         #endregion
 
-        private Image GetImage(ImageManager manager)
+        public void CombineIntoGroup(IDrawable drawable)
         {
-            return (this.MyDrawable = manager.GetImage(this.GetFinalWordSequence()));
+            IDrawable group = null;
+            if (this.Group == null && drawable.Group == null)
+                group = new MetaNoun(this, drawable);
+            else if (this.Group == null)
+            {
+                group = drawable.Group;
+                group.CombineIntoGroup(this);
+            }
+            else
+            {
+                group = this.Group;
+                group.CombineIntoGroup(drawable);   
+            }
+
+            this.Group = group;
+            drawable.Group = group;
+        }
+
+        private Image GetImage()
+        {
+            return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
         }
 
         private string GetFinalWordSequence()

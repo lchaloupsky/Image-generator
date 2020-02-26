@@ -11,6 +11,7 @@ namespace Image_Generator.Models
     {
         private Dictionary<IDrawable, List<IPositionateEdge>> Graph { get; }
 
+        public IEnumerable<IDrawable> Groups { get; set; }
         public IEnumerable<IDrawable> Vertices => this.Graph.Keys;
         public IEnumerable<IPositionateEdge> Edges => this.Graph.Values.SelectMany(edge => edge);
         public IEnumerable<IPositionateEdge> this[IDrawable vertex] => this.Graph.ContainsKey(vertex) ? this.Graph[vertex] : null;

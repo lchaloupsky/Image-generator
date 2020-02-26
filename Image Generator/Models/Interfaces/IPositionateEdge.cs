@@ -13,6 +13,5 @@ namespace Image_Generator.Models.Interfaces
         IDrawable Right { get; set; }
 
         void Positionate(int maxWidth, int maxHeight);
-        bool CheckPosition();
     }
 }

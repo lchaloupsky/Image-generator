@@ -12,6 +12,10 @@ namespace Image_Generator.Models.Interfaces
     /// </summary>
     interface IDrawable : IPositionable
     {
+        Image Image { get; }
+        IDrawable Group { get; set; }
+
+        void CombineIntoGroup(IDrawable drawable);
         void Draw(Renderer renderer, ImageManager manager);
     }
 }

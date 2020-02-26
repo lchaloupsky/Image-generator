@@ -20,43 +20,72 @@ namespace Image_Generator.Models
 
         public void Positionate(SentenceGraph graph, int width, int height)
         {
+            // Setting helpers properties
             this.Helper.SetProperties(width, height);
+
+            // Linear pass to positionate all vertices and all edges
+            foreach (var vertex in graph.Vertices)
+            {
+                foreach (var edge in graph[vertex])
+                {
+                    // in future remove this --> now only because theese edges are not supported in positioning
+                    if (edge.Right == null)
+                        continue;
+
+                    // Assign new free position to the right vertex -- maybe in the edges?
+                    if (!edge.Right.IsPositioned && !edge.Left.IsPositioned)
+                        edge.Right.Position = this.Helper.GetEmptyPosition();
+
+                    // edge positioning
+                    edge.Positionate(width, height);
+                }
+
+                // if vertex does not have any connected edges(its groups as itself)
+                if (vertex.Position == null)
+                    vertex.Position = this.Helper.GetEmptyPosition();
+            }
+
+            // Getting final "groups" after positioning
+            HashSet<IDrawable> groups = new HashSet<IDrawable>();
+            foreach (var vertex in graph.Vertices)
+            {
+                // If vertex is group as itself, insert it into groups.
+                if (vertex.Group == null)
+                {
+                    groups.Add(vertex);
+                    continue;
+                }
+                   
+                // add only unique groups.
+                if (!groups.Contains(vertex.Group))
+                    groups.Add(vertex.Group);
+            }
+            graph.Groups = groups;
+
+            // Resolving final conflicts
             bool isPositioned = false;
             while (!isPositioned)
             {
                 isPositioned = true;
-                foreach (var vertex in graph.Vertices)
+                foreach (var vertex in graph.Groups)
                 {
-                    // check conflicts --->
-                    // --->   repositionate
+                    // check conflicts ---> repositionate(move)
                     if (vertex.IsPositioned)
                     {
-                        var conflicts = this.Helper.GetConflictingVertices(vertex, graph.Vertices);
+                        var conflicts = this.Helper.GetConflictingVertices(vertex, graph.Groups);
                         if (conflicts.Count != 0)
                         {
                             isPositioned = false;
-                            foreach (var conflictVertex in conflicts) //move conflicts to the right
-                                conflictVertex.Position += new Vector2(vertex.Width, 0);
+
+                            //move conflicts to the right
+                            foreach (var conflictVertex in conflicts)
+                                conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
                         }
-                    }
-
-                    foreach (var edge in graph[vertex])
-                    {
-                        // in future remove this --> now only because theese edges are not supported in positioning
-                        if (edge.Right == null)
-                            continue;
-
-                        // Assign new free position to the right vertex -- maybe in the edges?
-                        if (!edge.Right.IsPositioned && !edge.Left.IsPositioned)
-                            edge.Right.Position = this.Helper.GetEmptyPosition();
-
-                        if (!edge.CheckPosition())
-                            edge.Positionate(width, height);
                     }
                 }
             }
 
-            this.CenterVertices(graph.Vertices, width, height);
+            this.CenterVertices(groups, width, height);
         }
 
         /// <summary>
@@ -165,12 +194,12 @@ namespace Image_Generator.Models
         public int Width { get; set; }
         public int Height { get; set; }
 
-        private const int defaultWidth = 240;
+        private const int defaultWidth = 180;
         private const int defaultHeight = 120;
+        private const int defaultShiftPadding = 0;
 
         private Vector2? NewEmptyPosition { get; set; } = null;
-
-
+        
         public Vector2? GetEmptyPosition()
         {
             if (this.NewEmptyPosition == null)
@@ -196,9 +225,29 @@ namespace Image_Generator.Models
             return conflicts;
         }
 
+        public Vector2 GetShift(IDrawable vertex1, IDrawable vertex2)
+        {
+            return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding, 0);
+        }
+
         private bool CheckConflict(IDrawable vertex1, IDrawable vertex2)
         {
-            return vertex1.Position == vertex2.Position;
+            float x1 = vertex1.Position.Value.X;
+            float y1 = vertex1.Position.Value.Y;
+
+            float x2 = vertex2.Position.Value.X;
+            float y2 = vertex2.Position.Value.Y;
+
+            // If in x-axis are distinct
+            if (x1 >= x2 + vertex2.Width || x1 + vertex1.Width <= x2)
+                return false;
+
+            // if in y-axis are distinct
+            if (y1 >= y2 + vertex2.Height || y1 + vertex1.Height <= y2)
+                return false;
+
+            // they overlap
+            return true;
         }
 
         public void SetProperties(int width, int height)

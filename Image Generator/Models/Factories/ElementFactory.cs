@@ -13,15 +13,17 @@ namespace Image_Generator.Models.Factories
     /// </summary>
     class ElementFactory
     {
-        private const int DEFAULT_OBJECT_WIDTH = 240;
+        private const int DEFAULT_OBJECT_WIDTH = 180;
         private const int DEFAULT_OBJECT_HEIGHT = 120;
 
         private EdgeFactory EdgeFactory { get; }
+        private ImageManager Manager { get; }
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> { "top", "front", "down" };
 
-        public ElementFactory()
+        public ElementFactory(ImageManager manager)
         {
             this.EdgeFactory = new EdgeFactory();
+            this.Manager = manager;
         }
 
         public IProcessable Create(string[] parts)
@@ -33,7 +35,7 @@ namespace Image_Generator.Models.Factories
             {
                 case "NOUN":
                     //TODO Plurals! Maybe Dimensions set separately!
-                    part = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
+                    part = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
                     break;
                 case "ADJ":
                     part = new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);

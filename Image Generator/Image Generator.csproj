@@ -97,6 +97,7 @@
     <Compile Include="Models\Text elements\Adjective.cs" />
     <Compile Include="Models\Text elements\Adposition.cs" />
     <Compile Include="Models\Text elements\Element.cs" />
+    <Compile Include="Models\Text elements\MetaNoun.cs" />
     <Compile Include="Models\Text elements\Noun.cs" />
     <Compile Include="Models\Text elements\NounSet.cs" />
     <Compile Include="Models\Text elements\Root.cs" />

@@ -11,30 +11,21 @@ namespace Image_Generator.Models.Edges
 {
     class AtEdge : Edge
     {
+        private int MaxWidth { get => this.Right.Width / 2; }
+        private int MaxHeight { get => this.Right.Height / 2; }
+
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            this.Left.Width = this.Right.Width;
-            this.Left.Height = this.Right.Height;
-            this.Left.ZIndex = this.Right.ZIndex;
-            this.Left.Position = this.Right.Position;
-
-            this.Right.Width /= 2;
-            this.Right.Height /= 2;
-            this.Right.ZIndex += 1;
-            this.Right.Position = this.Left.Position + new Vector2(this.Right.Width / 2, this.Right.Height);
+            this.CopyPosition(this.Left, this.Right);
+            this.PositionateLeft(MaxWidth, maxHeight);
         }
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.Right.Width = this.Left.Width / 2;
-            this.Right.Height = this.Left.Height / 2;
-            this.Right.ZIndex = this.Left.ZIndex + 1;
-            this.Right.Position = this.Left.Position + new Vector2(this.Right.Width / 2, this.Right.Height);
-        }
-
-        protected override bool CheckConcretePosition()
-        {
-            return true;
+            this.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
+            this.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
+            this.Left.ZIndex++;
+            this.Left.Position = this.Right.Position + new Vector2(this.MaxWidth / 2, this.MaxHeight); // maybe do padding? Maybe not. One simple call.
         }
     }
 }

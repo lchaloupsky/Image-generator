@@ -26,6 +26,12 @@ namespace Image_Generator.Models.Edges
 
         public virtual void Positionate(int maxWidth, int maxHeight)
         {
+            if (this.Left.Group != null)
+                this.Left = this.Left.Group;
+
+            if (this.Right.Group != null)
+                this.Right = this.Right.Group;
+
             if (this.Right is Root)
                 return; //Do here a method?
             else if (!this.Left.IsPositioned)
@@ -35,6 +41,9 @@ namespace Image_Generator.Models.Edges
             else
                 Console.WriteLine("COLLISION"); //something like check some condition. then propagate change?
 
+            // Fix both vertices as one group.
+            this.Left.CombineIntoGroup(this.Right);
+
             Console.WriteLine(this); //debug log.
         }
 
@@ -42,14 +51,33 @@ namespace Image_Generator.Models.Edges
 
         protected abstract void PositionateLeft(int maxWidth, int maxHeight);
 
-        protected abstract bool CheckConcretePosition();
-
-        public virtual bool CheckPosition()
+        protected int GetShift(int dim1, int dim2)
         {
-            if (!this.Left.IsPositioned || !this.Right.IsPositioned)
-                return false;
+            return (dim1 - dim2) / 2;
+        }
 
-            return this.CheckConcretePosition();
+        protected float GetScaleFactor(int max, int dim)
+        {
+            return max * 1f / dim;
+        }
+
+        protected void ScaleByFactor(float factor, IDrawable element)
+        {
+            element.Width = (int)(element.Width * factor);
+            element.Height = (int)(element.Height * factor);
+        }
+
+        protected void RescaleWithMax(int max, int value, IDrawable element)
+        {
+            var rescale = this.GetScaleFactor(max, value);
+            if (rescale < 1)
+                this.ScaleByFactor(rescale, element);
+        }
+
+        protected void CopyPosition(IDrawable source, IDrawable destination)
+        {
+            destination.Position = source.Position;
+            destination.ZIndex = source.ZIndex;
         }
 
         public override string ToString()

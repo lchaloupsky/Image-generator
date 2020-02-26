@@ -26,13 +26,16 @@ namespace Image_Generator
         private Bitmap MyBitmap { get; set; }
         private UDPipeParser MyParser { get; }
         private Positioner MyPositioner { get; }
+        private ResolutionItem ImageResolution { get; set; }
 
         public Form1()
         {
             InitializeComponent();
-            this.MyRenderer = new Renderer(this.generatedImage.Width, this.generatedImage.Height);
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+            this.FillResolutionBox();
+            this.MyRenderer = new Renderer(this.ImageResolution.Width, this.ImageResolution.Height);
             this.Manager = new ImageManager();
-            this.MyParser = new UDPipeParser("english-ud-1.2-160523");
+            this.MyParser = new UDPipeParser("english-ud-1.2-160523", this.Manager);
             this.MyPositioner = new Positioner();
         }
 
@@ -64,7 +67,7 @@ namespace Image_Generator
             try
             {
                 // Parsing given text
-                var result = this.MyParser.ParseText(this.sentenceBox.Text, this.generatedImage.Width, this.generatedImage.Height);
+                var result = this.MyParser.ParseText(this.sentenceBox.Text, this.resolutionBox.Width, this.resolutionBox.Height);
 
                 // Clear draw field
                 this.MyRenderer.ResetImage();
@@ -73,10 +76,12 @@ namespace Image_Generator
                 foreach (var graph in result)
                 {
                     // positioning given sentence graph with given with and height
-                    this.MyPositioner.Positionate(graph, this.generatedImage.Width, this.generatedImage.Height);
+                    //this.MyPositioner.Positionate(graph, this.generatedImage.Width, this.generatedImage.Height);
+                    this.MyPositioner.Positionate(graph, this.ImageResolution.Width, this.ImageResolution.Height);
 
                     // drawing each vertex of graph
-                    foreach (var vertex in graph.Vertices.OrderBy(v => v.ZIndex))
+                    var drawables = graph.Groups ?? graph.Vertices;
+                    foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
                         vertex.Draw(this.MyRenderer, this.Manager);
                 }
 
@@ -155,10 +160,44 @@ namespace Image_Generator
                 GenerateButton_Click(sender, e);
         }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        private void FillResolutionBox()
         {
-            if (this.MyRenderer != null && this.generatedImage != null)
-                this.MyRenderer.UpdateSizes(this.generatedImage.Width, this.generatedImage.Height);
+            this.resolutionBox.DataSource = new ResolutionItem[]
+            {
+                new ResolutionItem(1920, 1080),
+                new ResolutionItem(1280, 1080),
+                new ResolutionItem(1280, 720),
+                new ResolutionItem(960, 540),
+                new ResolutionItem(640, 360),
+                new ResolutionItem(640, 480)
+            };
+
+            this.resolutionBox.SelectedIndex = 3;
+        }
+
+        private void resolutionBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ResolutionItem item = (ResolutionItem)this.resolutionBox.SelectedValue;
+
+            this.ImageResolution = item;
+            this.MyRenderer?.SetResolution(item.Width, item.Height);
+        }
+
+        private struct ResolutionItem
+        {
+            public int Width { get; }
+            public int Height { get; }
+
+            public ResolutionItem(int width, int height)
+            {
+                this.Width = width;
+                this.Height = height;
+            }
+
+            public override string ToString()
+            {
+                return $"{this.Width}x{this.Height} px";
+            }
         }
     }
 }

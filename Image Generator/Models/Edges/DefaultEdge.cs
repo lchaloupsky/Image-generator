@@ -23,10 +23,5 @@ namespace Image_Generator.Models.Edges
         {
             this.Left.Position = this.Right.Position - new Vector2(this.Right.Width, 0);
         }
-
-        protected override bool CheckConcretePosition()
-        {
-            return true;
-        }
     }
 }

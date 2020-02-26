@@ -13,7 +13,8 @@ namespace Image_Generator.Models.Factories
     {
         public Edge Create<T1>(T1 left, List<Adposition> adpositions) where T1 : IDrawable, IProcessable
         {
-            return GetEdge(string.Join(" ", adpositions.SelectMany(x => x.GetAdpositions())).ToLower()).Add(left, null);
+            Edge edge = this.GetEdge(string.Join(" ", adpositions.SelectMany(x => x.GetAdpositions())).ToLower());
+            return edge?.Add(left, null);
         }
 
         public Edge Create<T1, T2>(T1 left, T2 right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions)
@@ -24,7 +25,7 @@ namespace Image_Generator.Models.Factories
             var rightAll = rightAdpositions.SelectMany(x => x.GetAdpositions()).ToList();
 
             Edge edge = this.Create(left, right, leftAll.Concat(rightAll).ToList());
-            if (edge is DefaultEdge)
+            if (edge == null)
             {
                 if (this.CheckIfParameterIsSubject(right))
                 {
@@ -51,6 +52,10 @@ namespace Image_Generator.Models.Factories
             where T2 : IDrawable, IProcessable
         {
             Edge edge = GetEdge(string.Join(" ", adpositions).ToLower());
+
+            if (edge == null)
+                return null;
+
             if (this.CheckIfParameterIsSubject(right))
                 return edge.Add(right, left);
                     
@@ -67,7 +72,8 @@ namespace Image_Generator.Models.Factories
                 case "under": return new UnderEdge();
                 case "on top of":
                 case "on top": return new OnTopEdge();
-                default: return new DefaultEdge();
+                //default: return new DefaultEdge();
+                default: return null;
             }
         }
 
