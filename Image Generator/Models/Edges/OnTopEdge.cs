@@ -11,6 +11,11 @@ namespace Image_Generator.Models.Edges
 {
     class OnTopEdge : Edge
     {
+        protected override void PositionateAgainstRoot(int maxWidth, int maxHeight)
+        {
+            this.Left.Position = new Vector2(this.GetShift(maxWidth, this.Left.Width), 0);
+        }
+
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
             this.Right.Position = this.Left.Position + new Vector2(this.GetShift(this.Left.Width, this.Right.Width), this.Left.Height);

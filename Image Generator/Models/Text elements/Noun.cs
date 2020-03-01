@@ -50,6 +50,7 @@ namespace Image_Generator.Models.Text_elements
         public int Width { get; set; }
         public int Height { get; set; }
         public bool IsPositioned => this.Position != null;
+        public bool IsFixed { get; set; } = false;
 
         public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
         {
@@ -149,6 +150,13 @@ namespace Image_Generator.Models.Text_elements
 
         public void CombineIntoGroup(IDrawable drawable)
         {
+            if (drawable is MetaNoun)
+            {
+                drawable.CombineIntoGroup(this);
+                this.Group = drawable;
+                return;
+            }
+
             IDrawable group = null;
             if (this.Group == null && drawable.Group == null)
                 group = new MetaNoun(this, drawable);

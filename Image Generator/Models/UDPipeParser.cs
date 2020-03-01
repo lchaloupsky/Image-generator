@@ -162,7 +162,9 @@ namespace Image_Generator.Models
             public int Compare(IProcessable x, IProcessable y)
             {
                 // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
-                return x is Adposition ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) : (y is Adposition ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) : (x.Id < y.Id ? -1 : 1));
+                return x is Adposition || x is Adjective ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) : 
+                      (y is Adposition || y is Adjective ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) : 
+                      (x.Id < y.Id ? -1 : 1));
             }
         }
     }

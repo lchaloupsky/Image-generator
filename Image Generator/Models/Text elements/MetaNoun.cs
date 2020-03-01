@@ -21,6 +21,8 @@ namespace Image_Generator.Models.Text_elements
 
         public bool IsPositioned => true;
 
+        public bool IsFixed { get; set; }
+
         public Image Image { get; set; }
 
         public IDrawable Group { get; set; }
@@ -35,6 +37,7 @@ namespace Image_Generator.Models.Text_elements
             var rect = this.GetSmallestCoveringRectangle(drawable1, drawable2);
             this.SetNewCoordinatesAndDimensions(rect.Item1, rect.Item2, rect.Item3, Math.Min(drawable1.ZIndex, drawable2.ZIndex));
             this.Image =  this.CombineImages(drawable1, drawable2, this.Position.Value, this.Width, this.Height);
+            this.IsFixed = drawable1.IsFixed || drawable2.IsFixed;
         }
 
         public void CombineIntoGroup(IDrawable drawable)
@@ -43,6 +46,7 @@ namespace Image_Generator.Models.Text_elements
             this.Image = this.CombineImages(this, drawable, rect.Item1, rect.Item2, rect.Item3);
             this.SetNewCoordinatesAndDimensions(rect.Item1, rect.Item2, rect.Item3, Math.Min(this.ZIndex, drawable.ZIndex));
             drawable.Group = this;
+            drawable.IsFixed = this.IsFixed || drawable.IsFixed;
         }
 
         private Tuple<Vector2, int, int> GetSmallestCoveringRectangle(IDrawable drawable1, IDrawable drawable2) {

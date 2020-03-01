@@ -18,7 +18,9 @@ namespace Image_Generator.Models.Factories
 
         private EdgeFactory EdgeFactory { get; }
         private ImageManager Manager { get; }
-        private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> { "top", "front", "down" };
+        private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
+            "top", "front", "down", "middle", "left", "next", "midst", "bottom", "corner"
+        };
 
         public ElementFactory(ImageManager manager)
         {

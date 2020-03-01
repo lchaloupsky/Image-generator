@@ -2,6 +2,7 @@
 using Image_Generator.Models.Text_elements;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -23,47 +24,22 @@ namespace Image_Generator.Models
             // Setting helpers properties
             this.Helper.SetProperties(width, height);
 
-            // Linear pass to positionate all vertices and all edges
-            foreach (var vertex in graph.Vertices)
-            {
-                foreach (var edge in graph[vertex])
-                {
-                    // in future remove this --> now only because theese edges are not supported in positioning
-                    if (edge.Right == null)
-                        continue;
-
-                    // Assign new free position to the right vertex -- maybe in the edges?
-                    if (!edge.Right.IsPositioned && !edge.Left.IsPositioned)
-                        edge.Right.Position = this.Helper.GetEmptyPosition();
-
-                    // edge positioning
-                    edge.Positionate(width, height);
-                }
-
-                // if vertex does not have any connected edges(its groups as itself)
-                if (vertex.Position == null)
-                    vertex.Position = this.Helper.GetEmptyPosition();
-            }
-
-            // Getting final "groups" after positioning
-            HashSet<IDrawable> groups = new HashSet<IDrawable>();
-            foreach (var vertex in graph.Vertices)
-            {
-                // If vertex is group as itself, insert it into groups.
-                if (vertex.Group == null)
-                {
-                    groups.Add(vertex);
-                    continue;
-                }
-                   
-                // add only unique groups.
-                if (!groups.Contains(vertex.Group))
-                    groups.Add(vertex.Group);
-            }
-            graph.Groups = groups;
+            // Positionate all Edges first
+            this.PositionateAllEdges(graph, width, height);
 
             // Resolving final conflicts
+            this.ResolveConflicts(graph, width, height);
+
+            // Final not abolute positioned vertices centering
+            // this.CenterVertices(groups, width, height, true);
+            this.CenterVertices(graph.Groups, width, height);
+        }
+
+        private void ResolveConflicts(SentenceGraph graph, int width, int height)
+        {
             bool isPositioned = false;
+
+            // While there is some conflict, check positions
             while (!isPositioned)
             {
                 isPositioned = true;
@@ -79,13 +55,52 @@ namespace Image_Generator.Models
 
                             //move conflicts to the right
                             foreach (var conflictVertex in conflicts)
-                                conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
+                                this.Helper.ResolveConflict(vertex, conflictVertex);
+                                //conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
                         }
                     }
                 }
             }
+        }
 
-            this.CenterVertices(groups, width, height);
+        private void PositionateAllEdges(SentenceGraph graph, int width, int height)
+        {
+            // Linear pass to positionate all vertices and all edges
+            foreach (var vertex in graph.Vertices)
+            {
+                foreach (var edge in graph[vertex])
+                {
+                    // Assign new free position to the right vertex
+                    if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
+                        edge.Right.Position = this.Helper.GetEmptyPosition();
+
+                    // Edge positioning itself
+                    edge.Positionate(width, height);
+                }
+
+                // if vertex does not have any connected edges(its groups as itself)
+                if (vertex.Position == null)
+                    vertex.Position = this.Helper.GetEmptyPosition();
+            }
+
+            // Getting final vertex "groups" after positioning
+            HashSet<IDrawable> groups = new HashSet<IDrawable>();
+            foreach (var vertex in graph.Vertices)
+            {
+                // If vertex is group as itself, insert it into groups.
+                if (vertex.Group == null)
+                {
+                    groups.Add(vertex);
+                    continue;
+                }
+
+                // add only unique groups.
+                if (!groups.Contains(vertex.Group))
+                    groups.Add(vertex.Group);
+            }
+
+            // Set groups
+            graph.Groups = groups;
         }
 
         /// <summary>
@@ -94,7 +109,7 @@ namespace Image_Generator.Models
         /// <param name="vertices">Vertices to be centered</param>
         /// <param name="width">Maximal width</param>
         /// <param name="height">Maximal height</param>
-        private void CenterVertices(IEnumerable<IDrawable> vertices, int width, int height)
+        private void CenterVertices(IEnumerable<IDrawable> vertices, int width, int height, bool absolute = false)
         {
             IDrawable leftMost = vertices.First(),
                       rightMost = leftMost,
@@ -104,6 +119,9 @@ namespace Image_Generator.Models
             // get most edgy vertices
             foreach (var vertex in vertices)
             {
+                if (vertex.IsFixed)
+                    continue;
+
                 int vX = (int)vertex.Position.Value.X;
                 int vY = (int)vertex.Position.Value.Y;
 
@@ -126,7 +144,12 @@ namespace Image_Generator.Models
             // adding final shift to center vertices
             Vector2 finalShift = new Vector2(this.GetPaddingX(leftMost, rightMost, width), this.GetPaddingY(topMost, bottomMost, height));
             foreach (var vertex in vertices)
+            {
+                if (vertex.IsFixed)
+                    continue;
+
                 vertex.Position += finalShift;
+            }
         }
 
         /// <summary>
@@ -163,9 +186,12 @@ namespace Image_Generator.Models
         /// <returns>Calculated shift</returns>
         private float GetPadding(float firstPos, float secondPos, float secondDim, int max)
         {
+            if (firstPos == secondPos)
+                return firstPos < 0 ? (max - secondDim) / 2 - firstPos : (max - secondDim) / 2 - firstPos;
+
             float firstDist = Math.Abs(firstPos);
             float secondDist = Math.Abs(max - (secondPos + secondDim));
-            float padding = (firstPos >= 0 && secondPos + secondDim <= max) ? (firstDist - secondDist) / 2 : (firstDist + secondDist) / 2;
+            float padding = (firstPos > 0 && secondPos + secondDim <= max) ? (firstDist - secondDist) / 2 : (firstDist + secondDist) / 2;
 
             return firstDist > secondDist ? (firstPos < 0 ? padding : -padding) : (secondPos + secondDim > max ? -padding : padding);
         }
@@ -196,8 +222,9 @@ namespace Image_Generator.Models
 
         private const int defaultWidth = 180;
         private const int defaultHeight = 120;
-        private const int defaultShiftPadding = 0;
+        private const int defaultShiftPadding = 60;
 
+        private Random Random { get; } = new Random();
         private Vector2? NewEmptyPosition { get; set; } = null;
         
         public Vector2? GetEmptyPosition()
@@ -206,7 +233,9 @@ namespace Image_Generator.Models
                 return this.NewEmptyPosition = new Vector2(this.Width / 2 - (defaultWidth / 2), 2 * this.Height / 3);
 
             //Stupid move to the right
-            this.NewEmptyPosition += new Vector2(defaultWidth, 0);
+            this.NewEmptyPosition += new Vector2(defaultWidth + Random.Next(-defaultShiftPadding, defaultShiftPadding) + 1,
+                                                 Random.Next(-defaultShiftPadding, defaultShiftPadding));
+            // Return new position
             return this.NewEmptyPosition;
         }
 
@@ -215,7 +244,7 @@ namespace Image_Generator.Models
             List<IDrawable> conflicts = new List<IDrawable>();
             foreach (var vert in vertices)
             {
-                if (vert == vertex)
+                if (vert == vertex || vert.IsFixed != vertex.IsFixed)
                     continue;
 
                 if (this.CheckConflict(vert, vertex))
@@ -225,9 +254,27 @@ namespace Image_Generator.Models
             return conflicts;
         }
 
+        public void ResolveConflict(IDrawable vertex, IDrawable conflictVertex)
+        {
+            // RESOLVING by both vertices shifting by a half
+            IDrawable left = vertex.Position.Value.X <= conflictVertex.Position.Value.X ? vertex : conflictVertex;
+            IDrawable right = left == vertex ? conflictVertex : vertex;
+
+            Vector2 overlap = GetOverlapX(left, right);
+            left.Position -= overlap / 2;
+            right.Position += overlap / 2;
+            //conflictVertex.Position += this.GetShift(vertex, conflictVertex);
+        }
+
         public Vector2 GetShift(IDrawable vertex1, IDrawable vertex2)
         {
             return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding, 0);
+        }
+
+        // Maybe use for abolute positioned vertices?
+        private Vector2 GetOverlapX(IDrawable vertex1, IDrawable vertex2)
+        {
+            return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding), 0);
         }
 
         private bool CheckConflict(IDrawable vertex1, IDrawable vertex2)
@@ -238,11 +285,15 @@ namespace Image_Generator.Models
             float x2 = vertex2.Position.Value.X;
             float y2 = vertex2.Position.Value.Y;
 
+            // If in z-axis are distinct
+            if (vertex1.ZIndex != vertex2.ZIndex)
+                return false;
+
             // If in x-axis are distinct
             if (x1 >= x2 + vertex2.Width || x1 + vertex1.Width <= x2)
                 return false;
 
-            // if in y-axis are distinct
+            // If in y-axis are distinct
             if (y1 >= y2 + vertex2.Height || y1 + vertex1.Height <= y2)
                 return false;
 

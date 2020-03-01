@@ -29,12 +29,17 @@ namespace Image_Generator.Models.Edges
             if (this.Left.Group != null)
                 this.Left = this.Left.Group;
 
+            if (this.Right == null)
+            {
+                this.PositionateAgainstRoot(maxWidth, maxHeight);
+                this.Left.IsFixed = true;
+                return;
+            }
+
             if (this.Right.Group != null)
                 this.Right = this.Right.Group;
 
-            if (this.Right is Root)
-                return; //Do here a method?
-            else if (!this.Left.IsPositioned)
+            if (!this.Left.IsPositioned)
                 this.PositionateLeft(maxWidth, maxHeight);
             else if (!this.Right.IsPositioned)
                 this.PositionateRight(maxWidth, maxHeight);
@@ -46,6 +51,8 @@ namespace Image_Generator.Models.Edges
 
             Console.WriteLine(this); //debug log.
         }
+
+        protected virtual void PositionateAgainstRoot(int maxWidth, int maxHeight) { }
 
         protected abstract void PositionateRight(int maxWidth, int maxHeight);
 
@@ -85,4 +92,7 @@ namespace Image_Generator.Models.Edges
             return $"{this.GetType().Name} --> positioning: \n     Left: {this.Left} \n    Right: {this.Right}";
         }
     }
+
+    public enum HorizontalPlace { LEFT, RIGHT }
+    public enum VerticalPlace { TOP, BOTTOM }
 }

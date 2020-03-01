@@ -10,8 +10,12 @@ namespace Image_Generator.Models.Text_elements
     class Adposition : Element
     {
         private Adposition DependingAdposition { get; set; }
+        private List<Adjective> Extensions { get; }
 
-        public Adposition(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
+        public Adposition(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        {
+            this.Extensions = new List<Adjective>();
+        }
 
         public IEnumerable<Adposition> GetAdpositions()
         {
@@ -25,6 +29,7 @@ namespace Image_Generator.Models.Text_elements
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Adposition adp: return this.ProcessElement(adp, graph);
+                case Adjective adj: return this.ProcessElement(adj, graph);
                 default: break;
             }
 
@@ -45,6 +50,20 @@ namespace Image_Generator.Models.Text_elements
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
             return nounSet.Process(this, graph);
+        }
+
+        private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
+        {
+            this.Extensions.Add(adj);
+            return this;
+        }
+
+        public override string ToString()
+        {
+            if (this.Extensions.Count == 0)
+                return base.ToString();
+
+            return $"{string.Join(" ", this.Extensions)} {this.Lemma}";
         }
     }
 }

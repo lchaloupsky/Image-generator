@@ -76,7 +76,6 @@ namespace Image_Generator
                 foreach (var graph in result)
                 {
                     // positioning given sentence graph with given with and height
-                    //this.MyPositioner.Positionate(graph, this.generatedImage.Width, this.generatedImage.Height);
                     this.MyPositioner.Positionate(graph, this.ImageResolution.Width, this.ImageResolution.Height);
 
                     // drawing each vertex of graph
@@ -175,7 +174,7 @@ namespace Image_Generator
             this.resolutionBox.SelectedIndex = 3;
         }
 
-        private void resolutionBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void ResolutionBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             ResolutionItem item = (ResolutionItem)this.resolutionBox.SelectedValue;
 

@@ -14,5 +14,6 @@ namespace Image_Generator.Models.Interfaces
         int Width { get; set; }
         int Height { get; set; }
         bool IsPositioned { get; }
+        bool IsFixed { get; set; }
     }
 }

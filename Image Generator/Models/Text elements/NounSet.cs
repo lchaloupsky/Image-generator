@@ -19,6 +19,7 @@ namespace Image_Generator.Models.Text_elements
         public int Width { get; set; }
         public int Height { get; set; }
         public bool IsPositioned => this.Position != null;
+        public bool IsFixed { get; set; } = false;
 
         public string DependencyType { get; private set; }
 
@@ -52,7 +53,7 @@ namespace Image_Generator.Models.Text_elements
 
             foreach (Noun noun in args)
             {
-                if(noun.Dependencies.Count == 0)
+                if (noun.Dependencies.Count == 0)
                     this.Dependencies.AddRange(noun.Dependencies);
             }
         }
@@ -72,14 +73,15 @@ namespace Image_Generator.Models.Text_elements
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
             if (noun.DependencyType == "conj")
-                this.Nouns.Add(noun);
-            else
             {
-                //REDO
-                //this.Dependencies.Add(this.EdgeFactory.Create(this, noun, GetAdpositions()));
-                //this.ClearAdpositions();
-                Console.WriteLine();
+                this.Nouns.Add(noun);
+                return this;
             }
+
+            //REDO
+            //this.Dependencies.Add(this.EdgeFactory.Create(this, noun, GetAdpositions()));
+            //this.ClearAdpositions();
+            Console.WriteLine();
 
             return this;
         }
@@ -94,6 +96,7 @@ namespace Image_Generator.Models.Text_elements
 
         public IProcessable FinalizeProcessing(SentenceGraph graph)
         {
+            // REDO
             this.Nouns.ForEach(noun => noun.FinalizeProcessing(graph));
             return this.Nouns.First();
         }

@@ -77,11 +77,18 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Downloader.cs" />
+    <Compile Include="Models\Edges\AtBottomEdge.cs" />
+    <Compile Include="Models\Edges\BehindEdge.cs" />
     <Compile Include="Models\Edges\DefaultEdge.cs" />
     <Compile Include="Models\Edges\Edge.cs" />
+    <Compile Include="Models\Edges\InCornerEdge.cs" />
     <Compile Include="Models\Edges\InEdge.cs" />
     <Compile Include="Models\Edges\AtEdge.cs" />
+    <Compile Include="Models\Edges\InFrontEdge.cs" />
+    <Compile Include="Models\Edges\InMiddleEdge.cs" />
     <Compile Include="Models\Edges\OnTopEdge.cs" />
+    <Compile Include="Models\Edges\ToLeftEdge.cs" />
+    <Compile Include="Models\Edges\ToRightEdge.cs" />
     <Compile Include="Models\Edges\UnderEdge.cs" />
     <Compile Include="Models\Edges\OnEdge.cs" />
     <Compile Include="Models\Factories\EdgeFactory.cs" />
