@@ -31,7 +31,6 @@ namespace Image_Generator.Models
             this.ResolveConflicts(graph, width, height);
 
             // Final not abolute positioned vertices centering
-            // this.CenterVertices(groups, width, height, true);
             this.CenterVertices(graph.Groups, width, height);
         }
 
@@ -55,8 +54,8 @@ namespace Image_Generator.Models
 
                             //move conflicts to the right
                             foreach (var conflictVertex in conflicts)
-                                this.Helper.ResolveConflict(vertex, conflictVertex);
-                                //conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
+                                //this.Helper.ResolveConflict(vertex, conflictVertex);
+                                conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
                         }
                     }
                 }
@@ -66,19 +65,30 @@ namespace Image_Generator.Models
         private void PositionateAllEdges(SentenceGraph graph, int width, int height)
         {
             // Linear pass to positionate all vertices and all edges
+            //foreach (var vertex in graph.Vertices)
+            //{
+            //    foreach (var edge in graph[vertex])
+            //    {
+            //        // Assign new free position to the right vertex
+            //        if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
+            //            edge.Right.Position = this.Helper.GetEmptyPosition();
+
+            //        // Edge positioning itself
+            //        edge.Positionate(width, height);
+            //    }
+
+            //    // if vertex does not have any connected edges(its groups as itself)
+            //    if (vertex.Position == null)
+            //        vertex.Position = this.Helper.GetEmptyPosition();
+            //}
+
             foreach (var vertex in graph.Vertices)
             {
-                foreach (var edge in graph[vertex])
-                {
-                    // Assign new free position to the right vertex
-                    if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
-                        edge.Right.Position = this.Helper.GetEmptyPosition();
+                if (vertex.IsPositioned)
+                    continue;
 
-                    // Edge positioning itself
-                    edge.Positionate(width, height);
-                }
+                this.PositionateDFS(graph, vertex, width, height);
 
-                // if vertex does not have any connected edges(its groups as itself)
                 if (vertex.Position == null)
                     vertex.Position = this.Helper.GetEmptyPosition();
             }
@@ -94,13 +104,30 @@ namespace Image_Generator.Models
                     continue;
                 }
 
-                // add only unique groups.
-                if (!groups.Contains(vertex.Group))
+                // add only unique and valid groups.
+                if (vertex.Group.IsValid && !groups.Contains(vertex.Group))
                     groups.Add(vertex.Group);
             }
 
             // Set groups
             graph.Groups = groups;
+        }
+
+        public void PositionateDFS(SentenceGraph graph, IDrawable vertex, int width, int height)
+        {
+            foreach (var edge in graph[vertex])
+            {
+                // Positionate dfs
+                if (edge.Right != null && !edge.Right.IsPositioned)
+                    this.PositionateDFS(graph, edge.Right, width, height);
+
+                // Assign new free position to the right vertex
+                if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
+                    edge.Right.Position = this.Helper.GetEmptyPosition();
+
+                // Edge positioning itself
+                edge.Positionate(width, height);
+            }
         }
 
         /// <summary>

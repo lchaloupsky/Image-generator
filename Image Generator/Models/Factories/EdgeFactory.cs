@@ -111,8 +111,11 @@ namespace Image_Generator.Models.Factories
                 case "to left of": return new ToLeftEdge();
                 case "near":
                 case "next to":
+                case "with":
+                case "along":
                 case "to right of": return new ToRightEdge();
                 case "at bottom of": return new AtBottomEdge();
+                case "outside":
                 case "in front of": return new InFrontEdge();
                 case "past":
                 case "beyond":

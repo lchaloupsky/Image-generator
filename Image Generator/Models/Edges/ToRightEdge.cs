@@ -16,12 +16,12 @@ namespace Image_Generator.Models.Edges
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            this.Right.Position = this.Left.Position - new Vector2(this.Right.Width, this.GetShift(this.Left.Height, this.Right.Height));
+            this.Right.Position = this.Left.Position - new Vector2(this.Right.Width, this.GetShift(this.Right.Height, this.Left.Height));
         }
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.Left.Position = this.Right.Position + new Vector2(this.Right.Width, this.GetShift(this.Left.Height, this.Right.Height));
+            this.Left.Position = this.Right.Position + new Vector2(this.Right.Width, this.GetShift(this.Right.Height, this.Left.Height));
         }
     }
 }

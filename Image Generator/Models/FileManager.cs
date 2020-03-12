@@ -38,7 +38,7 @@ namespace Image_Generator.Models
         /// <returns>Loaded image</returns>
         public Image LoadImage(string imageName)
         {
-            return new Bitmap(Directory.EnumerateFiles(this.Location, imageName + "*").First());
+            return new Bitmap(Directory.EnumerateFiles(this.Location, imageName + "*").Last());
         }
     }
 }

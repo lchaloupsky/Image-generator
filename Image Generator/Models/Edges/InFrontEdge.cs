@@ -21,7 +21,7 @@ namespace Image_Generator.Models.Edges
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
             this.Left.ZIndex++;
-            this.Left.Position = this.Right.Position + new Vector2(- this.MaxWidth, this.MaxHeight);
+            this.Left.Position = this.Right.Position + new Vector2(- this.Left.Width + this.MaxWidth, this.MaxHeight);
         }
     }
 }

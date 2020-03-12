@@ -18,7 +18,7 @@ namespace Image_Generator.Models.Text_elements
         public bool IsPositioned { get; } = true;
         public bool IsFixed { get; set; } = true;
 
-        public IDrawable Group { get; set; }
+        public IDrawableGroup Group { get; set; }
         public Image Image { get; set; }
 
         public Root() : base(0)

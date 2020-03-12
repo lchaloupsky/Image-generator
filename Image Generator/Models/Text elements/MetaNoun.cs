@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Text_elements
 {
-    class MetaNoun : IDrawable
+    class MetaNoun : IDrawableGroup
     {
         public Vector2? Position { get; set; }
 
@@ -23,9 +23,11 @@ namespace Image_Generator.Models.Text_elements
 
         public bool IsFixed { get; set; }
 
+        public bool IsValid { get; set; } = true;
+
         public Image Image { get; set; }
 
-        public IDrawable Group { get; set; }
+        public IDrawableGroup Group { get; set; }
 
         public void Draw(Renderer renderer, ImageManager manager)
         {
@@ -45,7 +47,14 @@ namespace Image_Generator.Models.Text_elements
             var rect = this.GetSmallestCoveringRectangle(this, drawable);
             this.Image = this.CombineImages(this, drawable, rect.Item1, rect.Item2, rect.Item3);
             this.SetNewCoordinatesAndDimensions(rect.Item1, rect.Item2, rect.Item3, Math.Min(this.ZIndex, drawable.ZIndex));
-            drawable.Group = this;
+
+            if (drawable.Group != null)
+                drawable.Group.IsValid = false;
+            else if (drawable is IDrawableGroup)
+                ((IDrawableGroup)drawable).IsValid = false;
+            else
+                drawable.Group = this;
+
             drawable.IsFixed = this.IsFixed || drawable.IsFixed;
         }
 

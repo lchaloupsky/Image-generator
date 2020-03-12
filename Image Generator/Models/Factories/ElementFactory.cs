@@ -19,7 +19,7 @@ namespace Image_Generator.Models.Factories
         private EdgeFactory EdgeFactory { get; }
         private ImageManager Manager { get; }
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
-            "top", "front", "down", "middle", "left", "next", "midst", "bottom", "corner"
+            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near"
         };
 
         public ElementFactory(ImageManager manager)
@@ -30,20 +30,28 @@ namespace Image_Generator.Models.Factories
 
         public IProcessable Create(string[] parts)
         {
-            Element part = null;
+            IProcessable part = null;
 
             this.MapKnownCases(parts[2], ref parts[3]);
             switch (parts[3])
             {
                 case "NOUN":
-                    //TODO Plurals! Maybe Dimensions set separately!
-                    part = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
+                    part = this.ProcessNoun(parts);
                     break;
                 case "ADJ":
                     part = new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
                     break;
                 case "ADP":
                     part = new Adposition(int.Parse(parts[0]), parts[2], parts[7]);
+                    break;
+                case "NUM":
+                    part = new Numeral(int.Parse(parts[0]), parts[2], parts[7]);
+                    break;
+                case "VERB":
+                    part = new Verb(int.Parse(parts[0]), parts[2], parts[7], parts[5].Contains("VerbForm=Part"), parts[1].ToLower());
+                    break;
+                case "ADV":
+                    part = new Adverb(int.Parse(parts[0]), parts[2], parts[7]);
                     break;
                 default:
                     break;
@@ -52,11 +60,21 @@ namespace Image_Generator.Models.Factories
             return part;
         }
 
-        public IProcessable Create(Noun left, Noun right)
+        private IProcessable ProcessNoun(string[] parts)
         {
-            return new NounSet(this, this.EdgeFactory, left, right);
+            var noun = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
+
+            if (parts[5].Contains("Number=Plur"))
+                return new NounSet(this, this.EdgeFactory, noun, parts[1]);
+
+            return noun;
         }
-        
+
+        public IProcessable Create(Noun left, Noun right, SentenceGraph graph)
+        {
+            return new NounSet(this, this.EdgeFactory, graph, left, right);
+        }
+
         //REDO SOMETIME
         private void MapKnownCases(string lemma, ref string type)
         {

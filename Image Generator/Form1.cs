@@ -28,6 +28,9 @@ namespace Image_Generator
         private Positioner MyPositioner { get; }
         private ResolutionItem ImageResolution { get; set; }
 
+        private bool UsingDataset { get; set; } = false;
+        private string DatasetFileName { get; set; }
+
         public Form1()
         {
             InitializeComponent();
@@ -59,30 +62,51 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void GenerateButton_Click(object sender, EventArgs e)
         {
+            if (!this.DataSetCheckBox.Checked)
+                this.GenerateImageForView();
+            else
+                this.GenerateImagesForDataset();
+        }
+
+        private void GenerateImagesForDataset()
+        {
+            if (this.DatasetFileName == "")
+                ShowErrorMessage("You have to select dataset first");
+
+            string directory;
+            var dialog = ReturnConfiguredFolderBrowserDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
+                directory = dialog.SelectedPath;
+            else
+            {
+                ShowErrorMessage("You have to select directory to save images first");
+                return;
+            }
+
+            using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
+            {
+                string str;
+                int counter = 1;
+
+                while ((str = streamReader.ReadLine()) != null)
+                {
+                    this.GenerateImage(str.Substring(str.IndexOf(' ') + 1));
+                    this.Manager.SaveImage(this.MyRenderer.GetImage(), Path.Combine(directory, counter + ".jpg"));
+                    counter++;
+                }
+            }
+        }
+
+        private void GenerateImageForView()
+        {
             // Check some basic info about text
             if (!this.CheckSentence())
                 return;
 
-            // Catch there or catch in the original function and then return new Exception???
             try
             {
-                // Parsing given text
-                var result = this.MyParser.ParseText(this.sentenceBox.Text, this.resolutionBox.Width, this.resolutionBox.Height);
-
-                // Clear draw field
-                this.MyRenderer.ResetImage();
-
-                // positioning and drawing phase of generation
-                foreach (var graph in result)
-                {
-                    // positioning given sentence graph with given with and height
-                    this.MyPositioner.Positionate(graph, this.ImageResolution.Width, this.ImageResolution.Height);
-
-                    // drawing each vertex of graph
-                    var drawables = graph.Groups ?? graph.Vertices;
-                    foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
-                        vertex.Draw(this.MyRenderer, this.Manager);
-                }
+                // Generating image
+                this.GenerateImage(this.sentenceBox.Text);
 
                 // Get drawn image bitmap to show it in form window
                 this.generatedImage.Image = MyRenderer.GetImage();
@@ -95,6 +119,27 @@ namespace Image_Generator
                     ShowErrorMessage("IO error");
                 else
                     ShowErrorMessage("Unknown exception\n" + ex.ToString());
+            }
+        }
+
+        private void GenerateImage(string description)
+        {
+            // Clear draw field
+            this.MyRenderer.ResetImage();
+
+            // Parsing given text
+            var result = this.MyParser.ParseText(description, this.resolutionBox.Width, this.resolutionBox.Height);
+
+            // positioning and drawing phase of generation
+            foreach (var graph in result)
+            {
+                // positioning given sentence graph with given with and height
+                this.MyPositioner.Positionate(graph, this.ImageResolution.Width, this.ImageResolution.Height);
+
+                // drawing each vertex of graph
+                var drawables = graph.Groups ?? graph.Vertices;
+                foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
+                    vertex.Draw(this.MyRenderer, this.Manager);
             }
         }
 
@@ -197,6 +242,37 @@ namespace Image_Generator
             {
                 return $"{this.Width}x{this.Height} px";
             }
+        }
+
+        private void DataSetCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.UsingDataset = DataSetCheckBox.Checked;
+        }
+
+        private OpenFileDialog ReturnConfiguredOpenFileDialog()
+        {
+            return new OpenFileDialog()
+            {
+                CheckFileExists = true,
+                AddExtension = true,
+                Filter = "TXT files (*.txt)|*.txt"
+            };
+        }
+
+        private FolderBrowserDialog ReturnConfiguredFolderBrowserDialog()
+        {
+            return new FolderBrowserDialog()
+            {
+                Description = "Choose directory for saving images",
+                ShowNewFolderButton = true
+            };
+        }
+
+        private void LoadDataset_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = this.ReturnConfiguredOpenFileDialog();
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+                this.DatasetFileName = openFileDialog.FileName;
         }
     }
 }

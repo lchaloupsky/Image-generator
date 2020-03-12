@@ -19,6 +19,11 @@ namespace Image_Generator.Models.Text_elements
         // Future also propnouns, adverbs?..
         private List<Element> Extensions { get; }
 
+        public List<Verb> Actions { get; }
+
+        // suffix extensions of noun (some numerals, propernouns..)
+        private List<Element> Suffixes { get; }
+
         // Tree dependencies of this noun
         public List<IPositionateEdge> Dependencies { get; }
 
@@ -29,12 +34,12 @@ namespace Image_Generator.Models.Text_elements
         public int Number { get; set; }
 
         // Flag idicating if noun is plural or not
-        private bool Plural { get; } = false;
+        public bool IsPlural { get; set; } = false;
 
         // Drawable of this noun
         public Image Image { get; set; }
 
-        public IDrawable Group { get; set; }
+        public IDrawableGroup Group { get; set; }
 
         // Factory for creating edges
         private EdgeFactory EdgeFactory { get; }
@@ -55,6 +60,8 @@ namespace Image_Generator.Models.Text_elements
         public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<Element>();
+            this.Suffixes = new List<Element>();
+            this.Actions = new List<Verb>();
             this.Dependencies = new List<IPositionateEdge>();
             this.Adpositions = new List<Adposition>();
             this.EdgeFactory = factory;
@@ -64,15 +71,8 @@ namespace Image_Generator.Models.Text_elements
             this.Height = height;
         }
 
-        public Noun(int Id, string Lemma, string Dependecy, bool Plural, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : this(Id, Lemma, Dependecy, factory, elementFactory, manager, width, height)
-        {
-            this.Plural = Plural;
-            this.Number = NUMBER_OF_INSTANCES;
-        }
-
         public void Draw(Renderer renderer, ImageManager manager)
         {
-            //renderer.DrawImage(this.GetImage(manager), renderer.LastX, renderer.LastY, this.Width, this.Height);
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
@@ -85,10 +85,42 @@ namespace Image_Generator.Models.Text_elements
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Adposition adp: return this.ProcessElement(adp, graph);
+                case Numeral num: return this.ProcessElement(num, graph);
+                case Verb verb: return this.ProcessElement(verb, graph);
+                case Adverb adv: return this.ProcessElement(adv, graph);
                 default: break;
             }
 
             return this;
+        }
+
+        private IProcessable ProcessElement(Verb verb, SentenceGraph graph)
+        {
+            if (verb.DependencyType == "cop")
+                return this;
+
+            this.Actions.Add(verb);
+            if(verb.DependingDrawable != null)
+            {
+                return this.Process(verb.DependingDrawable, graph);
+            }
+
+            return this;
+        }
+
+        private IProcessable ProcessElement(Numeral num, SentenceGraph graph)
+        {
+            if (num.DependencyType != "nummod")
+            {
+                if (num.Id > this.Id)
+                    this.Suffixes.Add(num);
+                else
+                    this.Extensions.Add(num);
+
+                return this;
+            }
+
+            return new NounSet(this.ElementFactory, this.EdgeFactory, this, num.GetValue());
         }
 
         private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
@@ -103,10 +135,22 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
+        private IProcessable ProcessElement(Adverb adv, SentenceGraph graph)
+        {
+            this.Extensions.Add(adv);
+            return this;
+        }
+
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
             if (noun.DependencyType == "conj")
-                return this.ElementFactory.Create(this, noun);
+                return this.ElementFactory.Create(this, noun, graph);
+
+            if (noun.DependencyType == "compound")
+            {
+                this.Extensions.Add(noun);
+                return this;
+            }
 
             // Get adpositions from adpositions combinations
             IPositionateEdge edge = this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions);
@@ -124,25 +168,38 @@ namespace Image_Generator.Models.Text_elements
         // REDO
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
-            // TODO: NOUNSET + NOUN / NOUNSET + NOUNSET etc.
-            //if (nounSet.DependencyType == "conj")
-            //    return this.ElementFactory.Create(this, nounSet);
+            if (nounSet.DependencyType == "conj")
+                return nounSet.Process(this, graph);
 
-            this.Adpositions = this.Adpositions.SelectMany(x => x.GetAdpositions()).Concat(nounSet.Adpositions.SelectMany(x => x.GetAdpositions())).ToList();
-            this.Dependencies.Add(this.EdgeFactory.Create(this, nounSet, this.Adpositions));
-            this.Adpositions.Clear();
+            // Get adpositions from adpositions combinations
+            IPositionateEdge edge = this.EdgeFactory.Create(this, nounSet, this.Adpositions, nounSet.Adpositions);
+            if (edge != null)
+                graph.AddEdge(edge);
+            else
+                graph.AddVertex(nounSet);
+
+            // Finalize processed noun
+            nounSet.FinalizeProcessing(graph);
 
             return this;
         }
 
         public override IProcessable FinalizeProcessing(SentenceGraph graph)
         {
-            IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.Adpositions);
-            if (newEdge != null)
-                graph.AddEdge(newEdge);
-
             if (this.Image == null)
                 this.GetImage();
+
+            IPositionateEdge newEdge;
+            if (this.IsPlural)
+            {
+                var finalizingElement = new NounSet(this.ElementFactory, this.EdgeFactory, this, NUMBER_OF_INSTANCES);
+                newEdge = this.EdgeFactory.Create(finalizingElement, this.Adpositions);
+                return finalizingElement;
+            }
+
+            newEdge = this.EdgeFactory.Create(this, this.Adpositions);
+            if (newEdge != null)
+                graph.AddEdge(newEdge);
 
             return this;
         }
@@ -153,11 +210,11 @@ namespace Image_Generator.Models.Text_elements
             if (drawable is MetaNoun)
             {
                 drawable.CombineIntoGroup(this);
-                this.Group = drawable;
+                this.Group = (MetaNoun)drawable;
                 return;
             }
 
-            IDrawable group = null;
+            IDrawableGroup group = null;
             if (this.Group == null && drawable.Group == null)
                 group = new MetaNoun(this, drawable);
             else if (this.Group == null)
@@ -175,6 +232,17 @@ namespace Image_Generator.Models.Text_elements
             drawable.Group = group;
         }
 
+        public Noun Copy()
+        {
+            var noun = new Noun(this.Id, this.Lemma, this.DependencyType, this.EdgeFactory, this.ElementFactory, this.Manager, this.Width, this.Height);
+
+            noun.Extensions.AddRange(this.Extensions);
+            noun.Suffixes.AddRange(this.Suffixes);
+            noun.Actions.AddRange(this.Actions);
+
+            return noun;
+        }
+
         private Image GetImage()
         {
             return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
@@ -182,10 +250,19 @@ namespace Image_Generator.Models.Text_elements
 
         private string GetFinalWordSequence()
         {
-            if (this.Extensions.Count == 0)
-                return base.ToString();
+            string final = "";
+            if (this.Extensions.Count != 0)
+                final += $"{string.Join(" ", this.Extensions)} ";
 
-            return $"{string.Join(" ", this.Extensions)} {this.Lemma}";
+            final += $"{base.ToString()}";
+
+            if(this.Suffixes.Count != 0)
+                final += $" {string.Join(" ", this.Suffixes)}";
+
+            if (this.Actions.Count != 0)
+                final += $" {string.Join(" and ", this.Actions)}";
+
+            return final;
         }
 
         public override string ToString()

@@ -44,9 +44,10 @@ namespace Image_Generator.Models.Edges
             else if (!this.Right.IsPositioned)
                 this.PositionateRight(maxWidth, maxHeight);
             else
-                Console.WriteLine("COLLISION"); //something like check some condition. then propagate change?
+                this.PositionateLeft(maxWidth, maxHeight);
+                //Console.WriteLine("COLLISION"); //something like check some condition. then propagate change?
 
-            // Fix both vertices as one group.
+            // Fix both vertices into one group.
             this.Left.CombineIntoGroup(this.Right);
 
             Console.WriteLine(this); //debug log.

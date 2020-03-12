@@ -9,7 +9,12 @@ namespace Image_Generator.Models.Text_elements
 {
     class Adjective : Element
     {
-        public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
+        public List<Element> ExtendingElements { get; }
+
+        public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        {
+            this.ExtendingElements = new List<Element>();
+        }
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
@@ -17,6 +22,8 @@ namespace Image_Generator.Models.Text_elements
             {
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
+                case Adjective adj: return this.ProcessElement(adj, graph);
+                case Adverb adv: return this.ProcessElement(adv, graph);
                 default: break;
             }
 
@@ -33,11 +40,23 @@ namespace Image_Generator.Models.Text_elements
             return nounSet.Process(this, graph);
         }
 
-        //Maybe redo with list?
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
-            this.Lemma += $" {adj}";
+            this.ExtendingElements.Add(adj);
+
             return this;
+        }
+
+        private IProcessable ProcessElement(Adverb adv, SentenceGraph graph)
+        {
+            this.ExtendingElements.Add(adv);
+
+            return this;
+        }
+
+        public override string ToString()
+        {
+            return this.ExtendingElements.Count == 0 ? base.ToString() : $"{string.Join(" ", this.ExtendingElements)} {this.Lemma}";
         }
     }
 }

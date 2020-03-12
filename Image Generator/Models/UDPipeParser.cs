@@ -1,12 +1,15 @@
 ﻿using Image_Generator.Models.Factories;
 using Image_Generator.Models.Interfaces;
+using Image_Generator.Models.Preprocessors;
 using Image_Generator.Models.Text_elements;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,12 +28,14 @@ namespace Image_Generator.Models
         private string Model { get; }
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
+        private List<IPreprocessor> Preprocessors { get; }
 
         public UDPipeParser(string model, ImageManager manager)
         {
             this.Model = model;
             this.ElementFactory = new ElementFactory(manager);
             this.Comparer = new ElementComparer();
+            this.Preprocessors = this.GetPreprocessors();
         }
 
         /// <summary>
@@ -42,7 +47,7 @@ namespace Image_Generator.Models
         {
             var parts = new List<SentenceGraph>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
-                parts.Add(ParseSentence(line));
+                parts.Add(ParseSentence(PreprocessText($"{line}.")));
 
             return parts;
         }
@@ -58,7 +63,7 @@ namespace Image_Generator.Models
             Dictionary<int, List<IProcessable>> dependencyTree; // Field of fields --> REDO
             SentenceGraph graph = new SentenceGraph();
 
-            // RESTAPI call with given text
+            // REST API call with given text
             using (WebClient client = new WebClient())
                 json = client.DownloadString(ConstructURL(sentence));
 
@@ -74,6 +79,19 @@ namespace Image_Generator.Models
                 graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
 
             return graph;
+        }
+
+        private string PreprocessText(string text)
+        {
+            this.Preprocessors.ForEach(p => text = p.Preprocess(text));
+            return text;
+        }
+
+        private List<IPreprocessor> GetPreprocessors()
+        {
+            return new List<IPreprocessor> {
+                new TextToNumberPreprocessor()
+            };
         }
 
         /// <summary>
@@ -98,7 +116,7 @@ namespace Image_Generator.Models
                     continue;
 
                 AddDependencyIntoTree(tree, element, index);
-            }             
+            }
 
             return tree;
         }
@@ -161,9 +179,22 @@ namespace Image_Generator.Models
 
             public int Compare(IProcessable x, IProcessable y)
             {
+                // Numerals modificating number of elements are a priority 
+                if (x is Numeral && x.DependencyType == "nummod")
+                    return -1;
+
+                if (y is Numeral && y.DependencyType == "nummod")
+                    return 1;
+
+                if ((x is Noun || x is NounSet) && x.DependencyType == "dobj")
+                    return -1;
+
+                if ((y is Noun || y is NounSet) && y.DependencyType == "dobj")
+                    return 1;
+
                 // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
-                return x is Adposition || x is Adjective ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) : 
-                      (y is Adposition || y is Adjective ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) : 
+                return x is Adposition || x is Adjective ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) :
+                      (y is Adposition || y is Adjective ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) :
                       (x.Id < y.Id ? -1 : 1));
             }
         }
