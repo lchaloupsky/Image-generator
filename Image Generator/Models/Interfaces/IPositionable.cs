@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Interfaces
 {
+    /// <summary>
+    /// Interface for poositionable elements
+    /// </summary>
     interface IPositionable
     {
         Vector2? Position { get; set; }

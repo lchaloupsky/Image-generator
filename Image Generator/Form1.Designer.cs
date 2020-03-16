@@ -37,6 +37,7 @@
             this.generateButton = new System.Windows.Forms.Button();
             this.DataSetCheckBox = new System.Windows.Forms.CheckBox();
             this.LoadDataset = new System.Windows.Forms.Button();
+            this.ProcessedImages = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.generatedImage)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
@@ -81,6 +82,7 @@
             this.tableLayoutPanel2.Controls.Add(this.generateButton, 1, 1);
             this.tableLayoutPanel2.Controls.Add(this.DataSetCheckBox, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.LoadDataset, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.ProcessedImages, 3, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 429);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -156,13 +158,25 @@
             this.LoadDataset.UseVisualStyleBackColor = true;
             this.LoadDataset.Click += new System.EventHandler(this.LoadDataset_Click);
             // 
+            // ProcessedImages
+            // 
+            this.ProcessedImages.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.ProcessedImages.AutoSize = true;
+            this.ProcessedImages.Location = new System.Drawing.Point(706, 16);
+            this.ProcessedImages.Name = "ProcessedImages";
+            this.ProcessedImages.Size = new System.Drawing.Size(119, 17);
+            this.ProcessedImages.TabIndex = 6;
+            this.ProcessedImages.Text = "Processed";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(834, 533);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.MinimumSize = new System.Drawing.Size(852, 580);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -185,6 +199,7 @@
         private System.Windows.Forms.ComboBox resolutionBox;
         private System.Windows.Forms.CheckBox DataSetCheckBox;
         private System.Windows.Forms.Button LoadDataset;
+        private System.Windows.Forms.Label ProcessedImages;
     }
 }
 

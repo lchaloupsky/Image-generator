@@ -106,8 +106,7 @@ namespace Image_Generator.Models
                 MediaType = MediaType.Photos,
                 PerPage = 1,
                 Text = imageName,
-                Page = 1,
-                ContentType = ContentTypeSearch.PhotosOnly
+                Page = 1
             };
         }
     }

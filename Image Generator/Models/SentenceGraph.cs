@@ -39,5 +39,27 @@ namespace Image_Generator.Models
 
             this.Graph.Add(vertex, new List<IPositionateEdge>());
         }
+
+        public void RemoveVertex(IDrawable vertex)
+        {
+            this.Graph.Remove(vertex);
+        }
+
+        public void ReplaceVertex(IDrawable vertex, IDrawable vertexToReplace)
+        {
+            // Get all edges belonging to the vertex
+            var newEdges = this.Edges
+                .Where(e => e.Left.Equals(vertexToReplace))
+                .Select(e => { e.Left = vertex; return e; })
+                .ToList();
+
+            this.Edges.Where(e => e.Right.Equals(vertexToReplace))
+                       .Select(e => { e.Right = vertex; return e; })
+                       .ToList();
+
+            // Take its edges as edges from this vertex
+            this.RemoveVertex(vertexToReplace);
+            newEdges.ForEach(e => this.AddEdge(e));
+        }
     }
 }

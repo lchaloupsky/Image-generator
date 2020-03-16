@@ -76,6 +76,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\Downloader.cs" />
     <Compile Include="Models\Edges\AtBottomEdge.cs" />
     <Compile Include="Models\Edges\BehindEdge.cs" />

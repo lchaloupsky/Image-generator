@@ -9,6 +9,8 @@ namespace Image_Generator.Models.Text_elements
 {
     class Numeral : Element
     {
+        public IProcessable DependingDrawable { get; set; }
+
         public Numeral(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
@@ -25,11 +27,25 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
+            if (this.DependencyType == "appos")
+            {
+                this.DependingDrawable = noun;
+                return this;
+            }
+
+            this.DependencyType = "nummod";
             return noun.Process(this, graph);
         }
 
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
+            if (this.DependencyType == "appos")
+            {
+                this.DependingDrawable = nounSet;
+                return this;
+            }
+
+            this.DependencyType = "nummod";
             return nounSet.Process(this, graph);
         }
 

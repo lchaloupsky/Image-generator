@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Interfaces
 {
+    /// <summary>
+    /// Interface for processable elements
+    /// </summary>
     interface IProcessable
     {
         int Id { get; }
-        string DependencyType { get; }
+        string DependencyType { get; set; }
 
         IProcessable Process(IProcessable element, SentenceGraph graph);
         IProcessable FinalizeProcessing(SentenceGraph graph);

@@ -23,10 +23,22 @@ namespace Image_Generator.Models.Text_elements
                 case Verb verb: return this.ProcessElement(verb, graph);
                 case Adjective adj: return this.ProcessElement(adj, graph);
                 case Adverb adv: return this.ProcessElement(adv, graph);
+                case Noun noun: return this.ProcessElement(noun, graph);
+                case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 default: break;
             }
 
             return this;
+        }
+
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
+        {
+            return nounSet.Process(this, graph);
+        }
+
+        private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
+        {
+            return noun.Process(this, graph);
         }
 
         private IProcessable ProcessElement(Verb verb, SentenceGraph graph)

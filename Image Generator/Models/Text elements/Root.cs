@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Text_elements
 {
-    class Root : Element, IDrawable //In future throw away IDrawable
+    class Root : Element, IDrawable //TODO pass whole sentence
     {
         public Vector2? Position { get; set; }
         public int ZIndex { get; set; } = 0;
@@ -41,6 +41,7 @@ namespace Image_Generator.Models.Text_elements
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
+            element = element.FinalizeProcessing(graph);
             return element is IDrawable ? element : this;
         }
     }

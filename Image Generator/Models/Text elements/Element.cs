@@ -13,7 +13,7 @@ namespace Image_Generator.Models.Text_elements
 
         public string Lemma { get; protected set; }
 
-        public string DependencyType { get; private set; }
+        public string DependencyType { get; set; }
 
         public Element(int Id, string Lemma, string DependencyType)
         {

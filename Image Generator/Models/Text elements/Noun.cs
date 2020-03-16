@@ -11,18 +11,14 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Text_elements
 {
+    /// <summary>
+    /// Class representing noun in sentence
+    /// </summary>
     class Noun : Element, IDrawable
     {
-        // Default number for plurals
-        private const int NUMBER_OF_INSTANCES = 3;
-
-        // Future also propnouns, adverbs?..
-        private List<Element> Extensions { get; }
-
+        // --------Public properties--------
+        // Noun actions
         public List<Verb> Actions { get; }
-
-        // suffix extensions of noun (some numerals, propernouns..)
-        private List<Element> Suffixes { get; }
 
         // Tree dependencies of this noun
         public List<IPositionateEdge> Dependencies { get; }
@@ -36,10 +32,39 @@ namespace Image_Generator.Models.Text_elements
         // Flag idicating if noun is plural or not
         public bool IsPlural { get; set; } = false;
 
-        // Drawable of this noun
+        // Noun image
         public Image Image { get; set; }
 
+        // Group in which noun belongs
         public IDrawableGroup Group { get; set; }
+
+        // Noun position
+        public Vector2? Position { get; set; }
+
+        // Noun z-index
+        public int ZIndex { get; set; } = 0;
+
+        // Noun width
+        public int Width { get; set; }
+
+        // Noun height
+        public int Height { get; set; }
+
+        // Flag indicating if noun is positioned
+        public bool IsPositioned => this.Position != null;
+
+        // Flag indicating if noun is fixed
+        public bool IsFixed { get; set; } = false;
+
+        // -------Private properties--------
+        // Default number for plurals
+        private const int NUMBER_OF_INSTANCES = 3;
+
+        // Future also propnouns, adverbs?..
+        private List<IProcessable> Extensions { get; }
+
+        // suffix extensions of noun (some numerals, propernouns..)
+        private List<Element> Suffixes { get; }
 
         // Factory for creating edges
         private EdgeFactory EdgeFactory { get; }
@@ -47,19 +72,12 @@ namespace Image_Generator.Models.Text_elements
         // Factory for creating elements
         private ElementFactory ElementFactory { get; }
 
+        // Image manager for getting images
         private ImageManager Manager { get; }
-
-        // IDrawable inteface properties
-        public Vector2? Position { get; set; }
-        public int ZIndex { get; set; } = 0;
-        public int Width { get; set; }
-        public int Height { get; set; }
-        public bool IsPositioned => this.Position != null;
-        public bool IsFixed { get; set; } = false;
 
         public Noun(int Id, string Lemma, string Dependency, EdgeFactory factory, ElementFactory elementFactory, ImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
         {
-            this.Extensions = new List<Element>();
+            this.Extensions = new List<IProcessable>();
             this.Suffixes = new List<Element>();
             this.Actions = new List<Verb>();
             this.Dependencies = new List<IPositionateEdge>();
@@ -76,7 +94,6 @@ namespace Image_Generator.Models.Text_elements
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
-        #region Processing depending elements
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
         {
             switch (element)
@@ -100,16 +117,27 @@ namespace Image_Generator.Models.Text_elements
                 return this;
 
             this.Actions.Add(verb);
-            if(verb.DependingDrawable != null)
+            if (verb.DependingDrawables.Count != 0)
             {
-                return this.Process(verb.DependingDrawable, graph);
+                verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
+                verb.DependingDrawables.Clear();
+                //return this.Process(verb.DependingDrawable, graph);
             }
+
+            verb.RelatedActions.ForEach(ra => this.Process(ra, graph));
+            verb.RelatedActions.Clear();
+
+            if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
+                graph.ReplaceVertex(this, (IDrawable)verb.Object);
 
             return this;
         }
 
         private IProcessable ProcessElement(Numeral num, SentenceGraph graph)
         {
+            if (num.DependencyType == "appos")
+                return this.Process(num.DependingDrawable, graph);
+
             if (num.DependencyType != "nummod")
             {
                 if (num.Id > this.Id)
@@ -125,7 +153,11 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
         {
-            this.Adpositions.Insert(0, adp);
+            if (adp.GetAdpositions().Count() == 1)
+                this.Adpositions.Add(adp);
+            else
+                this.Adpositions.Insert(0, adp);
+
             return this;
         }
 
@@ -152,12 +184,11 @@ namespace Image_Generator.Models.Text_elements
                 return this;
             }
 
-            // Get adpositions from adpositions combinations
-            IPositionateEdge edge = this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions);
-            if (edge != null)
-                graph.AddEdge(edge);
-            else
-                graph.AddVertex(noun);
+            if (noun.DependencyType.Contains(":poss"))
+                return this;
+
+            // Processing relationship between noun and this
+            this.ProcessEdge(graph, noun, noun.Adpositions);
 
             // Finalize processed noun
             noun.FinalizeProcessing(graph);
@@ -165,18 +196,58 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
-        // REDO
-        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
+        private void ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
         {
-            if (nounSet.DependencyType == "conj")
-                return nounSet.Process(this, graph);
-
             // Get adpositions from adpositions combinations
-            IPositionateEdge edge = this.EdgeFactory.Create(this, nounSet, this.Adpositions, nounSet.Adpositions);
+            List<string> leftAdp = this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
+            List<string> rightAdp = adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
+            IPositionateEdge edge = this.EdgeFactory.Create(this, drawable, leftAdp, rightAdp);
+
+            // Clear used adpositions
+            if (leftAdp.Count == 0)
+                this.Adpositions.Clear();
+            if (rightAdp.Count == 0)
+                adpositions.Clear();
+
+            // Add only not null edge
             if (edge != null)
                 graph.AddEdge(edge);
             else
-                graph.AddVertex(nounSet);
+            {
+                // Check if drawable contains "of" -> then it is an extension of this
+                if (adpositions.Count == 1 && adpositions[0].ToString() == "of")
+                {
+                    // replace vertex
+                    graph.ReplaceVertex(this, drawable);
+
+                    // Add to extensions
+                    this.Extensions.Add(drawable);
+                }
+                else
+                    graph.AddVertex(drawable);
+            }
+        }
+
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
+        {
+            if (nounSet.DependencyType == "conj")
+            {
+                nounSet.DependencyType = this.DependencyType;
+                nounSet.Nouns.Insert(0, this);
+                nounSet.Adpositions.AddRange(this.Adpositions);
+                this.Adpositions.Clear();
+
+                return nounSet;
+            }
+
+            if (nounSet.DependencyType == "compound")
+            {
+                this.Extensions.Add(nounSet);
+                return this;
+            }
+
+            // Processing relationship between noun and this
+            this.ProcessEdge(graph, nounSet, nounSet.Adpositions);
 
             // Finalize processed noun
             nounSet.FinalizeProcessing(graph);
@@ -203,7 +274,6 @@ namespace Image_Generator.Models.Text_elements
 
             return this;
         }
-        #endregion
 
         public void CombineIntoGroup(IDrawable drawable)
         {
@@ -225,7 +295,7 @@ namespace Image_Generator.Models.Text_elements
             else
             {
                 group = this.Group;
-                group.CombineIntoGroup(drawable);   
+                group.CombineIntoGroup(drawable);
             }
 
             this.Group = group;
@@ -245,7 +315,8 @@ namespace Image_Generator.Models.Text_elements
 
         private Image GetImage()
         {
-            return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
+            lock (this.Manager)
+                return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
         }
 
         private string GetFinalWordSequence()
@@ -256,7 +327,7 @@ namespace Image_Generator.Models.Text_elements
 
             final += $"{base.ToString()}";
 
-            if(this.Suffixes.Count != 0)
+            if (this.Suffixes.Count != 0)
                 final += $" {string.Join(" ", this.Suffixes)}";
 
             if (this.Actions.Count != 0)

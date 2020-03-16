@@ -9,11 +9,11 @@ namespace Image_Generator.Models.Text_elements
 {
     class Adjective : Element
     {
-        public List<Element> ExtendingElements { get; }
+        public List<Element> Extensions { get; }
 
         public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
         {
-            this.ExtendingElements = new List<Element>();
+            this.Extensions = new List<Element>();
         }
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
@@ -24,10 +24,16 @@ namespace Image_Generator.Models.Text_elements
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Adjective adj: return this.ProcessElement(adj, graph);
                 case Adverb adv: return this.ProcessElement(adv, graph);
+                case Verb verb: return this.ProcessElement(verb, graph);
                 default: break;
             }
 
             return this;
+        }
+
+        private IProcessable ProcessElement(Verb verb, SentenceGraph graph)
+        {
+            return verb.Process(this, graph);
         }
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
@@ -42,21 +48,21 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
-            this.ExtendingElements.Add(adj);
+            this.Extensions.Add(adj);
 
             return this;
         }
 
         private IProcessable ProcessElement(Adverb adv, SentenceGraph graph)
         {
-            this.ExtendingElements.Add(adv);
+            this.Extensions.Add(adv);
 
             return this;
         }
 
         public override string ToString()
         {
-            return this.ExtendingElements.Count == 0 ? base.ToString() : $"{string.Join(" ", this.ExtendingElements)} {this.Lemma}";
+            return this.Extensions.Count == 0 ? base.ToString() : $"{string.Join(" ", this.Extensions)} {this.Lemma}";
         }
     }
 }

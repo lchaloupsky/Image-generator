@@ -10,8 +10,12 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models
 {
+    /// <summary>
+    /// Class to positioning elements in graph
+    /// </summary>
     class Positioner
     {
+        // properties
         private PositionHelper Helper { get; }
 
         public Positioner()
@@ -19,6 +23,12 @@ namespace Image_Generator.Models
             this.Helper = new PositionHelper();
         }
 
+        /// <summary>
+        /// Method that positionates graph
+        /// </summary>
+        /// <param name="graph">graph to positionate</param>
+        /// <param name="width">screen with</param>
+        /// <param name="height">screen height</param>
         public void Positionate(SentenceGraph graph, int width, int height)
         {
             // Setting helpers properties
@@ -34,6 +44,12 @@ namespace Image_Generator.Models
             this.CenterVertices(graph.Groups, width, height);
         }
 
+        /// <summary>
+        /// Method for resolving conflicts between vetices
+        /// </summary>
+        /// <param name="graph">Graph to resolve</param>
+        /// <param name="width">screen width</param>
+        /// <param name="height">screen height</param>
         private void ResolveConflicts(SentenceGraph graph, int width, int height)
         {
             bool isPositioned = false;
@@ -62,33 +78,25 @@ namespace Image_Generator.Models
             }
         }
 
+        /// <summary>
+        /// Method that positionates all edges of graph
+        /// </summary>
+        /// <param name="graph">Graph to positionate</param>
+        /// <param name="width">screen width</param>
+        /// <param name="height">screen height</param>
         private void PositionateAllEdges(SentenceGraph graph, int width, int height)
         {
-            // Linear pass to positionate all vertices and all edges
-            //foreach (var vertex in graph.Vertices)
-            //{
-            //    foreach (var edge in graph[vertex])
-            //    {
-            //        // Assign new free position to the right vertex
-            //        if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
-            //            edge.Right.Position = this.Helper.GetEmptyPosition();
-
-            //        // Edge positioning itself
-            //        edge.Positionate(width, height);
-            //    }
-
-            //    // if vertex does not have any connected edges(its groups as itself)
-            //    if (vertex.Position == null)
-            //        vertex.Position = this.Helper.GetEmptyPosition();
-            //}
-
+            // positionate all vertices
             foreach (var vertex in graph.Vertices)
             {
+                // skip if already positioned
                 if (vertex.IsPositioned)
                     continue;
 
+                // positionate via DFS
                 this.PositionateDFS(graph, vertex, width, height);
 
+                // assign random new position if vertex is independent
                 if (vertex.Position == null)
                     vertex.Position = this.Helper.GetEmptyPosition();
             }
@@ -109,12 +117,20 @@ namespace Image_Generator.Models
                     groups.Add(vertex.Group);
             }
 
-            // Set groups
+            // Set groups of graph
             graph.Groups = groups;
         }
 
+        /// <summary>
+        /// Method for positionate graph via DFS pass
+        /// </summary>
+        /// <param name="graph">Graph to positionate</param>
+        /// <param name="vertex">Vertex to positionate</param>
+        /// <param name="width">sreen width</param>
+        /// <param name="height">screen height</param>
         public void PositionateDFS(SentenceGraph graph, IDrawable vertex, int width, int height)
         {
+            // positionate all edges of vertex
             foreach (var edge in graph[vertex])
             {
                 // Positionate dfs
@@ -131,6 +147,32 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
+        /// Method for positionate graph via regular pass
+        /// </summary>
+        /// <param name="graph">Graph to positionate</param>
+        /// <param name="vertex">Vertex to positionate</param>
+        /// <param name="width">sreen width</param>
+        /// <param name="height">screen height</param>
+        public void PositionateRegular(SentenceGraph graph, IDrawable vertex, int width, int height)
+        {
+            // Linear pass to positionate all vertices and all edges
+            foreach (var edge in graph[vertex])
+            {
+                // Assign new free position to the right vertex
+                if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
+                    edge.Right.Position = this.Helper.GetEmptyPosition();
+
+                // Edge positioning itself
+                edge.Positionate(width, height);
+            }
+
+            // if vertex does not have any connected edges(its groups as itself)
+            if (vertex.Position == null)
+                vertex.Position = this.Helper.GetEmptyPosition();
+
+        }
+
+        /// <summary>
         /// Help function for centering vertices in image
         /// </summary>
         /// <param name="vertices">Vertices to be centered</param>
@@ -138,6 +180,7 @@ namespace Image_Generator.Models
         /// <param name="height">Maximal height</param>
         private void CenterVertices(IEnumerable<IDrawable> vertices, int width, int height, bool absolute = false)
         {
+            // set inital vertices
             IDrawable leftMost = vertices.First(),
                       rightMost = leftMost,
                       topMost = leftMost,
@@ -146,12 +189,14 @@ namespace Image_Generator.Models
             // get most edgy vertices
             foreach (var vertex in vertices)
             {
+                // skip fixed vertices
                 if (vertex.IsFixed)
                     continue;
 
                 int vX = (int)vertex.Position.Value.X;
                 int vY = (int)vertex.Position.Value.Y;
 
+                // check most edgy vertices
                 leftMost = leftMost.Position.Value.X < vX ? leftMost : vertex;
                 rightMost = rightMost.Position.Value.X + rightMost.Width > vX + vertex.Width ? rightMost : vertex;
                 topMost = topMost.Position.Value.Y < vY ? topMost : vertex;
@@ -175,6 +220,7 @@ namespace Image_Generator.Models
                 if (vertex.IsFixed)
                     continue;
 
+                // shift vertex
                 vertex.Position += finalShift;
             }
         }
@@ -232,6 +278,8 @@ namespace Image_Generator.Models
         private void RescaleVertices(IEnumerable<IDrawable> vertices, int total, int limit)
         {
             float factor = (1f * limit) / total;
+
+            // rescale all vertices with factor
             foreach (var vertex in vertices)
             {
                 vertex.Position *= factor;
@@ -242,18 +290,30 @@ namespace Image_Generator.Models
         }
     }
 
+    /// <summary>
+    /// Helper for position operations
+    /// </summary>
     class PositionHelper
     {
+        // screen dimensions
         public int Width { get; set; }
         public int Height { get; set; }
 
+        // Default object dimensions
         private const int defaultWidth = 180;
         private const int defaultHeight = 120;
+
+        // default shift
         private const int defaultShiftPadding = 60;
 
+        // other properties
         private Random Random { get; } = new Random();
         private Vector2? NewEmptyPosition { get; set; } = null;
-        
+
+        /// <summary>
+        /// Method that returns new empty position
+        /// </summary>
+        /// <returns>new empty position</returns>
         public Vector2? GetEmptyPosition()
         {
             if (this.NewEmptyPosition == null)
@@ -266,14 +326,22 @@ namespace Image_Generator.Models
             return this.NewEmptyPosition;
         }
 
+        /// <summary>
+        /// Return vertices of graph that are in conflict
+        /// </summary>
+        /// <param name="vertex">Vertex to check</param>
+        /// <param name="vertices">All vertices</param>
+        /// <returns>Conflicting vertices</returns>
         public List<IDrawable> GetConflictingVertices(IDrawable vertex, IEnumerable<IDrawable> vertices)
         {
             List<IDrawable> conflicts = new List<IDrawable>();
             foreach (var vert in vertices)
             {
+                // skip vertex itself and fixed vertices
                 if (vert == vertex || vert.IsFixed != vertex.IsFixed)
                     continue;
 
+                // check conflict
                 if (this.CheckConflict(vert, vertex))
                     conflicts.Add(vert);
             }
@@ -281,31 +349,54 @@ namespace Image_Generator.Models
             return conflicts;
         }
 
+        /// <summary>
+        /// Method for resolving conflicts
+        /// </summary>
+        /// <param name="vertex">Vertex to resolve</param>
+        /// <param name="conflictVertex">Conflict vertex</param>
         public void ResolveConflict(IDrawable vertex, IDrawable conflictVertex)
         {
-            // RESOLVING by both vertices shifting by a half
+            // Resolving by both vertices shifting by a half
             IDrawable left = vertex.Position.Value.X <= conflictVertex.Position.Value.X ? vertex : conflictVertex;
             IDrawable right = left == vertex ? conflictVertex : vertex;
 
+            // shift
             Vector2 overlap = GetOverlapX(left, right);
             left.Position -= overlap / 2;
             right.Position += overlap / 2;
-            //conflictVertex.Position += this.GetShift(vertex, conflictVertex);
         }
 
+        /// <summary>
+        /// Method that return needed shift
+        /// </summary>
+        /// <param name="vertex1">First vertex</param>
+        /// <param name="vertex2">Second vertex</param>
+        /// <returns>Vector that represents the shift</returns>
         public Vector2 GetShift(IDrawable vertex1, IDrawable vertex2)
         {
             return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding, 0);
         }
 
-        // Maybe use for abolute positioned vertices?
+        /// <summary>
+        /// Method that return how much are vertices overlapping in X dimension
+        /// </summary>
+        /// <param name="vertex1">First vertex</param>
+        /// <param name="vertex2">Second vertex</param>
+        /// <returns>Overlap vector</returns>
         private Vector2 GetOverlapX(IDrawable vertex1, IDrawable vertex2)
         {
             return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding), 0);
         }
 
+        /// <summary>
+        /// Method that determines if vertices are in conflict
+        /// </summary>
+        /// <param name="vertex1">First vertex</param>
+        /// <param name="vertex2">Second vertex</param>
+        /// <returns>True if they are in conflict</returns>
         private bool CheckConflict(IDrawable vertex1, IDrawable vertex2)
         {
+            // initial assigns
             float x1 = vertex1.Position.Value.X;
             float y1 = vertex1.Position.Value.Y;
 
@@ -328,6 +419,11 @@ namespace Image_Generator.Models
             return true;
         }
 
+        /// <summary>
+        /// Method that sets properties of helper
+        /// </summary>
+        /// <param name="width">screen width</param>
+        /// <param name="height">screen height</param>
         public void SetProperties(int width, int height)
         {
             this.Width = width;

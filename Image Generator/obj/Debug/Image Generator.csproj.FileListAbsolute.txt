@@ -1,7 +1,6 @@
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe.config
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csprojAssemblyReference.cache
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Form1.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Properties.Resources.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.GenerateResource.cache
@@ -16,3 +15,4 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Sec
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CopyComplete
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csprojAssemblyReference.cache

@@ -19,7 +19,9 @@ namespace Image_Generator.Models.Text_elements
 
         public IEnumerable<Adposition> GetAdpositions()
         {
-            return this.DependingAdposition == null ? new List<Adposition>() { this } : new List<Adposition>() { DependingAdposition, this };
+            return this.DependingAdposition == null ?
+                    new List<Adposition>() { this } :
+                    new List<Adposition>() { DependingAdposition, this };
         }
 
         public override IProcessable Process(IProcessable element, SentenceGraph graph)
@@ -39,6 +41,7 @@ namespace Image_Generator.Models.Text_elements
         private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
         {
             this.DependingAdposition = adp;
+
             return this;
         }
 
@@ -55,15 +58,13 @@ namespace Image_Generator.Models.Text_elements
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
             this.Extensions.Add(adj);
+
             return this;
         }
 
         public override string ToString()
         {
-            if (this.Extensions.Count == 0)
-                return base.ToString();
-
-            return $"{string.Join(" ", this.Extensions)} {this.Lemma}";
+            return this.Extensions.Count == 0 ? base.ToString() : $"{string.Join(" ", this.Extensions)} {this.Lemma}";
         }
     }
 }

@@ -17,25 +17,22 @@ namespace Image_Generator.Models.Factories
             return edge?.Add(left, null);
         }
 
-        public Edge Create<T1, T2>(T1 left, T2 right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions)
+        public Edge Create<T1, T2>(T1 left, T2 right, List<string> leftAdpositions, List<string> rightAdpositions)
             where T1 : IDrawable, IProcessable
             where T2 : IDrawable, IProcessable
         {
-            var leftAll = leftAdpositions.SelectMany(x => x.GetAdpositions()).ToList();
-            var rightAll = rightAdpositions.SelectMany(x => x.GetAdpositions()).ToList();
-
-            Edge edge = this.Create(left, right, leftAll.Concat(rightAll).ToList());
+            Edge edge = this.Create(left, right, leftAdpositions.Concat(rightAdpositions).ToList());
             if (edge == null)
             {
                 if (this.CheckIfParameterIsSubject(right))
                 {
-                    edge = this.Create(left, right, leftAll);
+                    edge = this.Create(left, right, leftAdpositions);
                     if (edge != null)
                         leftAdpositions.Clear();
                 }
                 else
                 {
-                    edge = this.Create(left, right, rightAll);
+                    edge = this.Create(left, right, rightAdpositions);
                     if (edge != null)
                         rightAdpositions.Clear();
                 }
@@ -49,7 +46,7 @@ namespace Image_Generator.Models.Factories
             return edge;
         }
 
-        public Edge Create<T1, T2>(T1 left, T2 right, List<Adposition> adpositions)
+        private Edge Create<T1, T2>(T1 left, T2 right, List<string> adpositions)
             where T1 : IDrawable, IProcessable
             where T2 : IDrawable, IProcessable
         {
@@ -94,6 +91,7 @@ namespace Image_Generator.Models.Factories
                 case "above":
                 case "up":
                 case "upon":
+                case "over":
                 case "on": return new OnEdge();
                 case "inside":
                 case "within":
@@ -103,6 +101,7 @@ namespace Image_Generator.Models.Factories
                 case "beneath":
                 case "underneath":
                 case "under": return new UnderEdge();
+                case "on edge of":
                 case "on top of": return new OnTopEdge();
                 case "in midst of":
                 case "in middle of": return new InMiddleEdge();
@@ -113,9 +112,13 @@ namespace Image_Generator.Models.Factories
                 case "next to":
                 case "with":
                 case "along":
+                case "for":
                 case "to right of": return new ToRightEdge();
                 case "at bottom of": return new AtBottomEdge();
                 case "outside":
+                case "outside of":
+                case "around":
+                case "out of":
                 case "in front of": return new InFrontEdge();
                 case "past":
                 case "beyond":

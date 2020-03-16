@@ -20,11 +20,13 @@ namespace Image_Generator.Models
     /// </summary>
     class UDPipeParser
     {
+        // constants
         private const string BASE_URL = "http://lindat.mff.cuni.cz/services/udpipe/api/process?";
         private const string CONST_PARAMS = "&tokenizer&tagger&parser&output=conllu&";
         private const string MODEL_PARAM = "model=";
         private const string DATA_PARAM = "data=";
 
+        // properties
         private string Model { get; }
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
@@ -81,12 +83,21 @@ namespace Image_Generator.Models
             return graph;
         }
 
+        /// <summary>
+        /// Preprocesses input text by preprocessors
+        /// </summary>
+        /// <param name="text">description</param>
+        /// <returns>preprocessed description</returns>
         private string PreprocessText(string text)
         {
             this.Preprocessors.ForEach(p => text = p.Preprocess(text));
             return text;
         }
 
+        /// <summary>
+        /// Get all current preprocessors
+        /// </summary>
+        /// <returns>list of preprocessors</returns>
         private List<IPreprocessor> GetPreprocessors()
         {
             return new List<IPreprocessor> {
@@ -112,6 +123,7 @@ namespace Image_Generator.Models
                 index = int.Parse(parts[6]);
                 element = this.ElementFactory.Create(parts);
 
+                // skip unsupported elements
                 if (element == null)
                     continue;
 
@@ -122,7 +134,7 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Helping function for adding dependency into dependency tree
+        /// Help method for adding dependency into dependency tree
         /// </summary>
         /// <param name="tree">tree to add</param>
         /// <param name="element">element to be added</param>
@@ -136,7 +148,7 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Function for compressing dependency tree edges into other representation
+        /// Method for compressing dependency tree edges into other representation
         /// </summary>
         /// <param name="tree">tree to be compressed</param>
         /// <param name="graph">new graph to be created</param>
@@ -171,12 +183,18 @@ namespace Image_Generator.Models
         }
 
         /// <summary>
-        /// Help comparer class for sorting dependencies before they are processed
+        /// Comparer class for sorting dependencies before they are processed
         /// </summary>
         private class ElementComparer : IComparer<IProcessable>
         {
             public Dictionary<int, List<IProcessable>> Tree { get; set; }
-
+            
+            /// <summary>
+            /// Overriden method for comparing elements
+            /// </summary>
+            /// <param name="x">First element</param>
+            /// <param name="y">Second element</param>
+            /// <returns>Order of given elements</returns>
             public int Compare(IProcessable x, IProcessable y)
             {
                 // Numerals modificating number of elements are a priority 
@@ -186,6 +204,7 @@ namespace Image_Generator.Models
                 if (y is Numeral && y.DependencyType == "nummod")
                     return 1;
 
+                // Direct object nouns of verbs has to be processed first
                 if ((x is Noun || x is NounSet) && x.DependencyType == "dobj")
                     return -1;
 

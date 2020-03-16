@@ -14,7 +14,7 @@ namespace Image_Generator.Models.Text_elements
     class NounSet : IDrawable, IProcessable
     {
         // Default number for plurals
-        private const int NUMBER_OF_INSTANCES = 3;
+        private int NumberOfInstances { get; set; } = 3;
 
         private int ZIndex_;
         private int Width_;
@@ -86,7 +86,7 @@ namespace Image_Generator.Models.Text_elements
 
         public bool IsFixed { get; set; } = false;
 
-        public string DependencyType { get; private set; }
+        public string DependencyType { get; set; }
 
         private bool IsFinalized { get; set; } = false;
 
@@ -107,8 +107,7 @@ namespace Image_Generator.Models.Text_elements
 
         public IDrawableGroup Group { get; set; }
 
-        // REDO under some interface
-        private List<Noun> Nouns { get; }
+        public List<Noun> Nouns { get; }
 
         private List<IPositionateEdge> Dependencies { get; }
 
@@ -125,6 +124,8 @@ namespace Image_Generator.Models.Text_elements
         public bool Processed { get; set; } = false;
 
         public int Id { get; }
+
+        private int LastProcessedNoun { get; set; } = 0;
 
         private NounSet(ElementFactory elementFactory, EdgeFactory edgeFactory)
         {
@@ -151,8 +152,7 @@ namespace Image_Generator.Models.Text_elements
             this.Nouns.Add(noun);
         }
 
-
-        public NounSet(ElementFactory elementFactory, EdgeFactory edgeFactory, SentenceGraph graph, params Noun[] args) : this (elementFactory, edgeFactory)
+        public NounSet(ElementFactory elementFactory, EdgeFactory edgeFactory, SentenceGraph graph, params Noun[] args) : this(elementFactory, edgeFactory)
         {
             this.Nouns.AddRange(args);
             this.Id = args[0].Id;
@@ -161,7 +161,7 @@ namespace Image_Generator.Models.Text_elements
             foreach (var noun in args)
             {
                 var edge = this.EdgeFactory.Create(this, noun.Adpositions);
-                if(edge != null)
+                if (edge != null)
                     graph.AddEdge(edge);
                 else
                     this.Adpositions.AddRange(noun.Adpositions);
@@ -173,9 +173,7 @@ namespace Image_Generator.Models.Text_elements
         private void GenerateNouns(int numberOfInstances)
         {
             for (int i = 0; i < numberOfInstances - 1; i++)
-            {
                 this.Nouns.Add(this.Nouns[0].Copy());
-            }
         }
 
         public IProcessable Process(IProcessable element, SentenceGraph graph)
@@ -200,11 +198,22 @@ namespace Image_Generator.Models.Text_elements
             if (verb.DependencyType == "cop")
                 return this;
 
-            if (verb.DependingDrawable != null)
+            if (verb.DependingDrawables.Count != 0)
             {
-                this.Process(verb.DependingDrawable, graph);
-                verb.DependingDrawable = null;
+                verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
+                verb.DependingDrawables.Clear();
             }
+
+            verb.RelatedActions.ForEach(ra =>
+            {
+                ra.DependingDrawables.ForEach(dd => this.Process(ra, graph));
+                ra.DependingDrawables.Clear();
+            });
+
+            verb.RelatedActions.Clear();
+
+            if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
+                graph.ReplaceVertex(this, (IDrawable)verb.Object);
 
             foreach (var noun in this.Nouns)
                 noun.Process(verb, graph);
@@ -214,12 +223,20 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Numeral num, SentenceGraph graph)
         {
+            if (num.DependencyType == "appos" && num.GetValue() < this.NumberOfInstances)
+            {
+                this.Nouns[num.GetValue() - 1 + LastProcessedNoun].Process(num.DependingDrawable, graph);
+                LastProcessedNoun += num.GetValue();
+                return this;
+            }            
+
             if (num.DependencyType != "nummod")
             {
                 this.Nouns.ForEach(noun => noun.Process(num, graph));
                 return this;
             }
 
+            this.NumberOfInstances = num.GetValue();
             this.GenerateNouns(num.GetValue());
             return this;
         }
@@ -232,12 +249,8 @@ namespace Image_Generator.Models.Text_elements
                 return this;
             }
 
-            // Get adpositions from adpositions combinations
-            IPositionateEdge edge = this.EdgeFactory.Create(this, noun, this.Adpositions, noun.Adpositions);
-            if (edge != null)
-                graph.AddEdge(edge);
-            else
-                graph.AddVertex(noun);
+            // Processing relationship between noun and this
+            this.ProcessEdge(graph, noun, noun.Adpositions);
 
             // Finalize processed noun
             noun.FinalizeProcessing(graph);
@@ -253,12 +266,8 @@ namespace Image_Generator.Models.Text_elements
                 Console.WriteLine();
             }
 
-            // Get adpositions from adpositions combinations
-            IPositionateEdge edge = this.EdgeFactory.Create(this, nounset, this.Adpositions, nounset.Adpositions);
-            if (edge != null)
-                graph.AddEdge(edge);
-            else
-                graph.AddVertex(nounset);
+            // Processing relationship between nounset and this
+            this.ProcessEdge(graph, nounset, nounset.Adpositions);
 
             // Finalize processed noun
             nounset.FinalizeProcessing(graph);
@@ -266,11 +275,45 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
+        private void ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
+        {
+            // Get adpositions from adpositions combinations
+            List<string> leftAdp = this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
+            List<string> rightAdp = adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
+            IPositionateEdge edge = this.EdgeFactory.Create(this, drawable, leftAdp, rightAdp);
+
+            // Clear used adpositions
+            if (leftAdp.Count == 0)
+                this.Adpositions.Clear();
+            if (rightAdp.Count == 0)
+                adpositions.Clear();
+
+            // Add only not null edge
+            if (edge != null)
+                graph.AddEdge(edge);
+            else
+            {
+                // Check if drawable contains "of" -> then it is an extension of this
+                if (adpositions.Count == 1 && adpositions[0].ToString() == "of")
+                {
+                    // Replace vertex in graph
+                    graph.ReplaceVertex(this, drawable);
+
+                    // Add to extensions
+                    drawable.DependencyType = "compound";
+                    this.Nouns.ForEach(n => n.Process(drawable, graph));
+                }
+                else
+                    graph.AddVertex(drawable);
+            }
+        }
+
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
             foreach (var noun in this.Nouns)
                 noun.Process(adj, graph);
 
+            // TODO do extensions
             return this;
         }
 
@@ -284,14 +327,18 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Adposition adp, SentenceGraph graph)
         {
-            this.Adpositions.Insert(0, adp);
+            if (adp.GetAdpositions().Count() == 1)
+                this.Adpositions.Add(adp);
+            else
+                this.Adpositions.Insert(0, adp);
+
             return this;
         }
 
         public IProcessable FinalizeProcessing(SentenceGraph graph)
         {
             if (this.Nouns.Count == 1)
-                this.GenerateNouns(NUMBER_OF_INSTANCES);
+                this.GenerateNouns(NumberOfInstances);
 
             this.Nouns.ForEach(noun => noun.FinalizeProcessing(graph));
 
@@ -364,7 +411,9 @@ namespace Image_Generator.Models.Text_elements
             {
                 finalElement = noun.Group ?? noun;
 
-                graphics.DrawImage(finalElement.Image, LastX, (int)(this.Height_ - finalElement.Height * scale), (int)(scale * finalElement.Width), (int)(scale * finalElement.Height));
+                lock (finalElement.Image)
+                    graphics.DrawImage(finalElement.Image, LastX, (int)(this.Height_ - finalElement.Height * scale), (int)(scale * finalElement.Width), (int)(scale * finalElement.Height));
+
                 LastX += (int)(finalElement.Width * scale);
             }
         }
@@ -410,12 +459,12 @@ namespace Image_Generator.Models.Text_elements
                 newX = (int)(distance * Math.Cos(angleInRadians)) + finalDim / 2;
                 newY = (int)(distance * Math.Sin(angleInRadians)) + finalDim / 2;
 
-                // REDO
                 newX = Math.Min(newX, finalDim - finalWidth);
                 newY = Math.Min(newY, finalDim - finalHeight);
 
-                graphics.DrawImage(finalElement.Image, newX, newY, finalWidth, finalHeight);
-            }  
+                lock (finalElement.Image)
+                    graphics.DrawImage(finalElement.Image, newX, newY, finalWidth, finalHeight);
+            }
         }
 
         public void Draw(Renderer renderer, ImageManager manager)

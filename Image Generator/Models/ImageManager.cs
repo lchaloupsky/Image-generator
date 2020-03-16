@@ -16,16 +16,18 @@ namespace Image_Generator.Models
     /// </summary>
     class ImageManager
     {
+        private const int CACHE_LIMIT = 2_500;
+
         private Downloader MyDownloader { get; }
         private FileManager MyManager { get; }
-        private Dictionary<string, Image> Cache { get; set; }
+        private LimitedDictionary<string, Image> Cache { get; set; }       
 
         public ImageManager()
         {
-            string location = System.IO.Path.Combine("..", "..", "Models", "Images");
+            string location = Path.Combine("..", "..", "Models", "Images");
             this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.MyManager = new FileManager(location);
-            this.Cache = new Dictionary<string, Image>();
+            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT);
         }
 
         /// <summary>
@@ -35,9 +37,11 @@ namespace Image_Generator.Models
         /// <returns>Truth value if image already exists or not</returns>
         public bool CheckImageExistence(string imageName)
         {
+            // Check if image is in cache
             if (this.Cache.ContainsKey(imageName))
                 return true;
 
+            // Check if image is saved already
             if (this.MyManager.CheckImageExistence(imageName))
             {
                 this.Cache.Add(imageName, this.MyManager.LoadImage(imageName));
@@ -106,6 +110,45 @@ namespace Image_Generator.Models
 
             // Saving the image itself
             image.Save(newLocation, format);
+        }
+    }
+
+    /// <summary>
+    /// Class representing cache with limited number of instances
+    /// </summary>
+    /// <typeparam name="K">Key type</typeparam>
+    /// <typeparam name="V">Value type</typeparam>
+    internal class LimitedDictionary<K, V>
+    {
+        private int Limit { get; set; }
+        private Dictionary<K, V> Dictionary { get; }
+        private Queue<K> KeyQueue { get; }
+
+        public LimitedDictionary(int limit)
+        {
+            this.Limit = limit;
+            this.Dictionary = new Dictionary<K, V>();
+            this.KeyQueue = new Queue<K>();
+        }
+
+        public void Add(K key, V value)
+        {
+            if (this.Limit == KeyQueue.Count)
+                Dictionary.Remove(KeyQueue.Dequeue());
+
+            KeyQueue.Enqueue(key);
+            Dictionary.Add(key, value);
+        }
+
+        public bool ContainsKey(K key)
+        {
+            return Dictionary.ContainsKey(key);
+        }
+
+        public V this[K key]
+        {
+            get => Dictionary[key];
+            set => Dictionary[key] = value;
         }
     }
 }

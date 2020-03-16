@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models.Interfaces
 {
+    /// <summary>
+    /// Preprocessor interface
+    /// </summary>
     interface IPreprocessor
     {
         string Preprocess(string text);

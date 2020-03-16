@@ -19,7 +19,7 @@ namespace Image_Generator.Models.Factories
         private EdgeFactory EdgeFactory { get; }
         private ImageManager Manager { get; }
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
-            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near"
+            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge"
         };
 
         public ElementFactory(ImageManager manager)
@@ -35,6 +35,7 @@ namespace Image_Generator.Models.Factories
             this.MapKnownCases(parts[2], ref parts[3]);
             switch (parts[3])
             {
+                case "PROPN":
                 case "NOUN":
                     part = this.ProcessNoun(parts);
                     break;
@@ -48,7 +49,7 @@ namespace Image_Generator.Models.Factories
                     part = new Numeral(int.Parse(parts[0]), parts[2], parts[7]);
                     break;
                 case "VERB":
-                    part = new Verb(int.Parse(parts[0]), parts[2], parts[7], parts[5].Contains("VerbForm=Part"), parts[1].ToLower());
+                    part = this.ProcessVerb(parts);
                     break;
                 case "ADV":
                     part = new Adverb(int.Parse(parts[0]), parts[2], parts[7]);
@@ -58,6 +59,19 @@ namespace Image_Generator.Models.Factories
             }
 
             return part;
+        }
+
+        private IProcessable ProcessVerb(string[] parts)
+        {
+            VerbForm form = VerbForm.NORMAL;
+
+            if (parts[5].Contains("VerbForm=Part"))
+                form = VerbForm.PARTICIPLE;
+
+            if (parts[5].Contains("VerbForm=Ger"))
+                form = VerbForm.GERUND;
+
+            return new Verb(int.Parse(parts[0]), parts[2], parts[7], form, parts[1].ToLower());
         }
 
         private IProcessable ProcessNoun(string[] parts)
@@ -78,7 +92,7 @@ namespace Image_Generator.Models.Factories
         //REDO SOMETIME
         private void MapKnownCases(string lemma, ref string type)
         {
-            if (type == "NOUN" && this.KnownCasesToMap.Contains(lemma.ToLower()))
+            if ((type == "NOUN" || type == "ADV") && this.KnownCasesToMap.Contains(lemma.ToLower()))
                 type = "ADP";
         }
     }

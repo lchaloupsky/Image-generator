@@ -13,11 +13,12 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Image_Generator.Models.Text_elements;
 using Image_Generator.Models.Interfaces;
+using System.Diagnostics;
 
 namespace Image_Generator
 {
     /// <summary>
-    /// Form to image generation
+    /// UI form for Image Generator Application
     /// </summary>
     public partial class Form1 : Form
     {
@@ -30,6 +31,7 @@ namespace Image_Generator
 
         private bool UsingDataset { get; set; } = false;
         private string DatasetFileName { get; set; }
+        private int Processed { get; set; } = 0;
 
         public Form1()
         {
@@ -42,10 +44,12 @@ namespace Image_Generator
             this.MyPositioner = new Positioner();
         }
 
-        //Temporary func to check sentence
+        /// <summary>
+        /// Function to check input sentence
+        /// </summary>
+        /// <returns>True if sentence in not empty</returns>
         private bool CheckSentence()
         {
-            //TODO Check then by response from REST API
             if (this.sentenceBox.Text == "")
             {
                 ShowErrorMessage("You have to write sentence first");
@@ -68,11 +72,16 @@ namespace Image_Generator
                 this.GenerateImagesForDataset();
         }
 
+        /// <summary>
+        /// Function to image generation from dataset
+        /// </summary>
         private void GenerateImagesForDataset()
         {
+            // check if dataset is loaded
             if (this.DatasetFileName == "")
                 ShowErrorMessage("You have to select dataset first");
 
+            // choosing directory
             string directory;
             var dialog = ReturnConfiguredFolderBrowserDialog();
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -83,20 +92,83 @@ namespace Image_Generator
                 return;
             }
 
+            // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
             {
                 string str;
-                int counter = 1;
+                int counter = 0;
 
                 while ((str = streamReader.ReadLine()) != null)
                 {
-                    this.GenerateImage(str.Substring(str.IndexOf(' ') + 1));
-                    this.Manager.SaveImage(this.MyRenderer.GetImage(), Path.Combine(directory, counter + ".jpg"));
                     counter++;
+                    this.CreateImageGeneratingTask(str, directory, counter).Start();
                 }
             }
         }
 
+        /// <summary>
+        /// Methods that prepare new Thread Task for generating image
+        /// </summary>
+        /// <param name="str">Description of image</param>
+        /// <param name="directory">Directory to save</param>
+        /// <param name="counter">Dataset image number</param>
+        /// <returns></returns>
+        private Task CreateImageGeneratingTask(string str, string directory, int counter)
+        {
+            return new Task(() =>
+            {
+                try
+                {
+                    var result = this.GenerateImage(str.Substring(str.IndexOf(str.First(c => char.IsWhiteSpace(c))) + 1));
+                    lock (this.Manager)
+                    {
+                        // Draw image
+                        this.DrawImage(result);
+
+                        // SaveImage
+                        this.Manager.SaveImage(this.MyRenderer.GetImage(), Path.Combine(directory, counter + ".jpg"));
+                    }
+                }
+                catch (Exception e)
+                {
+                    // TODO: LOGS?
+                    if (!e.Message.Contains("Index"))
+                    {
+                        Console.WriteLine();
+                    }
+                    Console.Error.WriteLine("__________ERROR__________" + counter);
+                    Console.Error.WriteLine(e);
+                }
+                finally
+                {
+                    // update count
+                    this.Processed++;
+                    this.ProcessedImages.BeginInvoke((Action)(() => {
+                        this.ShowProcessedImagesCount();
+                    }));
+                }
+            });
+        }
+
+        // Method for drawing final positioned images
+        private void DrawImage(List<SentenceGraph> result)
+        {
+            // Clear draw field
+            this.MyRenderer.ResetImage();
+
+            // Draw whole graph
+            foreach (var graph in result)
+            {
+                // drawing each vertex(group) of a graph
+                var drawables = graph.Groups ?? graph.Vertices;
+                foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
+                    vertex.Draw(this.MyRenderer, this.Manager);
+            }
+        }
+
+        /// <summary>
+        /// Function to image generation for form
+        /// </summary>
         private void GenerateImageForView()
         {
             // Check some basic info about text
@@ -106,7 +178,10 @@ namespace Image_Generator
             try
             {
                 // Generating image
-                this.GenerateImage(this.sentenceBox.Text);
+                var result = this.GenerateImage(this.sentenceBox.Text);
+
+                // Drawing image
+                this.DrawImage(result);
 
                 // Get drawn image bitmap to show it in form window
                 this.generatedImage.Image = MyRenderer.GetImage();
@@ -122,11 +197,13 @@ namespace Image_Generator
             }
         }
 
-        private void GenerateImage(string description)
+        /// <summary>
+        /// Function to image generation from given description
+        /// </summary>
+        /// <param name="description">Image description given as simple text</param>
+        /// <returns></returns>
+        private List<SentenceGraph> GenerateImage(string description)
         {
-            // Clear draw field
-            this.MyRenderer.ResetImage();
-
             // Parsing given text
             var result = this.MyParser.ParseText(description, this.resolutionBox.Width, this.resolutionBox.Height);
 
@@ -135,12 +212,14 @@ namespace Image_Generator
             {
                 // positioning given sentence graph with given with and height
                 this.MyPositioner.Positionate(graph, this.ImageResolution.Width, this.ImageResolution.Height);
-
-                // drawing each vertex of graph
-                var drawables = graph.Groups ?? graph.Vertices;
-                foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
-                    vertex.Draw(this.MyRenderer, this.Manager);
             }
+
+            return result;
+        }
+
+        private void ShowProcessedImagesCount()
+        {
+            this.ProcessedImages.Text = "Processed: " + this.Processed;
         }
 
         /// <summary>
@@ -204,6 +283,9 @@ namespace Image_Generator
                 GenerateButton_Click(sender, e);
         }
 
+        /// <summary>
+        /// Resolution select initialization
+        /// </summary>
         private void FillResolutionBox()
         {
             this.resolutionBox.DataSource = new ResolutionItem[]
@@ -219,6 +301,11 @@ namespace Image_Generator
             this.resolutionBox.SelectedIndex = 3;
         }
 
+        /// <summary>
+        /// Method for changing resolution in which should be images generated
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ResolutionBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             ResolutionItem item = (ResolutionItem)this.resolutionBox.SelectedValue;
@@ -227,6 +314,58 @@ namespace Image_Generator
             this.MyRenderer?.SetResolution(item.Width, item.Height);
         }
 
+        /// <summary>
+        /// Choosing if dataset will be used
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DataSetCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.UsingDataset = DataSetCheckBox.Checked;
+        }
+
+        /// <summary>
+        /// Method for preparing open file dialog to load dataset
+        /// </summary>
+        /// <returns>Configured open file dialog</returns>
+        private OpenFileDialog ReturnConfiguredOpenFileDialog()
+        {
+            return new OpenFileDialog()
+            {
+                CheckFileExists = true,
+                AddExtension = true,
+                Filter = "TXT files (*.txt)|*.txt"
+            };
+        }
+
+        /// <summary>
+        /// Method for preparing folder browser dialog where images from dataset should be saved
+        /// </summary>
+        /// <returns>Configured folder browser dialog</returns>
+        private FolderBrowserDialog ReturnConfiguredFolderBrowserDialog()
+        {
+            return new FolderBrowserDialog()
+            {
+                Description = "Choose directory for saving images",
+                ShowNewFolderButton = true
+            };
+        }
+
+        /// <summary>
+        /// Method for loading dataset from dialog
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LoadDataset_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = this.ReturnConfiguredOpenFileDialog();
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+                this.DatasetFileName = openFileDialog.FileName;
+        }
+
+        /// <summary>
+        /// Internal struct representing resolution for images
+        /// </summary>
         private struct ResolutionItem
         {
             public int Width { get; }
@@ -242,37 +381,6 @@ namespace Image_Generator
             {
                 return $"{this.Width}x{this.Height} px";
             }
-        }
-
-        private void DataSetCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            this.UsingDataset = DataSetCheckBox.Checked;
-        }
-
-        private OpenFileDialog ReturnConfiguredOpenFileDialog()
-        {
-            return new OpenFileDialog()
-            {
-                CheckFileExists = true,
-                AddExtension = true,
-                Filter = "TXT files (*.txt)|*.txt"
-            };
-        }
-
-        private FolderBrowserDialog ReturnConfiguredFolderBrowserDialog()
-        {
-            return new FolderBrowserDialog()
-            {
-                Description = "Choose directory for saving images",
-                ShowNewFolderButton = true
-            };
-        }
-
-        private void LoadDataset_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog = this.ReturnConfiguredOpenFileDialog();
-            if (openFileDialog.ShowDialog() == DialogResult.OK)
-                this.DatasetFileName = openFileDialog.FileName;
         }
     }
 }

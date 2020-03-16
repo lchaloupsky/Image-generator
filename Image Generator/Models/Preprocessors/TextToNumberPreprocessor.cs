@@ -30,7 +30,8 @@ namespace Image_Generator.Models.Preprocessors
         private Dictionary<string, long> Collections { get; } = new Dictionary<string, long>
         {{ "hundreds",100}, {"thousands",1000},{"millions",1000000},{"billions",1000000000},
         {"trillions",1000000000000},{"quadrillions",1000000000000000},
-        {"quintillions",1000000000000000000}};
+        {"quintillions",1000000000000000000},
+        {"several",2}, {"few",1},{"many",5},{"plenty",10}}; // TODO: "a lot", "lots of", etc.
 
         private Random Random { get; } = new Random();
 
@@ -40,6 +41,8 @@ namespace Image_Generator.Models.Preprocessors
             long result = 0;
             bool wasNumber = false;
             StringBuilder builder = new StringBuilder();
+
+            // TODO: number + string combination
 
             var splittedText = text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < splittedText.Length; i++)
