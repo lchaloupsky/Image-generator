@@ -1,7 +1,6 @@
 ﻿using Image_Generator.Models.Edges;
 using Image_Generator.Models.Factories;
 using Image_Generator.Models.Interfaces;
-using Image_Generator.Models.Text_elements.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,7 +9,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Image_Generator.Models.Text_elements
+namespace UDPipeParserLibrary.Text_elements
 {
     class NounSet : IDrawable, IProcessable
     {
@@ -120,8 +119,6 @@ namespace Image_Generator.Models.Text_elements
 
         private ElementFactory ElementFactory { get; }
 
-        private ImageCombineHelper ImageCombineHelper { get; }
-
         private string PluralForm { get; }
 
         public bool Processed { get; set; } = false;
@@ -137,7 +134,6 @@ namespace Image_Generator.Models.Text_elements
             this.Adpositions = new List<Adposition>();
             this.ElementFactory = elementFactory;
             this.EdgeFactory = edgeFactory;
-            this.ImageCombineHelper = new ImageCombineHelper();
         }
 
         public NounSet(ElementFactory elementFactory, EdgeFactory edgeFactory, Noun noun, int numberOfInstances) : this(elementFactory, edgeFactory)
@@ -383,19 +379,92 @@ namespace Image_Generator.Models.Text_elements
         private void FinalizeSet()
         {
             if (this.Nouns.Count > 4)
-                this.SetProperties(this.ImageCombineHelper.PlaceInCircle(this.Nouns));
+                this.PlaceInCircle();
             else
-                this.SetProperties(this.ImageCombineHelper.PlaceInRow(this.Nouns));
+                this.PlaceInRow();
 
             this.IsFinalized = true;
         }
 
-        private void SetProperties(Tuple<int, int, int, Image> dimTuple)
+        private void PlaceInRow()
         {
-            this.Width_ = dimTuple.Item1;
-            this.Height_ = dimTuple.Item2;
-            this.ZIndex_ = dimTuple.Item3;
-            this.Image_ = dimTuple.Item4;
+            double scale = 1;
+            foreach (var noun in this.Nouns)
+            {
+                this.Width_ += noun.Group?.Width ?? noun.Width;
+                this.Height_ = Math.Max(this.Height_, noun.Group?.Height ?? noun.Height);
+                this.ZIndex_ = Math.Min(this.ZIndex_, noun.ZIndex);
+                scale *= 0.75;
+
+                if (noun.Group != null)
+                    noun.Group.IsValid = false;
+            }
+
+            this.Height_ = (int)(this.Height_ * scale);
+            this.Width_ = (int)(this.Width_ * scale);
+            this.Image_ = new Bitmap(this.Width_, this.Height_);
+            Graphics graphics = Graphics.FromImage(this.Image_);
+
+            int LastX = 0;
+            IDrawable finalElement;
+            foreach (IDrawable noun in this.Nouns)
+            {
+                finalElement = noun.Group ?? noun;
+
+                lock (finalElement.Image)
+                    graphics.DrawImage(finalElement.Image, LastX, (int)(this.Height_ - finalElement.Height * scale), (int)(scale * finalElement.Width), (int)(scale * finalElement.Height));
+
+                LastX += (int)(finalElement.Width * scale);
+            }
+        }
+
+        private void PlaceInCircle()
+        {
+            int MaxWidth = 0;
+            int MaxHeight = 0;
+            foreach (var noun in this.Nouns)
+            {
+                MaxWidth = Math.Max(MaxWidth, noun.Group?.Width ?? noun.Width);
+                MaxHeight = Math.Max(MaxHeight, noun.Group?.Height ?? noun.Height);
+                this.ZIndex_ = Math.Min(this.ZIndex_, noun.ZIndex);
+
+                if (noun.Group != null)
+                    noun.Group.IsValid = false;
+            }
+
+            // REDO Scaling
+            //double scale = Math.Max(Math.Pow(0.8, this.Nouns.Count), 0.05);
+            double scale = Math.Pow(0.9, this.Nouns.Count);
+            //var finalDim = (int)(Math.Max(MaxWidth, MaxHeight) * Math.Pow(this.Nouns.Count, scale));
+            var finalDim = (int)Math.Log(Math.Max(MaxWidth, MaxHeight) * this.Nouns.Count) / 3 * 100;
+
+            this.Height_ = finalDim;
+            this.Width_ = finalDim;
+            this.Image_ = new Bitmap(this.Width_, this.Height_);
+            Graphics graphics = Graphics.FromImage(this.Image_);
+
+            int newX = 0;
+            int newY = 0;
+            Random rand = new Random();
+            IDrawable finalElement;
+            foreach (IDrawable noun in this.Nouns)
+            {
+                finalElement = noun.Group ?? noun;
+                int finalWidth = Math.Max(34, (int)(finalElement.Width * scale));
+                int finalHeight = Math.Max(20, (int)(finalElement.Height * scale));
+
+                int distance = rand.Next(finalDim / 2);
+                double angleInRadians = rand.Next(360) / (2 * Math.PI);
+
+                newX = (int)(distance * Math.Cos(angleInRadians)) + finalDim / 2;
+                newY = (int)(distance * Math.Sin(angleInRadians)) + finalDim / 2;
+
+                newX = Math.Min(newX, finalDim - finalWidth);
+                newY = Math.Min(newY, finalDim - finalHeight);
+
+                lock (finalElement.Image)
+                    graphics.DrawImage(finalElement.Image, newX, newY, finalWidth, finalHeight);
+            }
         }
 
         public void Draw(Renderer renderer, ImageManager manager)

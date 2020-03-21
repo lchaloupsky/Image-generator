@@ -95,6 +95,7 @@ namespace Image_Generator.Models.Factories
                 case "on": return new OnEdge();
                 case "inside":
                 case "within":
+                case "into":
                 case "in": return new InEdge();
                 case "at": return new AtEdge();
                 case "below":
@@ -107,6 +108,8 @@ namespace Image_Generator.Models.Factories
                 case "in middle of": return new InMiddleEdge();
                 case "beside":
                 case "by":
+                case "to":
+                case "against":
                 case "to left of": return new ToLeftEdge();
                 case "near":
                 case "next to":

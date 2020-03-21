@@ -109,6 +109,7 @@
     <Compile Include="Models\Text elements\Adposition.cs" />
     <Compile Include="Models\Text elements\Adverb.cs" />
     <Compile Include="Models\Text elements\Element.cs" />
+    <Compile Include="Models\Text elements\Helpers\ImageCombineHelper.cs" />
     <Compile Include="Models\Text elements\Helpers\VerbFormHelper.cs" />
     <Compile Include="Models\Text elements\MetaNoun.cs" />
     <Compile Include="Models\Text elements\Noun.cs" />
