@@ -1,4 +1,5 @@
 ﻿using FlickrNet;
+using Nito.AsyncEx;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Image_Generator.Models
@@ -62,6 +64,7 @@ namespace Image_Generator.Models
 
             using (WebClient client = new WebClient())
             {
+                client.Proxy = null;
                 try
                 {
                     fileName = imageName
@@ -79,8 +82,28 @@ namespace Image_Generator.Models
                 }
             }
 
+            return GetCapt(fileName).GetAwaiter().GetResult();
+        }
+
+        private async Task<Image> GetCapt(string fileName)
+        {
+            var captions = new List<ImageCaption>();
+            var a = AssignValue(fileName, captions);
+            while (!a.IsCompleted)
+                await Task.Yield();
+
             // Return newly dowloaded image
             return new Bitmap(ReturnImageAdress(fileName));
+        }
+
+        private async Task AssignValue(string fileName, List<ImageCaption> captions)
+        {
+            IBMCaptioner capt = new IBMCaptioner();
+            captions = await capt.GetCaptionsFromImage(Image.FromFile(ReturnImageAdress(fileName)), fileName);
+            while (captions.Count == 0)
+                await Task.Yield();
+
+            return;
         }
 
         /// <summary>
