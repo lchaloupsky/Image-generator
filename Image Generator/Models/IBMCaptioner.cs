@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
+using Nito.AsyncEx;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -16,9 +18,9 @@ namespace Image_Generator.Models
     {
         // Base URL of web service
         private const string BASE_URL = @"http://max-image-caption-generator.max.us-south.containers.appdomain.cloud/model/predict";
-        private HttpClient Client { get; } = new HttpClient();
+        private HttpClient Client { get; } = new HttpClient() { Timeout = TimeSpan.FromSeconds(10)};
 
-        public async Task<List<ImageCaption>> GetCaptionsFromImage(Image image, string imageName)
+        public List<ImageCaption> GetCaptionsFromImage(Image image, string imageName)
         {
             // Get image byte data
             byte[] imageData = this.GetImageData(image);
@@ -28,8 +30,40 @@ namespace Image_Generator.Models
 
             // ----Modify to final representation-----
             // send request to BASE_URL of tool to obtain captions
-            var result = await Client.PostAsync(BASE_URL, requestContent).ConfigureAwait(false);
-            var resultJson = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            //var result = AsyncContext.Run(async () => await Client.PostAsync(BASE_URL, requestContent));
+            //var resultJson = AsyncContext.Run(async () => await result.Content.ReadAsStringAsync());
+
+            var request = WebRequest.Create(BASE_URL);
+            request.Method = "POST";
+            var boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", NumberFormatInfo.InvariantInfo);
+            request.ContentType = "multipart/form-data; boundary=" + boundary;
+            //request.Accept = "application/json";
+            boundary = "--" + boundary;
+
+            using (var requestStream = request.GetRequestStream())
+            {
+                // Write the files
+                var buffer = Encoding.ASCII.GetBytes(boundary + Environment.NewLine);
+                requestStream.Write(buffer, 0, buffer.Length);
+                buffer = Encoding.UTF8.GetBytes(string.Format("Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\"{2}", "image", imageName, Environment.NewLine));
+                requestStream.Write(buffer, 0, buffer.Length);
+                buffer = Encoding.ASCII.GetBytes(string.Format("Content-Type: {0}{1}{1}", "image/jpeg", Environment.NewLine));
+                requestStream.Write(buffer, 0, buffer.Length);
+                //var imageData = GetImageData(image);
+                requestStream.Write(imageData, 0, imageData.Length);
+                buffer = Encoding.ASCII.GetBytes(Environment.NewLine);
+                requestStream.Write(buffer, 0, buffer.Length);
+
+                var boundaryBuffer = Encoding.ASCII.GetBytes(boundary + "--");
+                requestStream.Write(boundaryBuffer, 0, boundaryBuffer.Length);
+            }
+
+            string resultJson = null;
+            using (var response = request.GetResponse())
+            using (var responseStream = response.GetResponseStream())
+            {
+                resultJson = new StreamReader(responseStream).ReadToEnd();
+            }
 
             // parse returned json
             JObject parsedJson = JObject.Parse(resultJson);

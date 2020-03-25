@@ -20,7 +20,7 @@ namespace Image_Generator.Models
 
         private Downloader MyDownloader { get; }
         private FileManager MyManager { get; }
-        private LimitedDictionary<string, Image> Cache { get; set; }       
+        private LimitedDictionary<string, Image> Cache { get; set; }
 
         public ImageManager()
         {

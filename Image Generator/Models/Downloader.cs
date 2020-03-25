@@ -24,6 +24,15 @@ namespace Image_Generator.Models
         // Flickr API for downloading images
         private Flickr MyFlickr { get; }
 
+        // IBM caption downloader
+        private IBMCaptioner IBMCaptioner { get; }
+
+        // Levenstein Distance meter
+        private LDistanceMeter LDistanceMeter { get; }
+
+        // Format converter
+        private ImageFormatConverter Converter { get; }
+
         /// <summary>
         /// Constructor of Downloader
         /// </summary>
@@ -33,6 +42,9 @@ namespace Image_Generator.Models
         public Downloader(string apiKey, string secret, string location)
         {
             this.MyFlickr = new Flickr(apiKey, secret);
+            this.IBMCaptioner = new IBMCaptioner();
+            this.LDistanceMeter = new LDistanceMeter();
+            this.Converter = new ImageFormatConverter();
             this.Location = location;
         }
 
@@ -64,14 +76,10 @@ namespace Image_Generator.Models
 
             using (WebClient client = new WebClient())
             {
-                client.Proxy = null;
                 try
                 {
-                    fileName = imageName
-                               .ToLower() + photos[0]
-                               .Medium640Url
-                               .Substring(photos[0].Medium640Url.LastIndexOf('.'));
-
+                    //image = GetBestImage(photos, imageName);
+                    fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
                     client.DownloadFile(new Uri(photos[0].Medium640Url), ReturnImageAdress(fileName));
                 }
                 catch (WebException)
@@ -82,28 +90,67 @@ namespace Image_Generator.Models
                 }
             }
 
-            return GetCapt(fileName).GetAwaiter().GetResult();
-        }
+            // for now - DELETE
+            //if (image == null)
+            //{
+            //    Bitmap bmp = new Bitmap(240, 180);
+            //    Graphics g = Graphics.FromImage(bmp);
+            //    g.Clear(Color.Green);
+            //    image = bmp;
+            //}
 
-        private async Task<Image> GetCapt(string fileName)
-        {
-            var captions = new List<ImageCaption>();
-            var a = AssignValue(fileName, captions);
-            while (!a.IsCompleted)
-                await Task.Yield();
+            //IBMCaptioner capt = new IBMCaptioner();
+            //var captions = capt.GetCaptionsFromImage(Image.FromFile(ReturnImageAdress(fileName)), fileName);
+            //image.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat)));
 
             // Return newly dowloaded image
+            //return image;
             return new Bitmap(ReturnImageAdress(fileName));
         }
 
-        private async Task AssignValue(string fileName, List<ImageCaption> captions)
+        private Image GetBestImage(PhotoCollection photos, string imageName)
         {
-            IBMCaptioner capt = new IBMCaptioner();
-            captions = await capt.GetCaptionsFromImage(Image.FromFile(ReturnImageAdress(fileName)), fileName);
-            while (captions.Count == 0)
-                await Task.Yield();
+            Image bestImage = null;
+            long bestRating = int.MaxValue;
+            object imageLock = new object();
+            if (imageName == "guy stitching up coat")
+                Console.WriteLine();
 
-            return;
+            Parallel.ForEach(photos.Take(5), (photo) =>
+            {
+                Image image = null;
+                using (WebClient client = new WebClient())
+                {
+                    client.Proxy = null;
+                    using (var stream = client.OpenRead(photo.Medium640Url))
+                        image = Image.FromStream(stream);
+
+                }
+
+                var fileName = imageName.ToLower() + '.' + Converter.ConvertToString(image.RawFormat);
+                var captions = this.IBMCaptioner.GetCaptionsFromImage(image, fileName);
+
+                long br = int.MaxValue;
+                foreach (var capt in captions)
+                {
+                    long rating = (long)(this.LDistanceMeter.CalculateStringDistance(imageName, capt.Caption) / capt.Probability);
+                    br = rating < br ? rating : br;
+                }
+
+                lock (imageLock)
+                {
+                    if (br < bestRating)
+                    {
+                        bestImage = image;
+                        bestRating = br;
+                    }
+                    else
+                        image.Dispose();
+                }
+            });
+
+
+            return bestImage;
         }
 
         /// <summary>
@@ -127,9 +174,9 @@ namespace Image_Generator.Models
             {
                 SortOrder = PhotoSearchSortOrder.Relevance,
                 MediaType = MediaType.Photos,
-                PerPage = 1,
                 Text = imageName,
-                Page = 1
+                Page = 1,
+                Tags = imageName.Replace(' ', ',')
             };
         }
     }
