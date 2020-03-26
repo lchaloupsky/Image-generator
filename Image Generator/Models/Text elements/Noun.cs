@@ -315,8 +315,7 @@ namespace Image_Generator.Models.Text_elements
 
         private Image GetImage()
         {
-            lock (this.Manager)
-                return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
+            return (this.Image = this.Manager.GetImage(this.GetFinalWordSequence()));
         }
 
         private string GetFinalWordSequence()

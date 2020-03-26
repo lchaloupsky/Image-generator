@@ -46,6 +46,7 @@ namespace Image_Generator.Models
             this.LDistanceMeter = new LDistanceMeter();
             this.Converter = new ImageFormatConverter();
             this.Location = location;
+            ServicePointManager.Expect100Continue = false;
         }
 
         /// <summary>
@@ -73,16 +74,23 @@ namespace Image_Generator.Models
         {
             string fileName = "";
             var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageName));
+            Image image = null;
 
             using (WebClient client = new WebClient())
             {
+                client.Proxy = null;
                 try
                 {
+                    // __________ IMAGE CAPTION OPTION ___________
                     //image = GetBestImage(photos, imageName);
+                    //image.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat)));
+
+                    // ___________   REGULAR OPTION    ___________
                     fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
                     client.DownloadFile(new Uri(photos[0].Medium640Url), ReturnImageAdress(fileName));
+                    image = new Bitmap(ReturnImageAdress(fileName));
                 }
-                catch (WebException)
+                catch (Exception)
                 {
                     // TODO log here in future
                     Console.WriteLine("Network Error");
@@ -90,22 +98,8 @@ namespace Image_Generator.Models
                 }
             }
 
-            // for now - DELETE
-            //if (image == null)
-            //{
-            //    Bitmap bmp = new Bitmap(240, 180);
-            //    Graphics g = Graphics.FromImage(bmp);
-            //    g.Clear(Color.Green);
-            //    image = bmp;
-            //}
-
-            //IBMCaptioner capt = new IBMCaptioner();
-            //var captions = capt.GetCaptionsFromImage(Image.FromFile(ReturnImageAdress(fileName)), fileName);
-            //image.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat)));
-
             // Return newly dowloaded image
-            //return image;
-            return new Bitmap(ReturnImageAdress(fileName));
+            return image;
         }
 
         private Image GetBestImage(PhotoCollection photos, string imageName)
@@ -113,10 +107,8 @@ namespace Image_Generator.Models
             Image bestImage = null;
             long bestRating = int.MaxValue;
             object imageLock = new object();
-            if (imageName == "guy stitching up coat")
-                Console.WriteLine();
 
-            Parallel.ForEach(photos.Take(5), (photo) =>
+            Parallel.ForEach(photos, (photo) =>
             {
                 Image image = null;
                 using (WebClient client = new WebClient())
@@ -173,7 +165,9 @@ namespace Image_Generator.Models
             return new PhotoSearchOptions()
             {
                 SortOrder = PhotoSearchSortOrder.Relevance,
+                Extras = PhotoSearchExtras.Views,                
                 MediaType = MediaType.Photos,
+                PerPage = 5,
                 Text = imageName,
                 Page = 1,
                 Tags = imageName.Replace(' ', ',')

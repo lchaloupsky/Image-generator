@@ -33,7 +33,9 @@ namespace Image_Generator.Models
             //var result = AsyncContext.Run(async () => await Client.PostAsync(BASE_URL, requestContent));
             //var resultJson = AsyncContext.Run(async () => await result.Content.ReadAsStringAsync());
 
-            var request = WebRequest.Create(BASE_URL);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BASE_URL);
+            request.Timeout = 10000;
+            request.Proxy = null;
             request.Method = "POST";
             var boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", NumberFormatInfo.InvariantInfo);
             request.ContentType = "multipart/form-data; boundary=" + boundary;

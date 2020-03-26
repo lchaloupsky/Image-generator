@@ -21,6 +21,7 @@ namespace Image_Generator.Models
         private Downloader MyDownloader { get; }
         private FileManager MyManager { get; }
         private LimitedDictionary<string, Image> Cache { get; set; }
+        private Dictionary<string, object> Dowloaded { get; }
 
         public ImageManager()
         {
@@ -28,6 +29,7 @@ namespace Image_Generator.Models
             this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.MyManager = new FileManager(location);
             this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT);
+            this.Dowloaded = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -44,7 +46,10 @@ namespace Image_Generator.Models
             // Check if image is saved already
             if (this.MyManager.CheckImageExistence(imageName))
             {
-                this.Cache.Add(imageName, this.MyManager.LoadImage(imageName));
+                var image = this.MyManager.LoadImage(imageName);
+                if (!this.Cache.ContainsKey(imageName))
+                    this.Cache.Add(imageName, image);
+
                 return true;
             }
 
@@ -58,9 +63,21 @@ namespace Image_Generator.Models
         /// <returns>Wanted image</returns>
         public Image GetImage(string imageName)
         {
-            // If image is not in cache or in directory, then download it!
-            if (!CheckImageExistence(imageName))
-                this.Cache.Add(imageName, this.MyDownloader.DownloadImage(imageName));
+            imageName = imageName.ToLower();
+            lock (this.Dowloaded)
+                if (!this.Dowloaded.ContainsKey(imageName))
+                    this.Dowloaded.Add(imageName, new object());
+
+            lock (this.Dowloaded[imageName])
+            {
+                // If image is not in cache or in directory, then download it!
+                if (!CheckImageExistence(imageName))
+                {
+                    var image = this.MyDownloader.DownloadImage(imageName);
+                    if (!this.Cache.ContainsKey(imageName))
+                        this.Cache.Add(imageName, image);
+                }
+            }
 
             return this.Cache[imageName];
         }
