@@ -47,6 +47,9 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
+            if(noun.DependencyType == "compound" || noun.DependencyType =="nmod:poss")
+                noun.DependencyType = this.DependencyType;
+
             return noun.Process(this, graph);
         }
 

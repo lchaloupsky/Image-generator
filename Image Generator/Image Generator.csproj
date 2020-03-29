@@ -117,6 +117,8 @@
     <Compile Include="Models\Interfaces\IProcessable.cs" />
     <Compile Include="Models\LDistanceMeter.cs" />
     <Compile Include="Models\Positioner.cs" />
+    <Compile Include="Models\Preprocessors\CaptitalLetterPreprocessor.cs" />
+    <Compile Include="Models\Preprocessors\MisssingArticlePreprocessor.cs" />
     <Compile Include="Models\Preprocessors\TextToNumberPreprocessor.cs" />
     <Compile Include="Models\SentenceGraph.cs" />
     <Compile Include="Models\Text elements\Adjective.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="Models\Text elements\Root.cs" />
     <Compile Include="Models\Renderer.cs" />
     <Compile Include="Models\Text elements\Verb.cs" />
+    <Compile Include="Models\UDPipeClient.cs" />
     <Compile Include="Models\UDPipeParser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,23 +20,17 @@ namespace Image_Generator.Models
     /// </summary>
     class UDPipeParser
     {
-        // constants
-        private const string BASE_URL = "http://lindat.mff.cuni.cz/services/udpipe/api/process?";
-        private const string CONST_PARAMS = "&tokenizer&tagger&parser&output=conllu&";
-        private const string MODEL_PARAM = "model=";
-        private const string DATA_PARAM = "data=";
-
         // properties
-        private string Model { get; }
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
         private List<IPreprocessor> Preprocessors { get; }
+        private UDPipeClient Client { get; }
 
         public UDPipeParser(string model, ImageManager manager)
         {
-            this.Model = model;
             this.ElementFactory = new ElementFactory(manager);
             this.Comparer = new ElementComparer();
+            this.Client = new UDPipeClient(model);
             this.Preprocessors = this.GetPreprocessors();
         }
 
@@ -61,17 +55,11 @@ namespace Image_Generator.Models
         /// <returns>List of parsed elements</returns>
         public SentenceGraph ParseSentence(string sentence)
         {
-            string json;
-            Dictionary<int, List<IProcessable>> dependencyTree; // Field of fields --> REDO
-            SentenceGraph graph = new SentenceGraph();
-
-            // REST API call with given text
-            using (WebClient client = new WebClient())
-                json = client.DownloadString(ConstructURL(sentence));
+            Dictionary<int, List<IProcessable>> dependencyTree;
+            SentenceGraph graph = new SentenceGraph();            
 
             // recreating dependency tree given as RESTAPI reponse from UDPipe
-            var JsonObject = JObject.Parse(json);
-            var validLines = JsonObject["result"].ToString().Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(line => !line[0].Equals('#'));
+            var validLines = this.Client.GetResponse(sentence);
             dependencyTree = GetDependencyTree(validLines);
 
             // compressing dependency tree into graph
@@ -101,7 +89,9 @@ namespace Image_Generator.Models
         private List<IPreprocessor> GetPreprocessors()
         {
             return new List<IPreprocessor> {
-                new TextToNumberPreprocessor()
+                new CaptitalLetterPreprocessor(),
+                new TextToNumberPreprocessor(),
+                new MissingArticlePreprocessor(this.Client)
             };
         }
 
@@ -167,19 +157,6 @@ namespace Image_Generator.Models
                 element = element.Process(CompressDependencyTree(tree, graph, vertex), graph);
 
             return element;
-        }
-
-        /// <summary>
-        /// Construcs adress for calling
-        /// </summary>
-        /// <param name="sentence">Sentence data param</param>
-        /// <returns>Constructed URL for call</returns>
-        private string ConstructURL(string sentence)
-        {
-            return BASE_URL +
-                   MODEL_PARAM + Model +
-                   CONST_PARAMS +
-                   DATA_PARAM + sentence;
         }
 
         /// <summary>
