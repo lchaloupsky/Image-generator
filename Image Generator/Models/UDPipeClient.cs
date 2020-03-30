@@ -17,14 +17,18 @@ namespace Image_Generator.Models
         private const string MODEL_PARAM = "model=";
         private const string DATA_PARAM = "data=";
         private string Model { get; }
+        private SemaphoreSlim SemaphoreSlim { get; }
 
         public UDPipeClient(string model)
         {
             this.Model = model;
+            this.SemaphoreSlim = new SemaphoreSlim(4, 4);
         }
 
         public List<string> GetResponse(string sentence)
         {
+            SemaphoreSlim.Wait();
+
             string json = null;
 
             // REST API call with given text
@@ -40,12 +44,18 @@ namespace Image_Generator.Models
                     {
                         var code = (we.Response as HttpWebResponse)?.StatusCode;
                         if (code != null && (int)code == 429)
+                        {
+                            Thread.Sleep(200);
                             continue;
+                        }                           
 
                         throw;
                     }
                 }
             }
+
+            Thread.Sleep(200);
+            SemaphoreSlim.Release();
 
             // getting response tagged lines from json
             var JsonObject = JObject.Parse(json);
