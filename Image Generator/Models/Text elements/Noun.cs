@@ -94,7 +94,7 @@ namespace Image_Generator.Models.Text_elements
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
@@ -105,6 +105,7 @@ namespace Image_Generator.Models.Text_elements
                 case Numeral num: return this.ProcessElement(num, graph);
                 case Verb verb: return this.ProcessElement(verb, graph);
                 case Adverb adv: return this.ProcessElement(adv, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 
@@ -116,16 +117,20 @@ namespace Image_Generator.Models.Text_elements
             if (verb.DependencyType == "cop")
                 return this;
 
-            this.Actions.Add(verb);
+            if(!verb.IsNegated)
+                this.Actions.Add(verb);
+
             if (verb.DependingDrawables.Count != 0)
             {
                 verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
                 verb.DependingDrawables.Clear();
-                //return this.Process(verb.DependingDrawable, graph);
             }
 
             verb.RelatedActions.ForEach(ra => this.Process(ra, graph));
             verb.RelatedActions.Clear();
+
+            if (verb.DrawableAdposition != null)
+                this.Process(verb.DrawableAdposition, graph);
 
             if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
                 graph.ReplaceVertex(this, (IDrawable)verb.Object);
@@ -137,6 +142,12 @@ namespace Image_Generator.Models.Text_elements
         {
             if (num.DependencyType == "appos")
                 return this.Process(num.DependingDrawable, graph);
+
+            if (this.DependencyType == "nmod:npmod")
+            {
+                this.Extensions.Add(num);
+                return this;
+            }
 
             if (num.DependencyType != "nummod")
             {
@@ -175,10 +186,21 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
-            if (noun.DependencyType == "conj")
-                return this.ElementFactory.Create(this, noun, graph);
+            if (noun.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND && this.CoordinationType == CoordinationType.NOR))
+            {
+                IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                if (newEdge != null)
+                {
+                    noun.Adpositions.Clear();
+                    graph.AddEdge(newEdge);
+                    noun.FinalizeProcessing(graph);
+                    return this;
+                }
 
-            if (noun.DependencyType == "compound")
+                return this.ElementFactory.Create(this, noun, graph);
+            }
+
+            if (noun.DependencyType == "compound" || noun.DependencyType == "nmod:npmod")
             {
                 this.Extensions.Add(noun);
                 return this;
@@ -186,6 +208,9 @@ namespace Image_Generator.Models.Text_elements
 
             if (noun.DependencyType.Contains(":poss"))
                 return this;
+
+            if (this.IsNegated && this.DependencyType == "dobj")
+                return noun;
 
             // Processing relationship between noun and this
             this.ProcessEdge(graph, noun, noun.Adpositions);
@@ -196,7 +221,7 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
-        private void ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
+        private bool ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
         {
             // Get adpositions from adpositions combinations
             List<string> leftAdp = this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
@@ -226,12 +251,23 @@ namespace Image_Generator.Models.Text_elements
                 else
                     graph.AddVertex(drawable);
             }
+
+            return edge != null;
         }
 
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
-            if (nounSet.DependencyType == "conj")
+            if (nounSet.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND && this.CoordinationType == CoordinationType.NOR))
             {
+                IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                if (newEdge != null)
+                {
+                    nounSet.Adpositions.Clear();
+                    graph.AddEdge(newEdge);
+                    nounSet.FinalizeProcessing(graph);
+                    return this;
+                }
+
                 nounSet.DependencyType = this.DependencyType;
                 nounSet.Nouns.Insert(0, this);
                 nounSet.Adpositions.AddRange(this.Adpositions);
@@ -246,6 +282,9 @@ namespace Image_Generator.Models.Text_elements
                 return this;
             }
 
+            if (this.IsNegated && this.DependencyType == "dobj")
+                return nounSet;
+
             // Processing relationship between noun and this
             this.ProcessEdge(graph, nounSet, nounSet.Adpositions);
 
@@ -257,8 +296,10 @@ namespace Image_Generator.Models.Text_elements
 
         public override IProcessable FinalizeProcessing(SentenceGraph graph)
         {
-            if (this.Image == null)
-                this.GetImage();
+            if (this.Image != null)
+                return this;
+
+            this.GetImage();
 
             IPositionateEdge newEdge;
             if (this.IsPlural)

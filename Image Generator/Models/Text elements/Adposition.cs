@@ -24,7 +24,7 @@ namespace Image_Generator.Models.Text_elements
                     new List<Adposition>() { DependingAdposition, this };
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
@@ -32,6 +32,8 @@ namespace Image_Generator.Models.Text_elements
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Adposition adp: return this.ProcessElement(adp, graph);
                 case Adjective adj: return this.ProcessElement(adj, graph);
+                case Verb verb: return this.ProcessElement(verb, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 
@@ -47,10 +49,15 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
-            if(noun.DependencyType == "compound" || noun.DependencyType =="nmod:poss")
+            if (noun.DependencyType == "compound" || noun.DependencyType == "nmod:poss")
                 noun.DependencyType = this.DependencyType;
 
             return noun.Process(this, graph);
+        }
+
+        private IProcessable ProcessElement(Verb verb, SentenceGraph graph)
+        {
+            return verb.Process(this, graph);
         }
 
         private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)

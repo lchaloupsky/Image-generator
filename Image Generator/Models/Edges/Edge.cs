@@ -88,6 +88,13 @@ namespace Image_Generator.Models.Edges
             destination.ZIndex = source.ZIndex;
         }
 
+        protected void SwitchVertices()
+        {
+            var temp = this.Right;
+            this.Right = this.Left;
+            this.Left = temp;
+        }
+
         public override string ToString()
         {
             return $"{this.GetType().Name} --> positioning: \n     Left: {this.Left} \n    Right: {this.Right}";

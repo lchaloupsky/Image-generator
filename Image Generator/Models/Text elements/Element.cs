@@ -15,6 +15,10 @@ namespace Image_Generator.Models.Text_elements
 
         public string DependencyType { get; set; }
 
+        public CoordinationType CoordinationType { get; set; } = CoordinationType.AND;
+
+        public bool IsNegated { get; protected set; }
+
         public Element(int Id, string Lemma, string DependencyType)
         {
             this.Id = Id;
@@ -34,6 +38,45 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
-        public abstract IProcessable Process(IProcessable element, SentenceGraph graph);
+        public IProcessable Process(IProcessable element, SentenceGraph graph)
+        {
+            if (element is Negation)
+                return this.ProcessNegation((Negation)element);
+
+            if (element.IsNegated && !(this is Noun) && !(element is Verb))
+                return this;
+
+            if (this.IsNegated && element.DependencyType == "nsubj")
+                return element;
+
+            if (!this.IsAllowedCoordination() && element.DependencyType == "conj")
+            {
+                this.CoordinationType = CoordinationType.AND;
+                return this;
+                //Remove vertex?
+            }
+
+            var returnElement = this.ProcessElement(element, graph);
+            return returnElement.IsNegated && returnElement != this ? this : returnElement;
+        }
+
+        public abstract IProcessable ProcessElement(IProcessable element, SentenceGraph graph);
+
+        protected IProcessable ProcessCoordination(Coordination coordination)
+        {
+            this.CoordinationType = coordination.CoordinationType;
+            return this;
+        }
+
+        private IProcessable ProcessNegation(Negation negation)
+        {
+            this.IsNegated = true;
+            return this;
+        }
+
+        protected bool IsAllowedCoordination()
+        {
+            return this.CoordinationType != CoordinationType.OR && this.CoordinationType != CoordinationType.BUT;
+        }
     }
 }

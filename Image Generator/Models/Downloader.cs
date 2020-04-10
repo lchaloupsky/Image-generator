@@ -95,11 +95,13 @@ namespace Image_Generator.Models
 
                         // __________ IMAGE CAPTION OPTION ___________
                         //image = GetBestImage(photos, imageName);
-                        //image.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat)));
+                        //fileName = ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat));
+                        //image.Save(fileName);                       
 
                         // ___________   REGULAR OPTION    ___________
                         fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
                         client.DownloadFile(new Uri(photos[0].Medium640Url), ReturnImageAdress(fileName));
+
                         return new Bitmap(ReturnImageAdress(fileName));
                     }
                     catch (WebException)
@@ -199,7 +201,7 @@ namespace Image_Generator.Models
                 SortOrder = PhotoSearchSortOrder.Relevance,
                 Extras = PhotoSearchExtras.Views,
                 MediaType = MediaType.Photos,
-                PerPage = 1,
+                PerPage = 5,
                 Text = imageName,
                 Page = 1,
                 Tags = tags

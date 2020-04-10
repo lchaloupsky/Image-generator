@@ -56,7 +56,7 @@ namespace Image_Generator.Models.Text_elements
             this.Word = word;
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
@@ -66,6 +66,7 @@ namespace Image_Generator.Models.Text_elements
                 case Adverb adv: return this.ProcessElement(adv, graph);
                 case Adposition adp: return this.ProcessElement(adp, graph);
                 case Adjective adj: return this.ProcessElement(adj, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 

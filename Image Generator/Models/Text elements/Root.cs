@@ -39,7 +39,7 @@ namespace Image_Generator.Models.Text_elements
             return;
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             element = element.FinalizeProcessing(graph);
             return element is IDrawable ? element : this;

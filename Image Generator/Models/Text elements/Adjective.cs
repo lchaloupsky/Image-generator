@@ -16,7 +16,7 @@ namespace Image_Generator.Models.Text_elements
             this.Extensions = new List<Element>();
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
@@ -25,6 +25,7 @@ namespace Image_Generator.Models.Text_elements
                 case Adjective adj: return this.ProcessElement(adj, graph);
                 case Adverb adv: return this.ProcessElement(adv, graph);
                 case Verb verb: return this.ProcessElement(verb, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 
@@ -48,8 +49,10 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
         {
-            this.Extensions.Add(adj);
+            if (adj.CoordinationType != CoordinationType.AND)
+                return this;
 
+            this.Extensions.Add(adj);
             return this;
         }
 

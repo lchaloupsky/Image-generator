@@ -97,6 +97,8 @@ namespace Image_Generator
             {
                 string str;
                 int counter = 0;
+                int linesCount = File.ReadAllLines(this.DatasetFileName).Count();
+                this.ProcessedBar.Maximum = linesCount;
 
                 while ((str = streamReader.ReadLine()) != null)
                 {
@@ -219,7 +221,8 @@ namespace Image_Generator
 
         private void ShowProcessedImagesCount()
         {
-            this.ProcessedImages.Text = "Processed: " + this.Processed;
+            this.ProcessedBar.Value++;
+            this.ProcessedImages.Text = "Processed: " + this.Processed + " of " + this.ProcessedBar.Maximum;
         }
 
         /// <summary>

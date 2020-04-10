@@ -65,6 +65,7 @@ namespace Image_Generator.Models
             // compressing dependency tree into graph
             this.Comparer.Tree = dependencyTree;
             IProcessable element = CompressDependencyTree(dependencyTree, graph, new Root()).FinalizeProcessing(graph);
+
             if (element is IDrawable)
                 graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
 
@@ -149,6 +150,11 @@ namespace Image_Generator.Models
             if (!tree.ContainsKey(element.Id))
                 return element;
 
+            if (element is Adposition)
+                this.Comparer.IsAdposition = true;
+            else
+                this.Comparer.IsAdposition = false;
+
             // sorting dependencies before they are processed
             tree[element.Id].Sort(this.Comparer);
 
@@ -166,6 +172,8 @@ namespace Image_Generator.Models
         {
             public Dictionary<int, List<IProcessable>> Tree { get; set; }
             
+            public bool IsAdposition { get; set; }
+
             /// <summary>
             /// Overriden method for comparing elements
             /// </summary>
@@ -188,10 +196,22 @@ namespace Image_Generator.Models
                 if ((y is Noun || y is NounSet) && y.DependencyType == "dobj")
                     return 1;
 
+                return this.IsPriority(x) && !this.Tree.ContainsKey(x.Id) ? -1 : (
+                       this.IsPriority(y) && !this.Tree.ContainsKey(y.Id) ? 1 : (
+                       x.Id < y.Id ? -1 : 1));
+
                 // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
-                return x is Adposition || x is Adjective ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) :
-                      (y is Adposition || y is Adjective ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) :
-                      (x.Id < y.Id ? -1 : 1));
+                //return this.IsPriority(x) ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) :
+                //      (this.IsPriority(y) ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) :
+                //      (x.Id < y.Id ? -1 : 1));
+            }
+
+            private bool IsPriority(IProcessable x)
+            {
+                if(this.IsAdposition)
+                    return (x is Adposition || x is Adjective || x is Adverb || x is Negation);
+                else
+                    return (x is Adposition || x is Adverb || x is Negation);
             }
         }
     }

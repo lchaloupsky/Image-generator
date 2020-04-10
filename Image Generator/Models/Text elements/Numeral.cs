@@ -13,12 +13,13 @@ namespace Image_Generator.Models.Text_elements
 
         public Numeral(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 

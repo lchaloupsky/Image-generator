@@ -16,7 +16,7 @@ namespace Image_Generator.Models.Text_elements
             this.ExtendingAdverbs = new List<Adverb>();
         }
 
-        public override IProcessable Process(IProcessable element, SentenceGraph graph)
+        public override IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
         {
             switch (element)
             {
@@ -25,6 +25,7 @@ namespace Image_Generator.Models.Text_elements
                 case Adverb adv: return this.ProcessElement(adv, graph);
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 

@@ -38,6 +38,7 @@
             this.DataSetCheckBox = new System.Windows.Forms.CheckBox();
             this.LoadDataset = new System.Windows.Forms.Button();
             this.ProcessedImages = new System.Windows.Forms.Label();
+            this.ProcessedBar = new System.Windows.Forms.ProgressBar();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.generatedImage)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
@@ -83,6 +84,7 @@
             this.tableLayoutPanel2.Controls.Add(this.DataSetCheckBox, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.LoadDataset, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.ProcessedImages, 3, 0);
+            this.tableLayoutPanel2.Controls.Add(this.ProcessedBar, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 429);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -138,11 +140,11 @@
             // 
             this.DataSetCheckBox.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.DataSetCheckBox.AutoSize = true;
-            this.DataSetCheckBox.Location = new System.Drawing.Point(465, 14);
+            this.DataSetCheckBox.Location = new System.Drawing.Point(464, 14);
             this.DataSetCheckBox.Name = "DataSetCheckBox";
-            this.DataSetCheckBox.Size = new System.Drawing.Size(104, 21);
+            this.DataSetCheckBox.Size = new System.Drawing.Size(106, 21);
             this.DataSetCheckBox.TabIndex = 4;
-            this.DataSetCheckBox.Text = "use dataset";
+            this.DataSetCheckBox.Text = "Use dataset";
             this.DataSetCheckBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.DataSetCheckBox.UseVisualStyleBackColor = true;
             this.DataSetCheckBox.CheckedChanged += new System.EventHandler(this.DataSetCheckBox_CheckedChanged);
@@ -167,6 +169,14 @@
             this.ProcessedImages.Size = new System.Drawing.Size(119, 17);
             this.ProcessedImages.TabIndex = 6;
             this.ProcessedImages.Text = "Processed";
+            // 
+            // ProcessedBar
+            // 
+            this.ProcessedBar.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.ProcessedBar.Location = new System.Drawing.Point(177, 13);
+            this.ProcessedBar.Name = "ProcessedBar";
+            this.ProcessedBar.Size = new System.Drawing.Size(100, 23);
+            this.ProcessedBar.TabIndex = 7;
             // 
             // Form1
             // 
@@ -200,6 +210,7 @@
         private System.Windows.Forms.CheckBox DataSetCheckBox;
         private System.Windows.Forms.Button LoadDataset;
         private System.Windows.Forms.Label ProcessedImages;
+        private System.Windows.Forms.ProgressBar ProcessedBar;
     }
 }
 

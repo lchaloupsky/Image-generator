@@ -128,7 +128,11 @@ namespace Image_Generator.Models.Text_elements
 
         public int Id { get; }
 
+        public bool IsNegated { get; private set; } = false;
+
         private int LastProcessedNoun { get; set; } = 0;
+
+        private CoordinationType CoordinationType { get; set; } = CoordinationType.AND;
 
         private NounSet(ElementFactory elementFactory, EdgeFactory edgeFactory)
         {
@@ -182,6 +186,27 @@ namespace Image_Generator.Models.Text_elements
 
         public IProcessable Process(IProcessable element, SentenceGraph graph)
         {
+            if (element is Negation)
+                return this.ProcessNegation((Negation)element);
+
+            if (element.IsNegated && !(element is Verb))
+                return this;
+
+            if (this.IsNegated && element.DependencyType == "nsubj")
+                return element;
+
+            if (!this.IsAllowedCoordination() && element.DependencyType == "conj")
+            {
+                this.CoordinationType = CoordinationType.AND;
+                return this;
+            }
+
+            var returnElement = this.ProcessElement(element, graph);
+            return returnElement.IsNegated && returnElement != this ? this : returnElement;
+        }
+
+        private IProcessable ProcessElement(IProcessable element, SentenceGraph graph)
+        {
             switch (element)
             {
                 case Noun noun: return this.ProcessElement(noun, graph);
@@ -191,6 +216,7 @@ namespace Image_Generator.Models.Text_elements
                 case Numeral num: return this.ProcessElement(num, graph);
                 case Verb verb: return this.ProcessElement(verb, graph);
                 case Adverb adv: return this.ProcessElement(adv, graph);
+                case Coordination cor: return this.ProcessCoordination(cor);
                 default: break;
             }
 
@@ -216,11 +242,15 @@ namespace Image_Generator.Models.Text_elements
 
             verb.RelatedActions.Clear();
 
+            if (verb.DrawableAdposition != null)
+                this.Process(verb.DrawableAdposition, graph);
+
             if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
                 graph.ReplaceVertex(this, (IDrawable)verb.Object);
 
-            foreach (var noun in this.Nouns)
-                noun.Process(verb, graph);
+            if(!verb.IsNegated)
+                foreach (var noun in this.Nouns)
+                    noun.Process(verb, graph);
 
             return this;
         }
@@ -232,7 +262,7 @@ namespace Image_Generator.Models.Text_elements
                 this.Nouns[num.GetValue() - 1 + LastProcessedNoun].Process(num.DependingDrawable, graph);
                 LastProcessedNoun += num.GetValue();
                 return this;
-            }            
+            }
 
             if (num.DependencyType != "nummod")
             {
@@ -247,11 +277,35 @@ namespace Image_Generator.Models.Text_elements
 
         private IProcessable ProcessElement(Noun noun, SentenceGraph graph)
         {
-            if (noun.DependencyType == "conj")
+            if (noun.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND && this.CoordinationType == CoordinationType.NOR))
             {
-                this.Nouns.Add(noun);
+                IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                if (newEdge != null)
+                {
+                    noun.Adpositions.Clear();
+                    graph.AddEdge(newEdge);
+                    noun.FinalizeProcessing(graph);
+                }
+                else
+                {
+                    this.GetAllNouns();
+                    this.Nouns.Add(noun);
+                }
+
                 return this;
             }
+
+            if (noun.DependencyType.Contains(":poss"))
+                return this;
+
+            if (noun.DependencyType == "nmod:npmod" || noun.DependencyType == "compound")
+            {
+                this.Nouns.ForEach(n => n.Process(noun, graph));
+                return this;
+            }
+
+            if (this.IsNegated && this.DependencyType == "dobj")
+                return noun;
 
             // Processing relationship between noun and this
             this.ProcessEdge(graph, noun, noun.Adpositions);
@@ -262,24 +316,48 @@ namespace Image_Generator.Models.Text_elements
             return this;
         }
 
-        private IProcessable ProcessElement(NounSet nounset, SentenceGraph graph)
+        private IProcessable ProcessElement(NounSet nounSet, SentenceGraph graph)
         {
-            if (nounset.DependencyType == "conj")
+            if (nounSet.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND && this.CoordinationType == CoordinationType.NOR))
             {
-                // TODO Merge them
-                Console.WriteLine();
+                IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                if (newEdge != null)
+                {
+                    nounSet.Adpositions.Clear();
+                    graph.AddEdge(newEdge);
+                    nounSet.FinalizeProcessing(graph);
+                    return this;
+                }
+
+                // Merge them
+                this.GetAllNouns();
+                this.Nouns.AddRange(nounSet.GetAllNouns());
+                nounSet.Nouns.Clear();
+                graph.ReplaceVertex(this, nounSet);
+                return this;
             }
 
+            if (this.IsNegated && this.DependencyType == "dobj")
+                return nounSet;
+
             // Processing relationship between nounset and this
-            this.ProcessEdge(graph, nounset, nounset.Adpositions);
+            this.ProcessEdge(graph, nounSet, nounSet.Adpositions);
 
             // Finalize processed noun
-            nounset.FinalizeProcessing(graph);
+            nounSet.FinalizeProcessing(graph);
 
             return this;
         }
 
-        private void ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
+        private List<Noun> GetAllNouns()
+        {
+            if (this.Nouns.Count == 1)
+                this.GenerateNouns(this.NumberOfInstances);
+
+            return Nouns;
+        }
+
+        private bool ProcessEdge<T>(SentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
         {
             // Get adpositions from adpositions combinations
             List<string> leftAdp = this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
@@ -310,6 +388,8 @@ namespace Image_Generator.Models.Text_elements
                 else
                     graph.AddVertex(drawable);
             }
+
+            return edge != null;
         }
 
         private IProcessable ProcessElement(Adjective adj, SentenceGraph graph)
@@ -341,10 +421,10 @@ namespace Image_Generator.Models.Text_elements
 
         public IProcessable FinalizeProcessing(SentenceGraph graph)
         {
-            if (this.Nouns.Count == 1)
-                this.GenerateNouns(NumberOfInstances);
+            if (this.Image_ != null)
+                return this;
 
-            this.Nouns.ForEach(noun => noun.FinalizeProcessing(graph));
+            this.GetAllNouns().ForEach(noun => noun.FinalizeProcessing(graph));
 
             IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.Adpositions);
             if (newEdge != null)
@@ -380,6 +460,18 @@ namespace Image_Generator.Models.Text_elements
             drawable.Group = group;
         }
 
+        private IProcessable ProcessNegation(Negation negation)
+        {
+            this.IsNegated = true;
+            return this;
+        }
+
+        private IProcessable ProcessCoordination(Coordination coordination)
+        {
+            this.CoordinationType = coordination.CoordinationType;
+            return this;
+        }
+
         private void FinalizeSet()
         {
             if (this.Nouns.Count > 4)
@@ -396,6 +488,11 @@ namespace Image_Generator.Models.Text_elements
             this.Height_ = dimTuple.Item2;
             this.ZIndex_ = dimTuple.Item3;
             this.Image_ = dimTuple.Item4;
+        }
+
+        private bool IsAllowedCoordination()
+        {
+            return this.CoordinationType != CoordinationType.OR && this.CoordinationType != CoordinationType.NOR;
         }
 
         public void Draw(Renderer renderer, ImageManager manager)

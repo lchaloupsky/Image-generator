@@ -15,11 +15,17 @@ namespace Image_Generator.Models.Factories
     {
         private const int DEFAULT_OBJECT_WIDTH = 180;
         private const int DEFAULT_OBJECT_HEIGHT = 120;
+        private const string ADJECTIVE_NEGATION = "no";
 
         private EdgeFactory EdgeFactory { get; }
         private ImageManager Manager { get; }
+
+        private HashSet<string> Negations { get; } = new HashSet<string>() {
+            "not", "neither", "n't", "'t", "never"
+        };
+
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
-            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge"
+            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind"
         };
 
         public ElementFactory(ImageManager manager)
@@ -54,6 +60,12 @@ namespace Image_Generator.Models.Factories
                 case "ADV":
                     part = new Adverb(int.Parse(parts[0]), parts[2], parts[7]);
                     break;
+                case "CONJ":
+                    part = new Coordination(int.Parse(parts[0]), parts[2], parts[7]);
+                    break;
+                case "NEG":
+                    part = new Negation(int.Parse(parts[0]), parts[2], parts[7]);
+                    break;
                 default:
                     break;
             }
@@ -63,6 +75,9 @@ namespace Image_Generator.Models.Factories
 
         private IProcessable ProcessVerb(string[] parts)
         {
+            if (parts[2] == "be")
+                return new Auxiliary(int.Parse(parts[0]), parts[2], parts[7]);
+
             VerbForm form = VerbForm.NORMAL;
 
             if (parts[5].Contains("VerbForm=Part"))
@@ -78,7 +93,7 @@ namespace Image_Generator.Models.Factories
         {
             var noun = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
 
-            if (parts[5].Contains("Number=Plur"))
+            if (parts[5].Contains("Number=Plur") && parts[7] != "nmod:npmod")
                 return new NounSet(this, this.EdgeFactory, noun, parts[1]);
 
             return noun;
@@ -92,8 +107,16 @@ namespace Image_Generator.Models.Factories
         //REDO SOMETIME
         private void MapKnownCases(string lemma, ref string type)
         {
-            if ((type == "NOUN" || type == "ADV") && this.KnownCasesToMap.Contains(lemma.ToLower()))
+            string lemmaToFind = lemma.ToLower();
+
+            if ((type == "NOUN" || type == "ADV") && this.KnownCasesToMap.Contains(lemmaToFind))
                 type = "ADP";
+
+            if (lemmaToFind == ADJECTIVE_NEGATION)
+                type = "ADJ";
+
+            if (this.Negations.Contains(lemmaToFind))
+                type = "NEG";
         }
     }
 }

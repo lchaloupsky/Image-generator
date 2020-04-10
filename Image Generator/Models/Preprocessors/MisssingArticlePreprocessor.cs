@@ -81,7 +81,7 @@ namespace Image_Generator.Models.Preprocessors
                     }
 
                     finalIndex[id] = i;
-                    if(!nounsWithArticle.ContainsKey(id))
+                    if (!nounsWithArticle.ContainsKey(id))
                         nounsWithArticle.Add(id, false);
                 }
 
@@ -109,6 +109,7 @@ namespace Image_Generator.Models.Preprocessors
                         finalPartsToJoin[0] = finalPartsToJoin[0].First().ToString().ToUpper() + finalPartsToJoin[0].Substring(1);
                         finalPartsToJoin[1] = finalPartsToJoin[1].First().ToString().ToLower() + finalPartsToJoin[1].Substring(1);
                     }
+
                 }
             }
 
