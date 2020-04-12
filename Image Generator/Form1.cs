@@ -1,19 +1,13 @@
 ﻿using Image_Generator.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Image_Generator.Models.Text_elements;
-using Image_Generator.Models.Interfaces;
-using System.Diagnostics;
 
 namespace Image_Generator
 {
@@ -29,14 +23,14 @@ namespace Image_Generator
         private Positioner MyPositioner { get; }
         private ResolutionItem ImageResolution { get; set; }
 
-        private bool UsingDataset { get; set; } = false;
+        private bool UsingCaptioning { get; set; } = false;
+        private bool InProcess { get; set; } = false;
         private string DatasetFileName { get; set; }
         private int Processed { get; set; } = 0;
 
         public Form1()
         {
             InitializeComponent();
-            this.AutoScaleMode = AutoScaleMode.Dpi;
             this.FillResolutionBox();
             this.MyRenderer = new Renderer(this.ImageResolution.Width, this.ImageResolution.Height);
             this.Manager = new ImageManager();
@@ -60,16 +54,32 @@ namespace Image_Generator
         }
 
         /// <summary>
-        /// Function to image generation
+        /// Function to image generation from input text
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void GenerateButton_Click(object sender, EventArgs e)
         {
-            if (!this.DataSetCheckBox.Checked)
-                this.GenerateImageForView();
-            else
-                this.GenerateImagesForDataset();
+            this.StartGeneration(this.GenerateImageForView);
+        }
+
+        /// <summary>
+        /// Function to image generation from dataset
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GenerateDatasetButton_Click(object sender, EventArgs e)
+        {
+            this.StartGeneration(this.GenerateImagesForDataset);
+        }
+
+        private void StartGeneration(Action generateAction)
+        {
+            if (this.InProcess)
+                this.ShowErrorMessage("Generation is running, you have to wait to finish previous task");
+
+            this.InProcess = true;
+            generateAction();
         }
 
         /// <summary>
@@ -77,9 +87,13 @@ namespace Image_Generator
         /// </summary>
         private void GenerateImagesForDataset()
         {
-            // check if dataset is loaded
-            if (this.DatasetFileName == "")
-                ShowErrorMessage("You have to select dataset first");
+            // check if dataset is loaded and exists
+            if (this.DatasetFileName == null || !File.Exists(this.DatasetFileName))
+            {
+                this.InProcess = false;
+                ShowErrorMessage("You have to select existing dataset first.");
+                return;
+            }
 
             // choosing directory
             string directory;
@@ -87,10 +101,10 @@ namespace Image_Generator
             if (dialog.ShowDialog() == DialogResult.OK)
                 directory = dialog.SelectedPath;
             else
-            {
-                ShowErrorMessage("You have to select directory to save images first");
                 return;
-            }
+
+            this.ProcessedImages.Visible = true;
+            this.ProcessedBar.Visible = true;
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -117,6 +131,7 @@ namespace Image_Generator
         /// <returns></returns>
         private Task CreateImageGeneratingTask(string str, string directory, int counter)
         {
+            // Create new task, that will be running in background
             return new Task(() =>
             {
                 try
@@ -133,7 +148,6 @@ namespace Image_Generator
                 }
                 catch (Exception e)
                 {
-                    // TODO: LOGS?
                     if (!e.Message.Contains("Index"))
                     {
                         Console.WriteLine();
@@ -143,9 +157,10 @@ namespace Image_Generator
                 }
                 finally
                 {
-                    // update count
+                    // update processed image count
                     this.Processed++;
-                    this.ProcessedImages.BeginInvoke((Action)(() => {
+                    this.ProcessedImages.BeginInvoke((Action)(() =>
+                    {
                         this.ShowProcessedImagesCount();
                     }));
                 }
@@ -155,6 +170,8 @@ namespace Image_Generator
         // Method for drawing final positioned images
         private void DrawImage(List<SentenceGraph> result)
         {
+            this.SetProcessStatus("Drawing final image");
+
             // Clear draw field
             this.MyRenderer.ResetImage();
 
@@ -169,7 +186,7 @@ namespace Image_Generator
         }
 
         /// <summary>
-        /// Function to image generation for form
+        /// Function to image generation for formdoes 
         /// </summary>
         private void GenerateImageForView()
         {
@@ -177,16 +194,20 @@ namespace Image_Generator
             if (!this.CheckSentence())
                 return;
 
+            this.ProcessStatus.Visible = true;
+
             try
             {
                 // Generating image
-                var result = this.GenerateImage(this.sentenceBox.Text);
+                var result = this.GenerateImage(this.sentenceBox.Text);                
 
                 // Drawing image
                 this.DrawImage(result);
 
                 // Get drawn image bitmap to show it in form window
                 this.generatedImage.Image = MyRenderer.GetImage();
+
+                this.SetProcessStatus("Image succesfully generated");
             }
             catch (Exception ex)
             {
@@ -196,7 +217,26 @@ namespace Image_Generator
                     ShowErrorMessage("IO error");
                 else
                     ShowErrorMessage("Unknown exception\n" + ex.ToString());
+
+                this.SetProcessStatus("Failed to generate image");
             }
+            finally
+            {
+                this.InProcess = false;
+            }
+        }
+
+        /// <summary>
+        /// Auxiliary method for setting actual status of image processing
+        /// </summary>
+        /// <param name="message"></param>
+        private void SetProcessStatus(string message)
+        {
+            if (this.DataSetCheckBox.Checked)
+                return;
+
+            this.ProcessStatus.Text = message;
+            this.ProcessStatus.Refresh();
         }
 
         /// <summary>
@@ -206,8 +246,12 @@ namespace Image_Generator
         /// <returns></returns>
         private List<SentenceGraph> GenerateImage(string description)
         {
+            this.SetProcessStatus("Parsing image description and downloading images");
+
             // Parsing given text
             var result = this.MyParser.ParseText(description, this.resolutionBox.Width, this.resolutionBox.Height);
+
+            this.SetProcessStatus("Positioning image");
 
             // positioning and drawing phase of generation
             foreach (var graph in result)
@@ -219,10 +263,16 @@ namespace Image_Generator
             return result;
         }
 
+        /// <summary>
+        /// Auxiliray method for showing actual count of processed images
+        /// </summary>
         private void ShowProcessedImagesCount()
         {
             this.ProcessedBar.Value++;
-            this.ProcessedImages.Text = "Processed: " + this.Processed + " of " + this.ProcessedBar.Maximum;
+            this.ProcessedImages.Text = "Processed " + this.Processed + " / " + this.ProcessedBar.Maximum + " images";
+
+            if(this.ProcessedBar.Value == this.ProcessedBar.Maximum)
+                this.InProcess = false;
         }
 
         /// <summary>
@@ -232,6 +282,12 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void SaveButton_Click(object sender, EventArgs e)
         {
+            if (this.generatedImage.Image == null)
+            {
+                ShowErrorMessage("You have to generate image first!");
+                return;
+            }
+
             var dialog = ReturnConfiguredSaveFileDialog();
             try
             {
@@ -315,6 +371,8 @@ namespace Image_Generator
 
             this.ImageResolution = item;
             this.MyRenderer?.SetResolution(item.Width, item.Height);
+            this.generatedImage.Width = (int)(this.generatedImage.Height * item.Ratio);
+            this.generatedImage.Image = null;
         }
 
         /// <summary>
@@ -324,7 +382,20 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void DataSetCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            this.UsingDataset = DataSetCheckBox.Checked;
+            this.SentenceGeneratePanel.Visible = !this.DataSetCheckBox.Checked;
+            this.DatasetPanel.Visible = this.DataSetCheckBox.Checked;
+            this.DataSetCheckBox.ImageIndex = 1 - this.DataSetCheckBox.ImageIndex;
+        }
+
+        /// <summary>
+        /// Choosing if imageCaptioning will be used
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ImageCaptCheckbox_CheckedChanged(object sender, EventArgs e)
+        {
+            this.Manager.UseImageCaptioning = this.ImageCaptCheckbox.Checked;
+            this.ImageCaptCheckbox.ImageIndex = 1 - this.ImageCaptCheckbox.ImageIndex;
         }
 
         /// <summary>
@@ -363,7 +434,10 @@ namespace Image_Generator
         {
             OpenFileDialog openFileDialog = this.ReturnConfiguredOpenFileDialog();
             if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
                 this.DatasetFileName = openFileDialog.FileName;
+                this.ChosenFile.Text = Path.GetFileName(this.DatasetFileName);
+            }
         }
 
         /// <summary>
@@ -373,6 +447,7 @@ namespace Image_Generator
         {
             public int Width { get; }
             public int Height { get; }
+            public float Ratio => this.Width * 1f / this.Height;
 
             public ResolutionItem(int width, int height)
             {
@@ -382,7 +457,7 @@ namespace Image_Generator
 
             public override string ToString()
             {
-                return $"{this.Width}x{this.Height} px";
+                return $"{this.Width} x {this.Height} px";
             }
         }
     }

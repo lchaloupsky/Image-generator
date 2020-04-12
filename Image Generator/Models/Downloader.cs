@@ -18,6 +18,7 @@ namespace Image_Generator.Models
     /// </summary>
     class Downloader
     {
+        // Limit for tags
         private const int MAX_NUMBER_OF_TAGS = 20;
 
         // Where to save images
@@ -48,23 +49,6 @@ namespace Image_Generator.Models
             this.LDistanceMeter = new LDistanceMeter();
             this.Converter = new ImageFormatConverter();
             this.Location = location;
-            //ServicePointManager.Expect100Continue = false;
-        }
-
-        /// <summary>
-        /// Method for downloading multiple images
-        /// </summary>
-        /// <param name="items"></param>
-        /// <returns>List of newly dowloaded images</returns>
-        public List<Image> DownloadImages(List<string> items)
-        {
-            var downloaded = new List<Image>();
-            foreach (var item in items)
-            {
-                downloaded.Add(DownloadImage(item));
-            }
-
-            return downloaded;
         }
 
         /// <summary>
@@ -72,54 +56,63 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="imageName"></param>
         /// <returns>New downloaded image</returns>
-        public Image DownloadImage(string imageName)
+        public Image DownloadImage(string imageName, string element, bool useImageCaptioning = false)
         {
-            var fileName = "";
             var tags = this.GetTags(imageName);
             var imageFind = imageName;
             Image image = null;
+            int tryCount = 0;
 
-            using (WebClient client = new WebClient())
+            while (image == null)
             {
-                client.Proxy = null;
-                while (image == null)
+                tryCount++;
+                if (tryCount > tags.Length)
+                    tags = "";
+
+                try
                 {
-                    try
+                    var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageFind, tags));
+                    if (photos.Count == 0)
                     {
-                        var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageFind, tags));
-                        if (photos.Count == 0)
-                        {
-                            imageFind = this.GetRandomPartsSubstring(imageFind);
-                            continue;
-                        }
-
-                        // __________ IMAGE CAPTION OPTION ___________
-                        //image = GetBestImage(photos, imageName);
-                        //fileName = ReturnImageAdress(imageName + '.' + Converter.ConvertToString(image.RawFormat));
-                        //image.Save(fileName);                       
-
-                        // ___________   REGULAR OPTION    ___________
-                        fileName = imageName.ToLower() + photos[0].Medium640Url.Substring(photos[0].Medium640Url.LastIndexOf('.'));
-                        client.DownloadFile(new Uri(photos[0].Medium640Url), ReturnImageAdress(fileName));
-
-                        return new Bitmap(ReturnImageAdress(fileName));
+                        imageFind = this.GetImageNameSubstring(imageFind, element);
+                        continue;
                     }
-                    catch (WebException)
-                    {
-                        // TODO log here in future
-                        Console.WriteLine("Network Error");
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Unknown" + ex.Message);
-                        imageFind = this.GetRandomPartsSubstring(imageFind);
-                    }
+
+                    // __________ IMAGE CAPTION OPTION ___________
+                    if (useImageCaptioning)
+                        return GetBestImage(photos, imageName);
+
+                    // ___________   REGULAR OPTION    ___________
+                    return this.GetImage(photos[0], imageName);
+                }
+                catch (WebException)
+                {
+                    Console.WriteLine("Network Error");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unknown" + ex.Message);
+                    imageFind = this.GetImageNameSubstring(imageFind, element);
                 }
             }
 
-            // Return newly dowloaded image
-            return image;
+            // null if nothing were downloaded
+            return null;
+        }
+
+        private Image GetImage(Photo photo, string imageName)
+        {
+            string fileName = "";
+            using (WebClient client = new WebClient())
+            {
+                client.Proxy = null;
+                fileName = imageName.ToLower() + photo.Medium640Url.Substring(photo.Medium640Url.LastIndexOf('.'));
+                client.DownloadFile(new Uri(photo.Medium640Url), ReturnImageAdress(fileName));
+            }
+
+            // return newly dowloaded image
+            return new Bitmap(ReturnImageAdress(fileName));
         }
 
         private Image GetBestImage(PhotoCollection photos, string imageName)
@@ -128,7 +121,7 @@ namespace Image_Generator.Models
             long bestRating = int.MaxValue;
             object imageLock = new object();
 
-            Parallel.ForEach(photos, (photo) =>
+            foreach (Photo photo in photos)
             {
                 Image image = null;
                 using (WebClient client = new WebClient())
@@ -159,16 +152,22 @@ namespace Image_Generator.Models
                     else
                         image.Dispose();
                 }
-            });
+            }
 
+            // save image
+            bestImage.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(bestImage.RawFormat)));
 
+            // return best image
             return bestImage;
         }
 
-        private string GetRandomPartsSubstring(string imageName)
+        private string GetImageNameSubstring(string imageName, string element)
         {
-            // stupid cut
-            return imageName.Substring(imageName.LastIndexOf(' '));
+            var lastCut = imageName.Substring(imageName.LastIndexOf(' '));
+            if (lastCut == element)
+                return imageName.Substring(imageName.IndexOf(' '));
+
+            return imageName.Substring(0, imageName.LastIndexOf(' ') + 1);
         }
 
         private string GetTags(string imageName)

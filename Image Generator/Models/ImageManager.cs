@@ -16,12 +16,14 @@ namespace Image_Generator.Models
     /// </summary>
     class ImageManager
     {
-        private const int CACHE_LIMIT = 2_500;
+        private const int CACHE_LIMIT = 1000;
 
         private Downloader MyDownloader { get; }
         private FileManager MyManager { get; }
         private LimitedDictionary<string, Image> Cache { get; set; }
         private Dictionary<string, object> Dowloaded { get; }
+
+        public bool UseImageCaptioning { get; set; }
 
         public ImageManager()
         {
@@ -61,7 +63,7 @@ namespace Image_Generator.Models
         /// </summary>
         /// <param name="imageName"></param>
         /// <returns>Wanted image</returns>
-        public Image GetImage(string imageName)
+        public Image GetImage(string imageName, string element = null)
         {
             imageName = imageName.ToLower();
             lock (this.Dowloaded)
@@ -73,7 +75,7 @@ namespace Image_Generator.Models
                 // If image is not in cache or in directory, then download it!
                 if (!CheckImageExistence(imageName))
                 {
-                    var image = this.MyDownloader.DownloadImage(imageName);
+                    var image = this.MyDownloader.DownloadImage(imageName, element, this.UseImageCaptioning);
                     if (!this.Cache.ContainsKey(imageName))
                         this.Cache.Add(imageName, image);
                 }
@@ -135,7 +137,7 @@ namespace Image_Generator.Models
     /// </summary>
     /// <typeparam name="K">Key type</typeparam>
     /// <typeparam name="V">Value type</typeparam>
-    internal class LimitedDictionary<K, V>
+    internal class LimitedDictionary<K, V> where V : IDisposable
     {
         private int Limit { get; set; }
         private Dictionary<K, V> Dictionary { get; }
@@ -151,7 +153,11 @@ namespace Image_Generator.Models
         public void Add(K key, V value)
         {
             if (this.Limit == KeyQueue.Count)
-                Dictionary.Remove(KeyQueue.Dequeue());
+            {
+                K remove = KeyQueue.Dequeue();
+                Dictionary[remove].Dispose();
+                Dictionary.Remove(remove);
+            }
 
             KeyQueue.Enqueue(key);
             Dictionary.Add(key, value);
