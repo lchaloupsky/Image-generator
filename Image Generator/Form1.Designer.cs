@@ -46,6 +46,7 @@
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.label4 = new System.Windows.Forms.Label();
             this.resolutionBox = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
             this.ParentFormPanel = new System.Windows.Forms.Panel();
             this.SentenceGeneratePanel = new System.Windows.Forms.TableLayoutPanel();
             this.ProcessStatus = new System.Windows.Forms.Label();
@@ -64,6 +65,7 @@
             this.LoadDataset = new System.Windows.Forms.Button();
             this.ChosenFile = new System.Windows.Forms.Label();
             this.ProcessedBar = new System.Windows.Forms.ProgressBar();
+            this.DeleteImages = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -142,19 +144,23 @@
             // 
             this.tableLayoutPanel3.ColumnCount = 1;
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.DeleteImages, 0, 4);
             this.tableLayoutPanel3.Controls.Add(this.label1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel4, 0, 1);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel5, 0, 2);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel6, 0, 3);
+            this.tableLayoutPanel3.Controls.Add(this.label7, 0, 5);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 265);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 5;
+            this.tableLayoutPanel3.RowCount = 6;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(344, 410);
             this.tableLayoutPanel3.TabIndex = 1;
             // 
@@ -303,6 +309,18 @@
             this.resolutionBox.TabIndex = 5;
             this.resolutionBox.SelectedIndexChanged += new System.EventHandler(this.ResolutionBox_SelectedIndexChanged);
             // 
+            // label7
+            // 
+            this.label7.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Trebuchet MS", 8F);
+            this.label7.ForeColor = System.Drawing.Color.White;
+            this.label7.Location = new System.Drawing.Point(88, 392);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(167, 18);
+            this.label7.TabIndex = 5;
+            this.label7.Text = " © 2020 Lukáš Chaloupský";
+            // 
             // ParentFormPanel
             // 
             this.ParentFormPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(82)))));
@@ -353,7 +371,7 @@
             this.generatedImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.generatedImage.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("generatedImage.BackgroundImage")));
             this.generatedImage.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.generatedImage.Location = new System.Drawing.Point(25, 31);
+            this.generatedImage.Location = new System.Drawing.Point(25, 26);
             this.generatedImage.Margin = new System.Windows.Forms.Padding(25, 3, 25, 3);
             this.generatedImage.Name = "generatedImage";
             this.generatedImage.Size = new System.Drawing.Size(824, 455);
@@ -579,6 +597,23 @@
             this.ProcessedBar.TabIndex = 1;
             this.ProcessedBar.Visible = false;
             // 
+            // DeleteImages
+            // 
+            this.DeleteImages.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.DeleteImages.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(82)))));
+            this.DeleteImages.FlatAppearance.BorderSize = 0;
+            this.DeleteImages.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DeleteImages.Font = new System.Drawing.Font("Trebuchet MS", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteImages.ForeColor = System.Drawing.Color.White;
+            this.DeleteImages.Location = new System.Drawing.Point(56, 315);
+            this.DeleteImages.Margin = new System.Windows.Forms.Padding(3, 0, 3, 25);
+            this.DeleteImages.Name = "DeleteImages";
+            this.DeleteImages.Size = new System.Drawing.Size(231, 50);
+            this.DeleteImages.TabIndex = 8;
+            this.DeleteImages.Text = "Delete saved images";
+            this.DeleteImages.UseVisualStyleBackColor = false;
+            this.DeleteImages.Click += new System.EventHandler(this.DeleteImages_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -652,6 +687,8 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel11;
         private System.Windows.Forms.Button LoadDataset;
         private System.Windows.Forms.Label ChosenFile;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button DeleteImages;
     }
 }
 

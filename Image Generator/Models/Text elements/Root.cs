@@ -44,5 +44,10 @@ namespace Image_Generator.Models.Text_elements
             element = element.FinalizeProcessing(graph);
             return element is IDrawable ? element : this;
         }
+
+        public void Dispose()
+        {
+            this.Image = null;
+        }
     }
 }

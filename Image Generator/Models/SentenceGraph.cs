@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Image_Generator.Models
 {
-    class SentenceGraph
+    class SentenceGraph : IDisposable
     {
         private Dictionary<IDrawable, List<IPositionateEdge>> Graph { get; }
 
@@ -60,6 +60,21 @@ namespace Image_Generator.Models
             // Take its edges as edges from this vertex
             this.RemoveVertex(vertexToReplace);
             newEdges.ForEach(e => this.AddEdge(e));
+        }
+
+        public void Dispose()
+        {
+            foreach (var vertex in this.Vertices)
+            {
+                if(vertex.Image != null)
+                    vertex.Dispose();
+            }
+
+            foreach (var group in this.Groups)
+            {
+                if (group.Image != null)
+                    group.Dispose();
+            }
         }
     }
 }

@@ -26,7 +26,6 @@ namespace Image_Generator
         private bool UsingCaptioning { get; set; } = false;
         private bool InProcess { get; set; } = false;
         private string DatasetFileName { get; set; }
-        private int Processed { get; set; } = 0;
 
         public Form1()
         {
@@ -105,6 +104,7 @@ namespace Image_Generator
 
             this.ProcessedImages.Visible = true;
             this.ProcessedBar.Visible = true;
+            this.ProcessedBar.Value = 0;
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -158,7 +158,6 @@ namespace Image_Generator
                 finally
                 {
                     // update processed image count
-                    this.Processed++;
                     this.ProcessedImages.BeginInvoke((Action)(() =>
                     {
                         this.ShowProcessedImagesCount();
@@ -182,6 +181,8 @@ namespace Image_Generator
                 var drawables = graph.Groups ?? graph.Vertices;
                 foreach (var vertex in drawables.OrderBy(v => v.ZIndex))
                     vertex.Draw(this.MyRenderer, this.Manager);
+
+                graph.Dispose();
             }
         }
 
@@ -269,10 +270,13 @@ namespace Image_Generator
         private void ShowProcessedImagesCount()
         {
             this.ProcessedBar.Value++;
-            this.ProcessedImages.Text = "Processed " + this.Processed + " / " + this.ProcessedBar.Maximum + " images";
+            this.ProcessedImages.Text = "Processed " + this.ProcessedBar.Value + " / " + this.ProcessedBar.Maximum + " images";
 
-            if(this.ProcessedBar.Value == this.ProcessedBar.Maximum)
+            if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)
+            {
                 this.InProcess = false;
+                System.GC.Collect();
+            }
         }
 
         /// <summary>
@@ -408,7 +412,7 @@ namespace Image_Generator
             {
                 CheckFileExists = true,
                 AddExtension = true,
-                Filter = "TXT files (*.txt)|*.txt"
+                Filter = "txt files (*.txt)|*.txt|token files (*.token)|*.token"
             };
         }
 
@@ -458,6 +462,31 @@ namespace Image_Generator
             public override string ToString()
             {
                 return $"{this.Width} x {this.Height} px";
+            }
+        }
+
+        private void DeleteImages_Click(object sender, EventArgs e)
+        {
+            if (this.InProcess)
+                ShowErrorMessage("You have wait to generetaion completes");
+
+            var dialogResult = MessageBox.Show("Are you sure to delete all saved images?", "Confirm", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.No)
+                return;
+
+            if (this.generatedImage.Image != null)
+            {
+                //this.generatedImage.Image.Dispose();
+                this.generatedImage.Image = null;
+            }
+
+            try
+            {
+                this.Manager.DeleteAllImages();
+            }
+            catch (IOException)
+            {
+                ShowErrorMessage("You have to wait until program drops all references to images.\n Try it later please.");
             }
         }
     }

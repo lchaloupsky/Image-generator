@@ -380,5 +380,10 @@ namespace Image_Generator.Models.Text_elements
         {
             return this.GetFinalWordSequence();
         }
+
+        public void Dispose()
+        {
+            this.Image = null;
+        }
     }
 }

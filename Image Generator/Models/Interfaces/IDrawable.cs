@@ -10,7 +10,7 @@ namespace Image_Generator.Models.Interfaces
     /// <summary>
     /// Interface for Drawable objects
     /// </summary>
-    interface IDrawable : IPositionable
+    interface IDrawable : IPositionable, IDisposable
     {
         Image Image { get; }
         IDrawableGroup Group { get; set; }

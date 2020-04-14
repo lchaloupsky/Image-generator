@@ -504,5 +504,14 @@ namespace Image_Generator.Models.Text_elements
         {
             return this.PluralForm ?? string.Join(", ", this.Nouns);
         }
+
+        public void Dispose()
+        {
+            this.Image = null;
+            foreach (var noun in this.Nouns)
+            {
+                noun.Dispose();
+            }
+        }
     }
 }

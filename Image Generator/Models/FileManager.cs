@@ -40,5 +40,16 @@ namespace Image_Generator.Models
         {
             return new Bitmap(Directory.EnumerateFiles(this.Location, imageName + "*").Last());
         }
+
+        /// <summary>
+        /// Deletes all saved images
+        /// </summary>
+        public void DeleteAll()
+        {
+            foreach (var image in new DirectoryInfo(this.Location).GetFiles())
+            {
+                image.Delete();
+            }
+        }
     }
 }

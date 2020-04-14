@@ -74,6 +74,7 @@ namespace Image_Generator.Models
                     var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageFind, tags));
                     if (photos.Count == 0)
                     {
+                        Thread.Sleep(100);
                         imageFind = this.GetImageNameSubstring(imageFind, element);
                         continue;
                     }
@@ -87,6 +88,7 @@ namespace Image_Generator.Models
                 }
                 catch (WebException)
                 {
+                    // 500 INTERNAL !
                     Console.WriteLine("Network Error");
                     throw;
                 }
@@ -167,7 +169,7 @@ namespace Image_Generator.Models
             if (lastCut == element)
                 return imageName.Substring(imageName.IndexOf(' '));
 
-            return imageName.Substring(0, imageName.LastIndexOf(' ') + 1);
+            return imageName.Substring(0, imageName.LastIndexOf(' '));
         }
 
         private string GetTags(string imageName)

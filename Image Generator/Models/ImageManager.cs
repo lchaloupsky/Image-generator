@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Image_Generator.Models
@@ -21,7 +22,7 @@ namespace Image_Generator.Models
         private Downloader MyDownloader { get; }
         private FileManager MyManager { get; }
         private LimitedDictionary<string, Image> Cache { get; set; }
-        private Dictionary<string, object> Dowloaded { get; }
+        private Dictionary<string, object> Locks { get; }
 
         public bool UseImageCaptioning { get; set; }
 
@@ -30,8 +31,8 @@ namespace Image_Generator.Models
             string location = Path.Combine("..", "..", "Models", "Images");
             this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.MyManager = new FileManager(location);
-            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT);
-            this.Dowloaded = new Dictionary<string, object>();
+            this.Locks = new Dictionary<string, object>();
+            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
         }
 
         /// <summary>
@@ -48,9 +49,23 @@ namespace Image_Generator.Models
             // Check if image is saved already
             if (this.MyManager.CheckImageExistence(imageName))
             {
-                var image = this.MyManager.LoadImage(imageName);
-                if (!this.Cache.ContainsKey(imageName))
-                    this.Cache.Add(imageName, image);
+                // Image is still used in some other thread
+                while (true)
+                {
+                    try
+                    {
+                        var image = this.MyManager.LoadImage(imageName);
+                        if (!this.Cache.ContainsKey(imageName))
+                            this.Cache.Add(imageName, image);
+
+                        break;
+                    }
+                    catch (IOException)
+                    {
+                        Thread.Sleep(200);
+                        continue;
+                    }
+                }
 
                 return true;
             }
@@ -66,11 +81,11 @@ namespace Image_Generator.Models
         public Image GetImage(string imageName, string element = null)
         {
             imageName = imageName.ToLower();
-            lock (this.Dowloaded)
-                if (!this.Dowloaded.ContainsKey(imageName))
-                    this.Dowloaded.Add(imageName, new object());
+            lock (this.Locks)
+                if (!this.Locks.ContainsKey(imageName))
+                    this.Locks.Add(imageName, new object());
 
-            lock (this.Dowloaded[imageName])
+            lock (this.Locks[imageName])
             {
                 // If image is not in cache or in directory, then download it!
                 if (!CheckImageExistence(imageName))
@@ -79,9 +94,9 @@ namespace Image_Generator.Models
                     if (!this.Cache.ContainsKey(imageName))
                         this.Cache.Add(imageName, image);
                 }
-            }
 
-            return this.Cache[imageName];
+                return this.Cache[imageName];
+            }
         }
 
         /// <summary>
@@ -130,6 +145,15 @@ namespace Image_Generator.Models
             // Saving the image itself
             image.Save(newLocation, format);
         }
+
+        /// <summary>
+        /// Method for deleting all saved and cached images
+        /// </summary>
+        public void DeleteAllImages()
+        {
+            this.Cache.RemoveAll();
+            this.MyManager.DeleteAll();
+        }
     }
 
     /// <summary>
@@ -142,25 +166,42 @@ namespace Image_Generator.Models
         private int Limit { get; set; }
         private Dictionary<K, V> Dictionary { get; }
         private Queue<K> KeyQueue { get; }
+        private Dictionary<K, object> Locks { get; }
 
-        public LimitedDictionary(int limit)
+        public LimitedDictionary(int limit, Dictionary<K, object> locks)
         {
             this.Limit = limit;
             this.Dictionary = new Dictionary<K, V>();
             this.KeyQueue = new Queue<K>();
+            this.Locks = locks;
         }
 
         public void Add(K key, V value)
         {
             if (this.Limit == KeyQueue.Count)
-            {
-                K remove = KeyQueue.Dequeue();
-                Dictionary[remove].Dispose();
-                Dictionary.Remove(remove);
-            }
+                this.Remove(KeyQueue.Dequeue());
 
             KeyQueue.Enqueue(key);
             Dictionary.Add(key, value);
+        }
+
+        public void RemoveAll()
+        {
+            this.KeyQueue.Clear();
+            foreach (var key in this.Dictionary.Keys)
+                this.Dictionary[key].Dispose();
+
+            this.Dictionary.Clear();
+        }
+
+        public bool Remove(K key)
+        {
+            lock (this.Locks[key])
+            {
+                this.Dictionary.Remove(key);
+            }
+
+            return true;
         }
 
         public bool ContainsKey(K key)

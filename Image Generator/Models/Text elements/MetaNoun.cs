@@ -157,5 +157,10 @@ namespace Image_Generator.Models.Text_elements
 
             return bitmap;
         }
+
+        public void Dispose()
+        {
+            this.Image = null;
+        }
     }
 }
