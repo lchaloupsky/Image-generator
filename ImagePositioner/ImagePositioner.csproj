@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5F943CB4-D718-45AC-B47B-4DCBEA489E03}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ImagePositioner</RootNamespace>
+    <AssemblyName>ImagePositioner</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Edges\AtBottomEdge.cs" />
+    <Compile Include="Edges\AtEdge.cs" />
+    <Compile Include="Edges\BehindEdge.cs" />
+    <Compile Include="Edges\DefaultEdge.cs" />
+    <Compile Include="Edges\Edge.cs" />
+    <Compile Include="Edges\InCornerEdge.cs" />
+    <Compile Include="Edges\InEdge.cs" />
+    <Compile Include="Edges\InFrontEdge.cs" />
+    <Compile Include="Edges\InMiddleEdge.cs" />
+    <Compile Include="Edges\OnCornerEdge.cs" />
+    <Compile Include="Edges\OnEdge.cs" />
+    <Compile Include="Edges\OnTopEdge.cs" />
+    <Compile Include="Edges\ToLeftEdge.cs" />
+    <Compile Include="Edges\ToRightEdge.cs" />
+    <Compile Include="Edges\UnderEdge.cs" />
+    <Compile Include="Factories\EdgeFactory.cs" />
+    <Compile Include="Positioner.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ImageGeneratorInterfaces\ImageGeneratorInterfaces.csproj">
+      <Project>{501dc909-a0df-4fd9-b2cb-96160c63b682}</Project>
+      <Name>ImageGeneratorInterfaces</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

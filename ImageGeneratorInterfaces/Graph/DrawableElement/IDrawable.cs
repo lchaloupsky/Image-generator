@@ -1,0 +1,23 @@
+﻿using ImageGeneratorInterfaces.ImageManager;
+using ImageGeneratorInterfaces.Rendering;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ImageGeneratorInterfaces.Graph.DrawableElement
+{
+    /// <summary>
+    /// Interface for Drawable objects
+    /// </summary>
+    public interface IDrawable : IPositionable, IDisposable
+    {
+        Image Image { get; }
+        IDrawableGroup Group { get; set; }
+
+        void CombineIntoGroup(IDrawable drawable);
+        void Draw(IRenderer renderer, IImageManager manager);
+    }
+}

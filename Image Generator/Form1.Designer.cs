@@ -36,6 +36,7 @@
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.DeleteImages = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.label2 = new System.Windows.Forms.Label();
@@ -65,7 +66,6 @@
             this.LoadDataset = new System.Windows.Forms.Button();
             this.ChosenFile = new System.Windows.Forms.Label();
             this.ProcessedBar = new System.Windows.Forms.ProgressBar();
-            this.DeleteImages = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
@@ -163,6 +163,23 @@
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel3.Size = new System.Drawing.Size(344, 410);
             this.tableLayoutPanel3.TabIndex = 1;
+            // 
+            // DeleteImages
+            // 
+            this.DeleteImages.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.DeleteImages.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(82)))));
+            this.DeleteImages.FlatAppearance.BorderSize = 0;
+            this.DeleteImages.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DeleteImages.Font = new System.Drawing.Font("Trebuchet MS", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DeleteImages.ForeColor = System.Drawing.Color.White;
+            this.DeleteImages.Location = new System.Drawing.Point(56, 315);
+            this.DeleteImages.Margin = new System.Windows.Forms.Padding(3, 0, 3, 25);
+            this.DeleteImages.Name = "DeleteImages";
+            this.DeleteImages.Size = new System.Drawing.Size(231, 50);
+            this.DeleteImages.TabIndex = 8;
+            this.DeleteImages.Text = "Delete saved images";
+            this.DeleteImages.UseVisualStyleBackColor = false;
+            this.DeleteImages.Click += new System.EventHandler(this.DeleteImages_Click);
             // 
             // label1
             // 
@@ -303,7 +320,7 @@
             this.resolutionBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.resolutionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.resolutionBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.resolutionBox.Location = new System.Drawing.Point(214, 10);
+            this.resolutionBox.Location = new System.Drawing.Point(214, 9);
             this.resolutionBox.Name = "resolutionBox";
             this.resolutionBox.Size = new System.Drawing.Size(121, 24);
             this.resolutionBox.TabIndex = 5;
@@ -596,23 +613,6 @@
             this.ProcessedBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.ProcessedBar.TabIndex = 1;
             this.ProcessedBar.Visible = false;
-            // 
-            // DeleteImages
-            // 
-            this.DeleteImages.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.DeleteImages.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(45)))), ((int)(((byte)(82)))));
-            this.DeleteImages.FlatAppearance.BorderSize = 0;
-            this.DeleteImages.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.DeleteImages.Font = new System.Drawing.Font("Trebuchet MS", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DeleteImages.ForeColor = System.Drawing.Color.White;
-            this.DeleteImages.Location = new System.Drawing.Point(56, 315);
-            this.DeleteImages.Margin = new System.Windows.Forms.Padding(3, 0, 3, 25);
-            this.DeleteImages.Name = "DeleteImages";
-            this.DeleteImages.Size = new System.Drawing.Size(231, 50);
-            this.DeleteImages.TabIndex = 8;
-            this.DeleteImages.Text = "Delete saved images";
-            this.DeleteImages.UseVisualStyleBackColor = false;
-            this.DeleteImages.Click += new System.EventHandler(this.DeleteImages_Click);
             // 
             // Form1
             // 

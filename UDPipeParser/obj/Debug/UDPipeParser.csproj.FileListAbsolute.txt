@@ -1,0 +1,14 @@
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\UDPipeParser.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\UDPipeParser.pdb
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\ImageGeneratorInterfaces.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\ImageManager.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\Newtonsoft.Json.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\FlickrNet.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\ImageGeneratorInterfaces.pdb
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\ImageManager.pdb
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\bin\Debug\Newtonsoft.Json.xml
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\obj\Debug\UDPipeParser.csprojAssemblyReference.cache
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\obj\Debug\UDPipeParser.csproj.CoreCompileInputs.cache
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\obj\Debug\UDPipeParser.csproj.CopyComplete
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\obj\Debug\UDPipeParser.dll
+C:\Users\lukas\source\repos\Image Generator\UDPipeParser\obj\Debug\UDPipeParser.pdb

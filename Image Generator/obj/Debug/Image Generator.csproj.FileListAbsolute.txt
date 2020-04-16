@@ -122,3 +122,11 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Async
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Disposables.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Disposables.xml
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Collections.Immutable.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageGeneratorInterfaces.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageGeneratorInterfaces.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageManager.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageManager.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.pdb

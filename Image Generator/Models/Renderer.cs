@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageGeneratorInterfaces.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -10,15 +11,15 @@ namespace Image_Generator.Models
     /// <summary>
     /// Class for rendering new image
     /// </summary>
-    class Renderer
+    class Renderer : IRenderer
     {
         // Field for drawing
         private Bitmap DrawField { get; set; }
         private Graphics MyGraphics { get; set; }
 
-        // Coordinates for new image to draw
-        public int LastX { get; set; } = 0;
-        public int LastY { get; set; } = 0;
+        // Dimensions
+        public int Width => this.DrawField.Width;
+        public int Height => this.DrawField.Height;
 
         /// <summary>
         /// Constructor for Renderer
@@ -57,9 +58,6 @@ namespace Image_Generator.Models
             // Finally drawing of the current image
             lock (image)
                 this.MyGraphics.DrawImage(image, x, y, dimensions.Item1, dimensions.Item2);
-
-            LastX = x + dimensions.Item1;
-            LastY = y;
         }
 
         /// <summary>
@@ -69,7 +67,7 @@ namespace Image_Generator.Models
         /// <param name="width">width of an object</param>
         /// <param name="height">height of an object</param>
         /// <returns>Resized dimensions as Tuple</returns>
-        public Tuple<int, int> GetProportionalDimensions(Image image, int width, int height)
+        private Tuple<int, int> GetProportionalDimensions(Image image, int width, int height)
         {
             int finalW = width,
                 finalH = height;
@@ -109,8 +107,6 @@ namespace Image_Generator.Models
         /// </summary>
         public void ResetImage()
         {
-            this.LastX = 0;
-            this.LastY = 0;
             this.MyGraphics.Clear(Color.White);
         }
     }

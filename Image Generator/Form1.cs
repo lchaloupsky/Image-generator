@@ -1,4 +1,9 @@
 ﻿using Image_Generator.Models;
+using ImageGeneratorInterfaces.Graph;
+using ImageGeneratorInterfaces.ImageManager;
+using ImageManagment;
+using ImagePositioner;
+using ImagePositioner.Factories;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,6 +13,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using UDPipeParsing;
 
 namespace Image_Generator
 {
@@ -16,7 +22,7 @@ namespace Image_Generator
     /// </summary>
     public partial class Form1 : Form
     {
-        private ImageManager Manager { get; }
+        private IImageManager Manager { get; }
         private Renderer MyRenderer { get; }
         private Bitmap MyBitmap { get; set; }
         private UDPipeParser MyParser { get; }
@@ -25,6 +31,7 @@ namespace Image_Generator
 
         private bool UsingCaptioning { get; set; } = false;
         private bool InProcess { get; set; } = false;
+        private bool ProcessingDataset { get; set; } = false;
         private string DatasetFileName { get; set; }
 
         public Form1()
@@ -33,7 +40,7 @@ namespace Image_Generator
             this.FillResolutionBox();
             this.MyRenderer = new Renderer(this.ImageResolution.Width, this.ImageResolution.Height);
             this.Manager = new ImageManager();
-            this.MyParser = new UDPipeParser("english-ud-1.2-160523", this.Manager);
+            this.MyParser = new UDPipeParser("english-ud-1.2-160523", this.Manager, new EdgeFactory());
             this.MyPositioner = new Positioner();
         }
 
@@ -100,11 +107,15 @@ namespace Image_Generator
             if (dialog.ShowDialog() == DialogResult.OK)
                 directory = dialog.SelectedPath;
             else
+            {
+                this.InProcess = false;
                 return;
+            }
 
             this.ProcessedImages.Visible = true;
             this.ProcessedBar.Visible = true;
             this.ProcessedBar.Value = 0;
+            this.ProcessingDataset = true;
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -114,10 +125,17 @@ namespace Image_Generator
                 int linesCount = File.ReadAllLines(this.DatasetFileName).Count();
                 this.ProcessedBar.Maximum = linesCount;
 
-                while ((str = streamReader.ReadLine()) != null)
+                try
                 {
-                    counter++;
-                    this.CreateImageGeneratingTask(str, directory, counter).Start();
+                    while ((str = streamReader.ReadLine()) != null)
+                    {
+                        counter++;
+                        this.CreateImageGeneratingTask(str, directory, counter).Start();
+                    }
+                }
+                catch (IOException)
+                {
+                    ShowErrorMessage("Error while reading from loaded dataset.");
                 }
             }
         }
@@ -137,7 +155,7 @@ namespace Image_Generator
                 try
                 {
                     var result = this.GenerateImage(str.Substring(str.IndexOf(str.First(c => char.IsWhiteSpace(c))) + 1));
-                    lock (this.Manager)
+                    lock (this.MyRenderer)
                     {
                         // Draw image
                         this.DrawImage(result);
@@ -167,7 +185,7 @@ namespace Image_Generator
         }
 
         // Method for drawing final positioned images
-        private void DrawImage(List<SentenceGraph> result)
+        private void DrawImage(List<ISentenceGraph> result)
         {
             this.SetProcessStatus("Drawing final image");
 
@@ -193,38 +211,47 @@ namespace Image_Generator
         {
             // Check some basic info about text
             if (!this.CheckSentence())
+            {
+                this.InProcess = false;
                 return;
+            }
 
             this.ProcessStatus.Visible = true;
 
-            try
+            Task.Run(() =>
             {
-                // Generating image
-                var result = this.GenerateImage(this.sentenceBox.Text);                
+                try
+                {
+                    // Generating image
+                    var result = this.GenerateImage(this.sentenceBox.Text);
 
-                // Drawing image
-                this.DrawImage(result);
+                    // Drawing image
+                    this.DrawImage(result);
 
-                // Get drawn image bitmap to show it in form window
-                this.generatedImage.Image = MyRenderer.GetImage();
+                    // Get drawn image bitmap to show it in form window
+                    this.generatedImage.BeginInvoke((Action)(() =>
+                    {
+                        this.generatedImage.Image = MyRenderer.GetImage();
+                    }));
 
-                this.SetProcessStatus("Image succesfully generated");
-            }
-            catch (Exception ex)
-            {
-                if (ex is WebException)
-                    ShowErrorMessage("Internet connection failure");
-                else if (ex is IOException)
-                    ShowErrorMessage("IO error");
-                else
-                    ShowErrorMessage("Unknown exception\n" + ex.ToString());
+                    this.SetProcessStatus("Image succesfully generated");
+                }
+                catch (Exception ex)
+                {
+                    if (ex is WebException)
+                        ShowErrorMessage("Internet connection failure");
+                    else if (ex is IOException)
+                        ShowErrorMessage("IO error");
+                    else
+                        ShowErrorMessage("Unknown exception\n" + ex.ToString());
 
-                this.SetProcessStatus("Failed to generate image");
-            }
-            finally
-            {
-                this.InProcess = false;
-            }
+                    this.SetProcessStatus("Failed to generate image");
+                }
+                finally
+                {
+                    this.InProcess = false;
+                }
+            });
         }
 
         /// <summary>
@@ -233,11 +260,14 @@ namespace Image_Generator
         /// <param name="message"></param>
         private void SetProcessStatus(string message)
         {
-            if (this.DataSetCheckBox.Checked)
+            if (this.ProcessingDataset)
                 return;
 
-            this.ProcessStatus.Text = message;
-            this.ProcessStatus.Refresh();
+            this.ProcessStatus.BeginInvoke((Action)(() => 
+            {
+                this.ProcessStatus.Text = message;
+                this.ProcessStatus.Refresh();
+            }));        
         }
 
         /// <summary>
@@ -245,9 +275,9 @@ namespace Image_Generator
         /// </summary>
         /// <param name="description">Image description given as simple text</param>
         /// <returns></returns>
-        private List<SentenceGraph> GenerateImage(string description)
+        private List<ISentenceGraph> GenerateImage(string description)
         {
-            this.SetProcessStatus("Parsing image description and downloading images");
+            this.SetProcessStatus("Parsing image description and loading/downloading images");
 
             // Parsing given text
             var result = this.MyParser.ParseText(description, this.resolutionBox.Width, this.resolutionBox.Height);
@@ -275,6 +305,7 @@ namespace Image_Generator
             if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)
             {
                 this.InProcess = false;
+                this.ProcessingDataset = false;
                 System.GC.Collect();
             }
         }
@@ -331,7 +362,7 @@ namespace Image_Generator
         /// </summary>
         /// <param name="message">Message to show</param>
         private void ShowErrorMessage(string message)
-        {
+        {          
             MessageBox.Show(message, "Image Generator", MessageBoxButtons.OK);
         }
 
@@ -484,8 +515,9 @@ namespace Image_Generator
             {
                 this.Manager.DeleteAllImages();
             }
-            catch (IOException)
+            catch (IOException ex)
             {
+                Console.WriteLine(ex.Message);
                 ShowErrorMessage("You have to wait until program drops all references to images.\n Try it later please.");
             }
         }
