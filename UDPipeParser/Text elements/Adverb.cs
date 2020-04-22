@@ -10,7 +10,7 @@ namespace UDPipeParsing.Text_elements
 {
     public class Adverb : Element
     {
-        private List<Adverb> ExtendingAdverbs { get; }
+        public List<Adverb> ExtendingAdverbs { get; }
 
         public Adverb(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
         {

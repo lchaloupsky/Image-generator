@@ -51,7 +51,7 @@ namespace ImageManagment
         public Image LoadImage(string imageName)
         {
             return new Bitmap(
-                Directory.EnumerateFiles(this.Location, imageName + "*").
+                Directory.EnumerateFiles(this.Location, imageName + "." + "*").
                     Where(file => this.AllowedExtenstions.Contains(Path.GetExtension(file).ToLower())).
                     Last()
                 );

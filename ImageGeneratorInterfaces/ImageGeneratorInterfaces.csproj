@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Edges\Factory\IEdgeFactory.cs" />
+    <Compile Include="Edges\IAbsolutePositionateEdge.cs" />
     <Compile Include="Edges\IPositionateEdge.cs" />
     <Compile Include="Graph\DrawableElement\IDrawable.cs" />
     <Compile Include="Graph\DrawableElement\IDrawableGroup.cs" />

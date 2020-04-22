@@ -61,6 +61,9 @@ namespace UDPipeParsing.Text_elements
         // Flag indicating if noun is fixed
         public bool IsFixed { get; set; } = false;
 
+        // Scale of Noun
+        public float Scale { get; set; } = 1;
+
         // -------Private properties--------
         // Default number for plurals
         private const int NUMBER_OF_INSTANCES = 3;
@@ -179,6 +182,9 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
+            if (adj is FunctionalAdjective)
+                this.Scale *= ((FunctionalAdjective)adj).Scale;
+
             this.Extensions.Add(adj);
             return this;
         }
@@ -318,6 +324,10 @@ namespace UDPipeParsing.Text_elements
             if (newEdge != null)
                 graph.AddEdge(newEdge);
 
+            // Scaling
+            this.Width = (int)(this.Width * this.Scale);
+            this.Height = (int)(this.Height * this.Scale);
+
             return this;
         }
 
@@ -355,6 +365,7 @@ namespace UDPipeParsing.Text_elements
             noun.Extensions.AddRange(this.Extensions);
             noun.Suffixes.AddRange(this.Suffixes);
             noun.Actions.AddRange(this.Actions);
+            noun.Scale = this.Scale;
 
             return noun;
         }
@@ -369,7 +380,10 @@ namespace UDPipeParsing.Text_elements
 
         private void ResizeToImage()
         {
-            var ratio = this.Image.Width * 1f / Image.Height;
+            float ratio;
+            lock (this.Image)
+                ratio = this.Image.Width * 1f / Image.Height;
+
             this.Width = (int)(this.Height * ratio);
         }
 

@@ -57,7 +57,7 @@ namespace Image_Generator.Models
 
             // Finally drawing of the current image
             lock (image)
-                this.MyGraphics.DrawImage(image, x, y, dimensions.Item1, dimensions.Item2);
+                this.MyGraphics.DrawImage(image, x, y, width, height);
         }
 
         /// <summary>
@@ -82,13 +82,13 @@ namespace Image_Generator.Models
             // Resizing image dimension if image is larger than max width/height
             if (image.Width > width)
             {
-                double ratio = width * 1d / imgWidth;
+                float ratio = width * 1f / imgWidth;
                 finalW = width;
                 finalH = (int)(imgHeight * ratio);
             }
             if (finalH > height)
             {
-                double ratio = height * 1d / finalH;
+                float ratio = height * 1f / finalH;
                 finalH = height;
                 finalW = (int)(finalW * ratio);
             }

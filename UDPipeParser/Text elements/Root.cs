@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
-    public class Root : Element, IDrawable //TODO pass whole sentence
+    public class Root : Element, IDrawable
     {
         public Vector2? Position { get; set; }
         public int ZIndex { get; set; } = 0;
@@ -25,9 +25,12 @@ namespace UDPipeParsing.Text_elements
         public IDrawableGroup Group { get; set; }
         public Image Image { get; set; }
 
-        public Root() : base(0)
+        private IImageManager Manager { get; }
+
+        public Root(string text, IImageManager manager) : base(0, text, "root")
         {
             this.Position = new Vector2(0, 0);
+            this.Manager = manager;
         }
 
         public void SetSizes(int width, int height)
@@ -36,7 +39,15 @@ namespace UDPipeParsing.Text_elements
             this.Height = height;
         }
 
-        public void Draw(IRenderer renderer, IImageManager manager) { }
+        public void Draw(IRenderer renderer, IImageManager manager)
+        {
+            Width = renderer.Width;
+            Height = renderer.Height;
+
+            this.ResizeToImage();
+
+            renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, renderer.Width, renderer.Height);
+        }
 
         public void CombineIntoGroup(IDrawable drawable)
         {
@@ -49,9 +60,23 @@ namespace UDPipeParsing.Text_elements
             return element is IDrawable ? element : this;
         }
 
+        public override IProcessable FinalizeProcessing(ISentenceGraph graph)
+        {
+            this.Image = this.Manager.GetImage(this.Lemma, null);
+
+            return this;
+        }
+
         public void Dispose()
         {
             this.Image = null;
+        }
+
+        private void ResizeToImage()
+        {
+            //TODO helper
+            var ratio = this.Image.Width * 1f / Image.Height;
+            this.Width = (int)(this.Height * ratio);
         }
     }
 }

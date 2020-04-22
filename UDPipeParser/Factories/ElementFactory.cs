@@ -31,10 +31,25 @@ namespace UDPipeParsing.Factories
             "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind"
         };
 
+        private HashSet<string> UpScales { get; } = new HashSet<string>()
+        {
+            "big", "large", "tall", "great", "gigantic", "tremendous", "huge", "massive"
+        };
+
+        private HashSet<string> DownScales { get; } = new HashSet<string>()
+        {
+            "small", "short", "miniature", "slight", "tiny", "little", "mini"
+        };
+
         public ElementFactory(IImageManager manager, IEdgeFactory edgeFactory)
         {
             this.EdgeFactory = edgeFactory;
             this.Manager = manager;
+        }
+
+        public Root CreateRoot(string sentence)
+        {
+            return new Root(sentence, this.Manager);
         }
 
         public IProcessable Create(string[] parts)
@@ -49,7 +64,7 @@ namespace UDPipeParsing.Factories
                     part = this.ProcessNoun(parts);
                     break;
                 case "ADJ":
-                    part = new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
+                    part = this.ProcessAdj(parts);
                     break;
                 case "ADP":
                     part = new Adposition(int.Parse(parts[0]), parts[2], parts[7]);
@@ -107,7 +122,17 @@ namespace UDPipeParsing.Factories
             return new NounSet(this, this.EdgeFactory, graph, left, right);
         }
 
-        //REDO SOMETIME
+        private IProcessable ProcessAdj(string[] parts)
+        {
+            if (this.UpScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 1.5f);
+
+            if (this.DownScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 0.75f);
+
+            return new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
+        }
+
         private void MapKnownCases(string lemma, ref string type)
         {
             string lemmaToFind = lemma.ToLower();

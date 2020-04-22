@@ -61,15 +61,18 @@ namespace UDPipeParsing
         public SentenceGraph ParseSentence(string sentence)
         {
             Dictionary<int, List<IProcessable>> dependencyTree;
-            SentenceGraph graph = new SentenceGraph();            
+            SentenceGraph graph = new SentenceGraph();
 
             // recreating dependency tree given as RESTAPI reponse from UDPipe
             var validLines = this.Client.GetResponse(sentence);
             dependencyTree = GetDependencyTree(validLines);
 
+            // new root element
+            var root = this.ElementFactory.CreateRoot(sentence);
+
             // compressing dependency tree into graph
             this.Comparer.Tree = dependencyTree;
-            IProcessable element = CompressDependencyTree(dependencyTree, graph, new Root()).FinalizeProcessing(graph);
+            IProcessable element = CompressDependencyTree(dependencyTree, graph, root).FinalizeProcessing(graph);
 
             if (element is IDrawable)
                 graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
@@ -176,7 +179,7 @@ namespace UDPipeParsing
         private class ElementComparer : IComparer<IProcessable>
         {
             public Dictionary<int, List<IProcessable>> Tree { get; set; }
-            
+
             public bool IsAdposition { get; set; }
 
             /// <summary>
@@ -201,9 +204,13 @@ namespace UDPipeParsing
                 if ((y is Noun || y is NounSet) && y.DependencyType == "dobj")
                     return 1;
 
-                return this.IsPriority(x) && !this.Tree.ContainsKey(x.Id) ? -1 : (
-                       this.IsPriority(y) && !this.Tree.ContainsKey(y.Id) ? 1 : (
-                       x.Id < y.Id ? -1 : 1));
+                bool isFirstPrior = this.IsPriority(x) && !this.Tree.ContainsKey(x.Id);
+                bool isSecondPrior = this.IsPriority(y) && !this.Tree.ContainsKey(y.Id);
+
+                if (isFirstPrior && isSecondPrior)
+                    return x.Id < y.Id ? -1 : 1;
+
+                return isFirstPrior ? -1 : (isSecondPrior ? 1 : (x.Id < y.Id ? -1 : 1));
 
                 // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
                 //return this.IsPriority(x) ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) :
@@ -213,7 +220,7 @@ namespace UDPipeParsing
 
             private bool IsPriority(IProcessable x)
             {
-                if(this.IsAdposition)
+                if (this.IsAdposition)
                     return (x is Adposition || x is Adjective || x is Adverb || x is Negation);
                 else
                     return (x is Adposition || x is Adverb || x is Negation);

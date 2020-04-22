@@ -39,7 +39,7 @@ namespace UDPipeParsing.Preprocessors
                     continue;
                 }
 
-                if (this.IsAdposition(parts[3]))
+                if (this.IsAdposition(parts[3], parts[2]))
                 {
                     wasAdp = true;
                     lastDetIndex = i + 1;
@@ -138,14 +138,19 @@ namespace UDPipeParsing.Preprocessors
             return partOfSpeech == "VERB" && relation == "amod";
         }
 
-        private bool IsAdposition(string partOfSpeech)
+        private bool IsAdposition(string partOfSpeech, string lemma)
         {
-            return partOfSpeech == "ADP" || partOfSpeech == "PART";
+            return partOfSpeech == "ADP" || (partOfSpeech == "PART" && this.IsAllowedParticle(lemma));
+        }
+
+        private bool IsAllowedParticle(string lemma)
+        {
+            return !lemma.Contains("'") && lemma != "not"; 
         }
 
         private bool IsDeterminer(string partOfSpeech, string relation)
         {
-            return partOfSpeech == "DET" || (partOfSpeech == "PRON" && relation == "nmod:poss");
+            return partOfSpeech == "DET" || ((partOfSpeech == "PRON" || partOfSpeech == "NOUN") && relation == "nmod:poss");
         }
 
         private bool IsSingular(string otherParams)

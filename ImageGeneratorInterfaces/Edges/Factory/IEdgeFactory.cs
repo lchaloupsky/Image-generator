@@ -10,7 +10,7 @@ namespace ImageGeneratorInterfaces.Edges.Factory
 {
     public interface IEdgeFactory
     {
-        IPositionateEdge Create<T1>(T1 left, List<string> adpositions) 
+        IAbsolutePositionateEdge Create<T1>(T1 left, List<string> adpositions) 
             where T1 : IDrawable, IProcessable;
 
         IPositionateEdge Create<T1, T2>(T1 left, T2 right, List<string> leftAdpositions, List<string> rightAdpositions) 

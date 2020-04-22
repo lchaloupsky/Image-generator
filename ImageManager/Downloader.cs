@@ -164,9 +164,10 @@ namespace ImageManagment
                 }
 
                 long br = int.MaxValue;
+                float probSum = captions.Sum(capt => capt.Probability);
                 foreach (var capt in captions)
                 {
-                    long rating = (long)(this.LDistanceMeter.CalculateStringDistance(imageName, capt.Caption) / capt.Probability);
+                    long rating = (long)(this.LDistanceMeter.CalculateStringDistance(imageName, capt.Caption) / (capt.Probability / probSum));
                     br = rating < br ? rating : br;
                 }
 

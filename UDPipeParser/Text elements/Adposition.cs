@@ -10,19 +10,20 @@ namespace UDPipeParsing.Text_elements
 {
     public class Adposition : Element
     {
-        private Adposition DependingAdposition { get; set; }
+        private List<Adposition> DependingAdpositions { get; set; }
         private List<Adjective> Extensions { get; }
 
         public Adposition(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<Adjective>();
+            this.DependingAdpositions = new List<Adposition>();
         }
 
         public IEnumerable<Adposition> GetAdpositions()
         {
-            return this.DependingAdposition == null ?
+            return this.DependingAdpositions.Count == 0 ?
                     new List<Adposition>() { this } :
-                    new List<Adposition>() { DependingAdposition, this };
+                    new List<Adposition>(DependingAdpositions) { this };
         }
 
         public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
@@ -43,7 +44,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Adposition adp, ISentenceGraph graph)
         {
-            this.DependingAdposition = adp;
+            this.DependingAdpositions.Add(adp);
 
             return this;
         }

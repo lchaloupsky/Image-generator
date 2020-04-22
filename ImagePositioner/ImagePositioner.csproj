@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Edges\AbsoluteEdge.cs" />
     <Compile Include="Edges\AtBottomEdge.cs" />
     <Compile Include="Edges\AtEdge.cs" />
     <Compile Include="Edges\BehindEdge.cs" />

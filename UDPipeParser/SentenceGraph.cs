@@ -18,6 +18,8 @@ namespace UDPipeParsing
         public IEnumerable<IPositionateEdge> Edges => this.Graph.Values.SelectMany(edge => edge);
         public IEnumerable<IPositionateEdge> this[IDrawable vertex] => this.Graph.ContainsKey(vertex) ? this.Graph[vertex] : null;
 
+        private List<IAbsolutePositionateEdge> AbsoluteEdges { get; } = new List<IAbsolutePositionateEdge>();
+
         public SentenceGraph()
         {
             this.Graph = new Dictionary<IDrawable, List<IPositionateEdge>>();
@@ -30,6 +32,9 @@ namespace UDPipeParsing
 
             if (edge.Right != null && !this.Graph.ContainsKey(edge.Right))
                 this.Graph.Add(edge.Right, new List<IPositionateEdge>());
+
+            if (edge is IAbsolutePositionateEdge && edge.Right == null)
+                edge = AddAbsoluteEdge((IAbsolutePositionateEdge)edge);
 
             this.Graph[edge.Left].Add(edge);
         }
@@ -77,6 +82,24 @@ namespace UDPipeParsing
                 if (group.Image != null)
                     group.Dispose();
             }
+        }
+
+        private IPositionateEdge AddAbsoluteEdge(IAbsolutePositionateEdge edge)
+        {
+            foreach (var absEdge in this.AbsoluteEdges)
+            {
+                if (absEdge.GetType() == edge.GetType())
+                {
+                    var newEdge = absEdge.ResolveConflict(edge);
+                    if (newEdge == null)
+                        continue;
+
+                    return newEdge;
+                }
+            }
+
+            this.AbsoluteEdges.Add(edge);
+            return edge;
         }
     }
 }

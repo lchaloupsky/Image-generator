@@ -224,6 +224,7 @@
             // ImageCaptCheckbox
             // 
             this.ImageCaptCheckbox.Appearance = System.Windows.Forms.Appearance.Button;
+            this.ImageCaptCheckbox.BackColor = System.Drawing.Color.Transparent;
             this.ImageCaptCheckbox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ImageCaptCheckbox.Dock = System.Windows.Forms.DockStyle.Right;
             this.ImageCaptCheckbox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
@@ -271,6 +272,8 @@
             // DataSetCheckBox
             // 
             this.DataSetCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
+            this.DataSetCheckBox.BackColor = System.Drawing.Color.Transparent;
+            this.DataSetCheckBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.DataSetCheckBox.Dock = System.Windows.Forms.DockStyle.Right;
             this.DataSetCheckBox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.DataSetCheckBox.FlatAppearance.BorderSize = 0;
@@ -278,6 +281,7 @@
             this.DataSetCheckBox.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.DataSetCheckBox.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.DataSetCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.DataSetCheckBox.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.DataSetCheckBox.ImageIndex = 0;
             this.DataSetCheckBox.ImageList = this.DatasetCheckBoxImages;
             this.DataSetCheckBox.Location = new System.Drawing.Point(231, 3);

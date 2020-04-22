@@ -4,10 +4,12 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using ImageGeneratorInterfaces.Edges;
+using ImageGeneratorInterfaces.Graph.DrawableElement;
 
 namespace ImagePositioner.Edges
 {
-    class InCornerEdge : Edge
+    class InCornerEdge : AbsoluteEdge
     {
         private int MaxWidth { get => this.Right.Width / 2; }
         private int MaxHeight { get => this.Right.Height / 2; }
@@ -15,25 +17,27 @@ namespace ImagePositioner.Edges
         private VerticalPlace Vertical { get; }
         private HorizontalPlace Horizontal { get; }
 
-        public InCornerEdge()
+        private IDrawable LastElement { get; set; }
+
+        public InCornerEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
             this.Vertical = this.GetRandomEnum<VerticalPlace>();
         }
 
-        public InCornerEdge(VerticalPlace vertical)
+        public InCornerEdge(VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Vertical = vertical;
             this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
         }
 
-        public InCornerEdge(HorizontalPlace horizontal)
+        public InCornerEdge(HorizontalPlace horizontal) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Horizontal = horizontal;
             this.Vertical = this.GetRandomEnum<VerticalPlace>();
         }
 
-        public InCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical)
+        public InCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Vertical = vertical;
             this.Horizontal = horizontal;
@@ -42,6 +46,7 @@ namespace ImagePositioner.Edges
         protected override void PositionateAgainstRoot(int maxWidth, int maxHeight)
         {
             this.PlaceLeft(maxWidth, maxHeight);
+            this.Left.Position = new Vector2(Math.Max(0, this.Left.Position.Value.X), Math.Max(0, this.Left.Position.Value.Y));
         }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
@@ -79,6 +84,20 @@ namespace ImagePositioner.Edges
         {
             Array values = Enum.GetValues(typeof(T));
             return (T)values.GetValue(new Random().Next(values.Length));
+        }
+
+        public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
+        {
+            var cornerEdge = (InCornerEdge)edge;
+            if (cornerEdge.Horizontal != this.Horizontal || cornerEdge.Vertical != this.Vertical)
+                return null;
+
+            this.LastElement = this.LastElement ?? this.Left;
+            var newEdge = new ToLeftEdge();
+            newEdge.Add(this.LastElement, edge.Left);
+            this.LastElement = edge.Left;
+
+            return newEdge;
         }
     }
 }

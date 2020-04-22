@@ -1,4 +1,5 @@
-﻿using ImageGeneratorInterfaces.Graph;
+﻿using ImageGeneratorInterfaces.Edges;
+using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,12 @@ namespace ImagePositioner
             this.ResolveConflicts(graph, width, height);
 
             // Final not abolute positioned vertices centering
-            this.CenterVertices(graph.Groups, width, height);
+            this.CenterVertices(graph.Groups.Where(g => !g.IsFixed), width, height);
+
+
+            this.CenterVertices(graph.Groups.Where(g => g.IsFixed), width, height, true);
+            // Rescale absolute vertices
+            //this.RescaleAndFitAbsoluteVertices(graph.Groups.Where(g => g.IsFixed), width, height);
         }
 
         /// <summary>
@@ -52,6 +58,7 @@ namespace ImagePositioner
         /// <param name="height">screen height</param>
         private void ResolveConflicts(ISentenceGraph graph, int width, int height)
         {
+            var absoluteGroups = this.PositionateAbsoluteEdges(graph, width, height);
             bool isPositioned = false;
 
             // While there is some conflict, check positions
@@ -70,12 +77,65 @@ namespace ImagePositioner
 
                             //move conflicts to the right
                             foreach (var conflictVertex in conflicts)
-                                //this.Helper.ResolveConflict(vertex, conflictVertex);
-                                conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
+                            {
+                                if (vertex.IsFixed)
+                                    this.ResolveAbsoluteConflict(vertex, conflictVertex, absoluteGroups[vertex], absoluteGroups[conflictVertex], width, height);
+                                else
+                                    conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private void ResolveAbsoluteConflict(IDrawable left, IDrawable right, PlaceType leftPlace, PlaceType rightPlace, int width, int height)
+        {
+            if (leftPlace == PlaceType.CORNER)
+            {
+                if (rightPlace == PlaceType.CORNER)
+                    this.Helper.ResolveCornerConflict(left, right, width, height);
+
+                else if (rightPlace == PlaceType.VERTICAL)
+                    this.Helper.ResolveVerticalConflict(left, right);
+
+                else
+                    this.Helper.ResolveHorizontalConflict(left, right);
+            }
+
+            if (leftPlace == PlaceType.HORIZONTAL)
+            {
+                if (rightPlace == PlaceType.MIDDLE)
+                    this.Helper.ResolveVerticalConflict(left, right);
+                else
+                    this.Helper.ResolveHorizontalConflict(left, right);
+            }
+
+            if (leftPlace == PlaceType.MIDDLE)
+                this.Helper.ResolveHorizontalConflict(left, right);
+
+            if (leftPlace == PlaceType.VERTICAL)
+            {
+                if (rightPlace == PlaceType.MIDDLE)
+                    this.Helper.ResolveHorizontalConflict(left, right);
+                else
+                    this.Helper.ResolveVerticalConflict(left, right);
+            }
+        }
+
+        private Dictionary<IDrawable, PlaceType> PositionateAbsoluteEdges(ISentenceGraph graph, int width, int height)
+        {
+            var dict = new Dictionary<IDrawable, PlaceType>();
+
+            // positionate all absolute relations
+            foreach (IAbsolutePositionateEdge absEdge in graph.Edges.Where(edge => edge is IAbsolutePositionateEdge && edge.Right == null))
+            {
+                absEdge.Positionate(width, height);
+                if (!dict.ContainsKey(absEdge.Left))
+                    dict.Add(absEdge.Left, absEdge.Type);
+            }
+
+            return dict;
         }
 
         /// <summary>
@@ -133,6 +193,10 @@ namespace ImagePositioner
             // positionate all edges of vertex
             foreach (var edge in graph[vertex])
             {
+                // skip absolute edges for now
+                if (edge is IAbsolutePositionateEdge && edge.Right == null)
+                    continue;
+
                 // Positionate dfs
                 if (edge.Right != null && !edge.Right.IsPositioned)
                     this.PositionateDFS(graph, edge.Right, width, height);
@@ -180,6 +244,9 @@ namespace ImagePositioner
         /// <param name="height">Maximal height</param>
         private void CenterVertices(IEnumerable<IDrawable> vertices, int width, int height, bool absolute = false)
         {
+            if (vertices.Count() == 0)
+                return;
+
             // set inital vertices
             IDrawable leftMost = vertices.First(),
                       rightMost = leftMost,
@@ -190,9 +257,6 @@ namespace ImagePositioner
             foreach (var vertex in vertices)
             {
                 // skip fixed vertices
-                if (vertex.IsFixed)
-                    continue;
-
                 int vX = (int)vertex.Position.Value.X;
                 int vY = (int)vertex.Position.Value.Y;
 
@@ -214,14 +278,30 @@ namespace ImagePositioner
                 this.RescaleVertices(vertices, totalH, height);
 
             // adding final shift to center vertices
-            Vector2 finalShift = new Vector2(this.GetPaddingX(leftMost, rightMost, width), this.GetPaddingY(topMost, bottomMost, height));
+            Vector2 finalShift;
+            if (!absolute)
+                finalShift = new Vector2(this.GetPaddingX(leftMost, rightMost, width), this.GetPaddingY(topMost, bottomMost, height));
+            else
+                finalShift = new Vector2(Math.Abs(Math.Min(leftMost.Position.Value.X, 0)), Math.Abs(Math.Min(topMost.Position.Value.Y, 0)));
             foreach (var vertex in vertices)
             {
-                if (vertex.IsFixed)
-                    continue;
-
                 // shift vertex
                 vertex.Position += finalShift;
+            }
+        }
+
+        public void RescaleAndFitAbsoluteVertices(IEnumerable<IDrawable> vertices, int width, int height)
+        {
+            // Rescale vertices if they are bigger than borders
+            foreach (var vertex in vertices)
+            {
+                if (vertex.Width > width)
+                    RescaleVertex(vertex, width / (vertex.Width * 1f));
+
+                if (vertex.Height > height)
+                    RescaleVertex(vertex, height / (vertex.Height * 1f));
+
+                vertex.Position = new Vector2(Math.Abs(Math.Max(vertex.Position.Value.X, 0)), Math.Abs(Math.Max(vertex.Position.Value.Y, 0)));
             }
         }
 
@@ -281,12 +361,15 @@ namespace ImagePositioner
 
             // rescale all vertices with factor
             foreach (var vertex in vertices)
-            {
-                vertex.Position *= factor;
-                vertex.Position = new Vector2((float)Math.Floor(vertex.Position.Value.X), (float)Math.Floor(vertex.Position.Value.Y));
-                vertex.Width = (int)(vertex.Width * factor);
-                vertex.Height = (int)(vertex.Height * factor);
-            }
+                RescaleVertex(vertex, factor);
+        }
+
+        private void RescaleVertex(IDrawable vertex, float factor)
+        {
+            vertex.Width = (int)(vertex.Width * factor);
+            vertex.Height = (int)(vertex.Height * factor);
+            vertex.Position *= factor;
+            vertex.Position = new Vector2((float)Math.Floor(vertex.Position.Value.X), (float)Math.Floor(vertex.Position.Value.Y));
         }
     }
 
@@ -354,7 +437,7 @@ namespace ImagePositioner
         /// </summary>
         /// <param name="vertex">Vertex to resolve</param>
         /// <param name="conflictVertex">Conflict vertex</param>
-        public void ResolveConflict(IDrawable vertex, IDrawable conflictVertex)
+        public void ResolveHorizontalConflict(IDrawable vertex, IDrawable conflictVertex)
         {
             // Resolving by both vertices shifting by a half
             IDrawable left = vertex.Position.Value.X <= conflictVertex.Position.Value.X ? vertex : conflictVertex;
@@ -364,6 +447,43 @@ namespace ImagePositioner
             Vector2 overlap = GetOverlapX(left, right);
             left.Position -= overlap / 2;
             right.Position += overlap / 2;
+        }
+
+        /// <summary>
+        /// Method for resolving conflicts
+        /// </summary>
+        /// <param name="vertex">Vertex to resolve</param>
+        /// <param name="conflictVertex">Conflict vertex</param>
+        public void ResolveVerticalConflict(IDrawable vertex, IDrawable conflictVertex)
+        {
+            // Resolving by both vertices shifting by a half
+            IDrawable left = vertex.Position.Value.Y <= conflictVertex.Position.Value.Y ? vertex : conflictVertex;
+            IDrawable right = left == vertex ? conflictVertex : vertex;
+
+            // shift
+            Vector2 overlap = GetOverlapY(left, right);
+            left.Position -= overlap / 2;
+            right.Position += overlap / 2;
+        }
+
+        /// <summary>
+        /// Method for resolving conflicts
+        /// </summary>
+        /// <param name="vertex">Vertex to resolve</param>
+        /// <param name="conflictVertex">Conflict vertex</param>
+        public void ResolveCornerConflict(IDrawable vertex, IDrawable conflictVertex, int width, int height)
+        {
+            var vertexPosition = vertex.Position.Value;
+            var conflictPosition = vertex.Position.Value;
+
+            if ((vertexPosition.Y == 0 && conflictPosition.Y == 0)
+                || (vertexPosition.Y + vertex.Height == height && conflictPosition.Y + conflictVertex.Height == height
+                    && vertex.Height != height && conflictVertex.Height != height))
+                ResolveHorizontalConflict(vertex, conflictVertex);
+
+            if ((vertexPosition.X == 0 && conflictPosition.X == 0)
+                || (vertexPosition.X + vertex.Width == width && conflictPosition.X + conflictVertex.Width == width))
+                ResolveVerticalConflict(vertex, conflictVertex);
         }
 
         /// <summary>
@@ -386,6 +506,17 @@ namespace ImagePositioner
         private Vector2 GetOverlapX(IDrawable vertex1, IDrawable vertex2)
         {
             return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding), 0);
+        }
+
+        /// <summary>
+        /// Method that return how much are vertices overlapping in X dimension
+        /// </summary>
+        /// <param name="vertex1">First vertex</param>
+        /// <param name="vertex2">Second vertex</param>
+        /// <returns>Overlap vector</returns>
+        private Vector2 GetOverlapY(IDrawable vertex1, IDrawable vertex2)
+        {
+            return new Vector2(0, (float)Math.Ceiling(vertex1.Position.Value.Y + vertex1.Height - vertex2.Position.Value.Y));
         }
 
         /// <summary>

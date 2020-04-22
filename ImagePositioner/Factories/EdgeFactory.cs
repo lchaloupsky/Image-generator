@@ -13,10 +13,12 @@ namespace ImagePositioner.Factories
 {
     public class EdgeFactory : IEdgeFactory
     {
-        public IPositionateEdge Create<T1>(T1 left, List<string> adpositions) where T1 : IDrawable, IProcessable
+        public IAbsolutePositionateEdge Create<T1>(T1 left, List<string> adpositions) where T1 : IDrawable, IProcessable
         {
-            Edge edge = this.GetOneSidedEdge(string.Join(" ", adpositions));
-            return edge?.Add(left, null);
+            AbsoluteEdge edge = this.GetOneSidedEdge(string.Join(" ", adpositions));
+            edge?.Add(left, null);
+
+            return edge;
         }
 
         public IPositionateEdge Create<T1, T2>(T1 left, T2 right, List<string> leftAdpositions, List<string> rightAdpositions)
@@ -58,12 +60,14 @@ namespace ImagePositioner.Factories
                 return null;
 
             if (this.CheckIfParameterIsSubject(right))
-                return edge.Add(right, left);
+                edge.Add(right, left);
+            else
+                edge.Add(left, right);
 
-            return edge.Add(left, right);
+            return edge;
         }
 
-        private Edge GetOneSidedEdge(string edgeType)
+        private AbsoluteEdge GetOneSidedEdge(string edgeType)
         {
             switch (edgeType)
             {
@@ -74,15 +78,32 @@ namespace ImagePositioner.Factories
                 case "in midst":
                 case "in middle": return new InMiddleEdge();
                 case "at bottom": return new AtBottomEdge();
+                case "on corner":
+                case "on left top corner":
+                case "on top left corner":
+                case "on left bottom corner":
+                case "on bottom left corner":
+                case "on right top corner":
+                case "on top right corner":
+                case "on right bottom corner":
+                case "on bottom right corner":
+                case "on right corner":
+                case "on left corner":
+                case "on bottom corner":
+                case "on top corner": return (AbsoluteEdge)this.GetCornerEdge(edgeType.Replace("on ", "in "));
+                case "in top left corner":
                 case "in left top corner":
+                case "in bottom left corner":
                 case "in left bottom corner":
+                case "in top right corner":
                 case "in right top corner":
+                case "in bottom right corner":
                 case "in right bottom corner":
                 case "in right corner":
                 case "in left corner":
                 case "in bottom corner":
                 case "in top corner":
-                case "in corner": return this.GetCornerEdge(edgeType);
+                case "in corner": return (AbsoluteEdge)this.GetCornerEdge(edgeType);
                 default: return null;
             }
         }
@@ -107,7 +128,7 @@ namespace ImagePositioner.Factories
                 case "underneath":
                 case "under": return new UnderEdge();
                 case "on edge of":
-                case "at top of": 
+                case "at top of":
                 case "on top of": return new OnTopEdge();
                 case "in midst of":
                 case "between":
@@ -137,32 +158,31 @@ namespace ImagePositioner.Factories
                 case "in behind from":
                 case "behind": return new BehindEdge();
                 case "in behind": return new BehindEdge(true);
-                case "in left top corner of": 
-                case "in left bottom corner of": 
-                case "in right top corner of": 
-                case "in right bottom corner of": 
-                case "in right corner of": 
-                case "in left corner of": 
+                case "in left top corner of":
+                case "in top left corner of":
+                case "in left bottom corner of":
+                case "in bottom left corner of":
+                case "in right top corner of":
+                case "in top right corner of":
+                case "in right bottom corner of":
+                case "in bottom right corner of":
+                case "in right corner of":
+                case "in left corner of":
                 case "in bottom corner of":
                 case "in top corner of":
                 case "in corner of":
-                case "on corner":
-                case "on left top corner":
-                case "on left bottom corner":
-                case "on right top corner":
-                case "on right bottom corner":
-                case "on right corner":
-                case "on left corner":
-                case "on bottom corner":
-                case "on top corner":
                 case "on corner of":
                 case "on left top corner of":
+                case "on top left corner of":
                 case "on left bottom corner of":
+                case "on bottom left corner of":
                 case "on right top corner of":
+                case "on top right corner of":
                 case "on right bottom corner of":
+                case "on bottom right corner of":
                 case "on right corner of":
                 case "on left corner of":
-                case "on bottom corner of": return GetCornerEdge(edgeType.Replace(" of",""));
+                case "on bottom corner of": return GetCornerEdge(edgeType.Replace(" of", ""));
                 default: return null;
             }
         }
@@ -171,18 +191,26 @@ namespace ImagePositioner.Factories
         {
             switch (type)
             {
+                case "in top left corner":
                 case "in left top corner": return new InCornerEdge(HorizontalPlace.LEFT, VerticalPlace.TOP);
+                case "in bottom left corner":
                 case "in left bottom corner": return new InCornerEdge(HorizontalPlace.LEFT, VerticalPlace.BOTTOM);
+                case "in top right corner":
                 case "in right top corner": return new InCornerEdge(HorizontalPlace.RIGHT, VerticalPlace.TOP);
+                case "in bottom right corner":
                 case "in right bottom corner": return new InCornerEdge(HorizontalPlace.RIGHT, VerticalPlace.BOTTOM);
                 case "in right corner": return new InCornerEdge(HorizontalPlace.RIGHT);
                 case "in left corner": return new InCornerEdge(HorizontalPlace.LEFT);
                 case "in bottom corner": return new InCornerEdge(VerticalPlace.BOTTOM);
                 case "in top corner": return new InCornerEdge(VerticalPlace.TOP);
                 case "in corner": return new InCornerEdge();
+                case "on top left corner":
                 case "on left top corner": return new OnCornerEdge(HorizontalPlace.LEFT, VerticalPlace.TOP);
+                case "on bottom left corner":
                 case "on left bottom corner": return new OnCornerEdge(HorizontalPlace.LEFT, VerticalPlace.BOTTOM);
+                case "on top right corner":
                 case "on right top corner": return new OnCornerEdge(HorizontalPlace.RIGHT, VerticalPlace.TOP);
+                case "on bottom right corner":
                 case "on right bottom corner": return new OnCornerEdge(HorizontalPlace.RIGHT, VerticalPlace.BOTTOM);
                 case "on right corner": return new OnCornerEdge(HorizontalPlace.RIGHT);
                 case "on left corner": return new OnCornerEdge(HorizontalPlace.LEFT);

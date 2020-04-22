@@ -34,22 +34,22 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
-        private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
+        protected virtual IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
             return verb.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
+        protected virtual IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
             return noun.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
+        protected virtual IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
             return nounSet.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
+        protected virtual IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
             if (adj.CoordinationType != CoordinationType.AND)
                 return this;
@@ -58,7 +58,7 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
-        private IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
+        protected virtual IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
             this.Extensions.Add(adv);
 

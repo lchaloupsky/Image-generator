@@ -16,12 +16,10 @@ namespace ImagePositioner.Edges
         public IDrawable Left { get; set; }
         public IDrawable Right { get; set; }
 
-        public Edge Add(IDrawable left, IDrawable right)
+        public void Add(IDrawable left, IDrawable right)
         {
             this.Left = left;
             this.Right = right;
-
-            return this;
         }
 
         public virtual void Positionate(int maxWidth, int maxHeight)
@@ -45,7 +43,7 @@ namespace ImagePositioner.Edges
                 this.PositionateRight(maxWidth, maxHeight);
             else
                 this.PositionateLeft(maxWidth, maxHeight);
-                //Console.WriteLine("COLLISION"); //something like check some condition. then propagate change?
+            //Console.WriteLine("COLLISION"); //something like check some condition. then propagate change?
 
             // Fix both vertices into one group.
             this.Left.CombineIntoGroup(this.Right);
@@ -61,7 +59,7 @@ namespace ImagePositioner.Edges
 
         protected int GetShift(int dim1, int dim2)
         {
-            return (dim1 - dim2) / 2;
+            return (int)Math.Round((dim1 - dim2) / 2.0f, MidpointRounding.AwayFromZero);
         }
 
         protected float GetScaleFactor(int max, int dim)

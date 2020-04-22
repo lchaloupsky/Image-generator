@@ -29,7 +29,8 @@ namespace ImageManagment
 
         public ImageManager()
         {
-            string location = Path.Combine("..", "..", "Models", "Images");
+            //string location = Path.Combine("..", "..", "Models", "Images");
+            string location = Path.Combine(".", "Images");
             this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.MyManager = new FileManager(location);
             this.Locks = new Dictionary<string, object>();

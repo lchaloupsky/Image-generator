@@ -27,8 +27,6 @@ namespace UDPipeParsing.Text_elements
             this.DependencyType = DependencyType;
         }
 
-        public Element(int Id) : this(Id, "", "") { }
-
         public override string ToString()
         {
             return this.Lemma;

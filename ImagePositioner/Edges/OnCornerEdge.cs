@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ImageGeneratorInterfaces.Edges;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ImagePositioner.Edges
 {
-    class OnCornerEdge : Edge
+    class OnCornerEdge : AbsoluteEdge
     {
         private int MaxWidth { get => (int)(this.Right.Width * 0.75); }
         private int MaxHeight { get => (int)(this.Right.Height * 0.75); }
@@ -15,25 +16,25 @@ namespace ImagePositioner.Edges
         private VerticalPlace Vertical { get; }
         private HorizontalPlace Horizontal { get; }
 
-        public OnCornerEdge()
+        public OnCornerEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER) 
         {
             this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
             this.Vertical = this.GetRandomEnum<VerticalPlace>();
         }
 
-        public OnCornerEdge(VerticalPlace vertical)
+        public OnCornerEdge(VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Vertical = vertical;
             this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
         }
 
-        public OnCornerEdge(HorizontalPlace horizontal)
+        public OnCornerEdge(HorizontalPlace horizontal) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Horizontal = horizontal;
             this.Vertical = this.GetRandomEnum<VerticalPlace>();
         }
 
-        public OnCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical)
+        public OnCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
         {
             this.Vertical = vertical;
             this.Horizontal = horizontal;
@@ -74,6 +75,11 @@ namespace ImagePositioner.Edges
         {
             Array values = Enum.GetValues(typeof(T));
             return (T)values.GetValue(new Random().Next(values.Length));
+        }
+
+        public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
+        {
+            throw new NotImplementedException();
         }
     }
 }
