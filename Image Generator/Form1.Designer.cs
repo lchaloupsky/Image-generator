@@ -239,6 +239,7 @@
             this.ImageCaptCheckbox.Name = "ImageCaptCheckbox";
             this.ImageCaptCheckbox.Size = new System.Drawing.Size(104, 38);
             this.ImageCaptCheckbox.TabIndex = 3;
+            this.ImageCaptCheckbox.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ImageCaptCheckbox.UseVisualStyleBackColor = true;
             this.ImageCaptCheckbox.CheckedChanged += new System.EventHandler(this.ImageCaptCheckbox_CheckedChanged);
             // 
@@ -288,6 +289,7 @@
             this.DataSetCheckBox.Name = "DataSetCheckBox";
             this.DataSetCheckBox.Size = new System.Drawing.Size(104, 38);
             this.DataSetCheckBox.TabIndex = 4;
+            this.DataSetCheckBox.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.DataSetCheckBox.UseVisualStyleBackColor = true;
             this.DataSetCheckBox.CheckedChanged += new System.EventHandler(this.DataSetCheckBox_CheckedChanged);
             // 
