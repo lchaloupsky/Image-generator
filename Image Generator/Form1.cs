@@ -263,11 +263,11 @@ namespace Image_Generator
             if (this.ProcessingDataset)
                 return;
 
-            this.ProcessStatus.BeginInvoke((Action)(() => 
+            this.ProcessStatus.BeginInvoke((Action)(() =>
             {
                 this.ProcessStatus.Text = message;
                 this.ProcessStatus.Refresh();
-            }));        
+            }));
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace Image_Generator
         /// </summary>
         /// <param name="message">Message to show</param>
         private void ShowErrorMessage(string message)
-        {          
+        {
             MessageBox.Show(message, "Image Generator", MessageBoxButtons.OK);
         }
 
