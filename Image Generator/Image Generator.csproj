@@ -138,9 +138,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\Images\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ImageGeneratorInterfaces\ImageGeneratorInterfaces.csproj">
       <Project>{501dc909-a0df-4fd9-b2cb-96160c63b682}</Project>

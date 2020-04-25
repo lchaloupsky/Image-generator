@@ -225,6 +225,7 @@
             // 
             this.ImageCaptCheckbox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ImageCaptCheckbox.Appearance = System.Windows.Forms.Appearance.Button;
+            this.ImageCaptCheckbox.AutoCheck = false;
             this.ImageCaptCheckbox.BackColor = System.Drawing.Color.Transparent;
             this.ImageCaptCheckbox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ImageCaptCheckbox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
@@ -241,7 +242,7 @@
             this.ImageCaptCheckbox.TabIndex = 3;
             this.ImageCaptCheckbox.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.ImageCaptCheckbox.UseVisualStyleBackColor = true;
-            this.ImageCaptCheckbox.CheckedChanged += new System.EventHandler(this.ImageCaptCheckbox_CheckedChanged);
+            this.ImageCaptCheckbox.Click += new System.EventHandler(this.ImageCaptCheckbox_CheckedChanged);
             // 
             // tableLayoutPanel5
             // 
@@ -326,9 +327,9 @@
             this.resolutionBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.resolutionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.resolutionBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.resolutionBox.Location = new System.Drawing.Point(214, 10);
+            this.resolutionBox.Location = new System.Drawing.Point(205, 10);
             this.resolutionBox.Name = "resolutionBox";
-            this.resolutionBox.Size = new System.Drawing.Size(121, 24);
+            this.resolutionBox.Size = new System.Drawing.Size(130, 24);
             this.resolutionBox.TabIndex = 5;
             this.resolutionBox.SelectedIndexChanged += new System.EventHandler(this.ResolutionBox_SelectedIndexChanged);
             // 

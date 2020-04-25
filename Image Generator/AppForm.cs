@@ -192,6 +192,7 @@ namespace Image_Generator
                 return;
             }
 
+            this.ImageCaptCheckbox.Checked = !this.ImageCaptCheckbox.Checked;
             this.ImageManager.UseImageCaptioning = this.ImageCaptCheckbox.Checked;
             this.ImageCaptCheckbox.ImageIndex = 1 - this.ImageCaptCheckbox.ImageIndex;
         }
@@ -266,6 +267,7 @@ namespace Image_Generator
             this.ProcessedImages.Visible = true;
             this.ProcessedBar.Visible = true;
             this.ProcessedBar.Value = 0;
+            this.resolutionBox.Enabled = false;
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -468,6 +470,7 @@ namespace Image_Generator
             if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)
             {
                 this.State = GeneratorState.IDLE;
+                this.resolutionBox.Enabled = true;
                 System.GC.Collect();
             }
         }

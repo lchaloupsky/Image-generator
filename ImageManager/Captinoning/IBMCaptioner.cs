@@ -21,6 +21,12 @@ namespace ImageManagment.Captioning
         // Base URL of web service
         private const string BASE_URL = @"http://max-image-caption-generator.max.us-south.containers.appdomain.cloud/model/predict";
 
+        /// <summary>
+        /// Gets captions for image via REST API call to web service
+        /// </summary>
+        /// <param name="image">Image for get captions</param>
+        /// <param name="imageName">Image name</param>
+        /// <returns>List of captions to given image</returns>
         public List<ImageCaption> GetCaptionsFromImage(Image image, string imageName)
         {
             // Get image byte data
@@ -53,10 +59,19 @@ namespace ImageManagment.Captioning
             foreach (JToken caption in parsedJson["predictions"])
                 imageCaptions.Add(new ImageCaption(caption["caption"].ToString(), float.Parse(caption["probability"].ToString())));
 
+            // stop request
             request.Abort();
+
             return imageCaptions;
         }
 
+        /// <summary>
+        /// Creates request stream and writes all necessary data to stream
+        /// </summary>
+        /// <param name="request">Request object</param>
+        /// <param name="imageData">Byte array of image data</param>
+        /// <param name="imageName">Image name</param>
+        /// <param name="boundary">Boundary to distinguish between requests</param>
         private void WriteRequestIntoStream(HttpWebRequest request, byte[] imageData, string imageName, string boundary)
         {
             using (var requestStream = request.GetRequestStream())
@@ -86,12 +101,16 @@ namespace ImageManagment.Captioning
             }
         }
 
+        /// <summary>
+        /// Creates configured http request object
+        /// </summary>
+        /// <param name="boundary">boundary to distiguish between requests</param>
+        /// <returns>Configured http web request</returns>
         private HttpWebRequest CreateRequest(string boundary)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BASE_URL);
             request.Timeout = 10000;
             request.ReadWriteTimeout = 32000;
-            //request.AllowWriteStreamBuffering = false;
             request.KeepAlive = false;
             request.Pipelined = true;
             request.Proxy = null;
@@ -102,6 +121,11 @@ namespace ImageManagment.Captioning
             return request;
         }
 
+        /// <summary>
+        /// Gets image extenstion from given path
+        /// </summary>
+        /// <param name="imagePath">Path to an image</param>
+        /// <returns>Image extension</returns>
         private string GetImageExtensionType(string imagePath)
         {
             string extension = imagePath.Substring(imagePath.LastIndexOf('.') + 1).ToLower();
@@ -110,6 +134,11 @@ namespace ImageManagment.Captioning
             return extension.Equals("jpg") ? "jpeg" : extension;
         }
 
+        /// <summary>
+        /// Gets byte array data from given image
+        /// </summary>
+        /// <param name="image">Image to get the data</param>
+        /// <returns>Byte array of image</returns>
         private byte[] GetImageData(Image image)
         {
             // Save image data into stream and return final stream
@@ -121,6 +150,9 @@ namespace ImageManagment.Captioning
         }
     }
 
+    /// <summary>
+    /// Structure representing one received caption
+    /// </summary>
     public struct ImageCaption
     {
         public string Caption { get; }

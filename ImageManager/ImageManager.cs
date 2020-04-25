@@ -20,8 +20,8 @@ namespace ImageManagment
     {
         private const int CACHE_LIMIT = 1500;
 
-        private Downloader MyDownloader { get; }
-        private FileManager MyManager { get; }
+        private Downloader ImageDownloader { get; }
+        private FileManager FileManager { get; }
         private LimitedDictionary<string, Image> Cache { get; set; }
         private Dictionary<string, object> Locks { get; }
 
@@ -30,8 +30,8 @@ namespace ImageManagment
         public ImageManager()
         {
             string location = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
-            this.MyDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
-            this.MyManager = new FileManager(location);
+            this.ImageDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
+            this.FileManager = new FileManager(location);
             this.Locks = new Dictionary<string, object>();
             this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
         }
@@ -48,14 +48,14 @@ namespace ImageManagment
                 return true;
 
             // Check if image is saved already
-            if (this.MyManager.CheckImageExistence(imageName))
+            if (this.FileManager.CheckImageExistence(imageName))
             {
                 Image image = null;
                 while (image == null)
                 {
                     try
                     {
-                        image = this.MyManager.LoadImage(imageName);
+                        image = this.FileManager.LoadImage(imageName);
 
                         // Add only if not already in cache
                         if (!this.Cache.ContainsKey(imageName))
@@ -97,7 +97,7 @@ namespace ImageManagment
                 // If image is not in cache or in directory, then download it!
                 if (!CheckImageExistence(imageName))
                 {
-                    var image = this.MyDownloader.DownloadImage(imageName, element, this.UseImageCaptioning);
+                    var image = this.ImageDownloader.DownloadImage(imageName, element, this.UseImageCaptioning);
 
                     // Add only if not downloaded
                     if (!this.Cache.ContainsKey(imageName))
@@ -129,7 +129,7 @@ namespace ImageManagment
         /// <param name="newLocation">Location to store image</param>
         public void SaveImage(Image image, string newLocation)
         {
-            this.MyManager.SaveImage(image, newLocation);
+            this.FileManager.SaveImage(image, newLocation);
         }
 
         /// <summary>
@@ -137,8 +137,11 @@ namespace ImageManagment
         /// </summary>
         public void DeleteAllImages()
         {
-            this.Cache.RemoveAll();
-            this.MyManager.DeleteAll();
+            lock (this.Locks)
+            {
+                this.Cache.RemoveAll();
+                this.FileManager.DeleteAll();
+            }
         }
     }
 

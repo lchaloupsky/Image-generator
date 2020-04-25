@@ -36,6 +36,7 @@ namespace ImageManagment
         // Format converter
         private ImageFormatConverter Converter { get; }
 
+        // Semaphore for controlling number of downloaded images at a time 
         private SemaphoreSlim Semaphore { get; }
 
         /// <summary>
@@ -63,20 +64,26 @@ namespace ImageManagment
         /// <param name="imageName"></param>
         /// <returns>New downloaded image</returns>
         public Image DownloadImage(string imageName, string element, bool useImageCaptioning = false)
-        {
-            var tags = this.GetTags(imageName);
-            var imageFind = imageName;
+        {       
             Image image = null;
-            int tryCount = 0;
 
+            // Get tags
+            var tags = this.GetTags(imageName);
+            var imageFind = imageName;      
+
+            int tryCount = 0;
             while (image == null)
             {
+               
                 tryCount++;
+
+                // throw away tags, if Flickr cannot find and image after some number of trials
                 if (tryCount > tags.Length)
                     tags = "";
 
                 try
                 {
+                    // Get objects describing images from Flickr
                     var photos = this.MyFlickr.PhotosSearch(ConfigurePhotoSearchOptions(imageFind, tags));
                     if (photos.Count == 0)
                     {
@@ -94,8 +101,10 @@ namespace ImageManagment
                 }
                 catch (WebException ex)
                 {
-                    // 500 INTERNAL !
+                    // 500 INTERNAL!
                     Console.WriteLine("Network Error");
+
+                    // Not connected to the internet
                     if (ex.Status == WebExceptionStatus.NameResolutionFailure)
                         throw;
                 }
@@ -110,6 +119,12 @@ namespace ImageManagment
             return null;
         }
 
+        /// <summary>
+        /// Downloads one image without captioning
+        /// </summary>
+        /// <param name="photo">Photo Flickr object with urls to the image</param>
+        /// <param name="imageName">Image name</param>
+        /// <returns>Downloaded image</returns>
         private Image GetImage(Photo photo, string imageName)
         {
             string fileName = "";
@@ -124,17 +139,23 @@ namespace ImageManagment
             return new Bitmap(ReturnImageAdress(fileName));
         }
 
+        /// <summary>
+        /// Gets an image with using a captioning 
+        /// </summary>
+        /// <param name="photos">Collection of Flickr photos</param>
+        /// <param name="imageName">Image name</param>
+        /// <returns>Most corresponding image</returns>
         private Image GetBestImage(PhotoCollection photos, string imageName)
         {
             Image bestImage = null;
             long bestRating = int.MaxValue;
-            object imageLock = new object();
 
             // wait until semaphore is free to use
             Semaphore.Wait();
 
             foreach (var photo in photos)
             {
+                // Download image
                 Image image = null;
                 using (WebClient client = new WebClient())
                 {
@@ -143,8 +164,11 @@ namespace ImageManagment
                         image = Image.FromStream(stream);
                 }
 
+                // Get image filneName
                 var fileName = imageName.ToLower() + '.' + Converter.ConvertToString(image.RawFormat);
-                List<ImageCaption> captions = null;
+
+                // Get captions form IBM captioner
+                List<ImageCaption> captions = null;                
                 while (captions == null)
                 {
                     try
@@ -163,24 +187,24 @@ namespace ImageManagment
                     }
                 }
 
+                // Rate received captions
                 long br = int.MaxValue;
-                float probSum = captions.Sum(capt => capt.Probability);
+                float probSum = captions.Sum(capt => capt.Probability);             
                 foreach (var capt in captions)
                 {
                     long rating = (long)(this.LDistanceMeter.CalculateStringDistance(imageName, capt.Caption) / (capt.Probability / probSum));
                     br = rating < br ? rating : br;
                 }
 
-                lock (imageLock)
+                // Checks best rating
+                if (br < bestRating)
                 {
-                    if (br < bestRating)
-                    {
-                        bestImage = image;
-                        bestRating = br;
-                    }
-                    else
-                        image.Dispose();
+                    bestImage = image;
+                    bestRating = br;
                 }
+                else
+                    image.Dispose();
+
             }
 
             // release semaphore
@@ -193,6 +217,13 @@ namespace ImageManagment
             return bestImage;
         }
 
+        /// <summary>
+        /// Gets substring of image name.
+        /// This happens when flickr doesnt return images for original image name.
+        /// </summary>
+        /// <param name="imageName">Original image name</param>
+        /// <param name="element">Base element of image name</param>
+        /// <returns>Image name substring</returns>
         private string GetImageNameSubstring(string imageName, string element)
         {
             var lastCut = imageName.Substring(Math.Max(0, imageName.LastIndexOf(' ')));
@@ -202,6 +233,11 @@ namespace ImageManagment
             return imageName.Substring(0, imageName.LastIndexOf(' '));
         }
 
+        /// <summary>
+        /// Gets tags for given image name
+        /// </summary>
+        /// <param name="imageName">Image name</param>
+        /// <returns>Tags string</returns>
         private string GetTags(string imageName)
         {
             var parts = imageName.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);

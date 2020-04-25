@@ -12,7 +12,7 @@ namespace ImageManagment.Captioning
     public class LDistanceMeter
     {
         /// <summary>
-        /// Calculates standard Levenstein distance of two strings
+        /// Calculates standard Levenstein distance of two strings with dynamic programming
         /// </summary>
         /// <param name="s1">First string</param>
         /// <param name="s2">Second string</param>
