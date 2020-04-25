@@ -115,7 +115,6 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\Nito.Dis
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\System.Collections.Immutable.xml
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image Generator.csprojAssemblyReference.cache
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image Generator.exe.config
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image_Generator.Form1.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image_Generator.Properties.Resources.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image Generator.csproj.GenerateResource.cache
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image Generator.csproj.CoreCompileInputs.cache
@@ -130,3 +129,4 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\ImageGen
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\ImageManager.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\ImagePositioner.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Release\UDPipeParser.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Release\Image_Generator.AppForm.resources

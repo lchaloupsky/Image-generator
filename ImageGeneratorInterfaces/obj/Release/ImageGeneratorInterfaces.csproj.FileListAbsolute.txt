@@ -3,3 +3,4 @@ C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\bin\Release
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Release\ImageGeneratorInterfaces.csproj.CoreCompileInputs.cache
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Release\ImageGeneratorInterfaces.dll
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Release\ImageGeneratorInterfaces.pdb
+C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Release\ImageGeneratorInterfaces.csprojAssemblyReference.cache

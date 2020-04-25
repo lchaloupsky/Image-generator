@@ -1,7 +1,6 @@
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe.config
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Form1.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Properties.Resources.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.GenerateResource.cache
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CoreCompileInputs.cache
@@ -130,3 +129,4 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipePars
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.AppForm.resources

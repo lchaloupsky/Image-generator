@@ -1,6 +1,6 @@
 ﻿namespace Image_Generator
 {
-    partial class Form1
+    partial class AppForm
     {
         /// <summary>
         /// Vyžaduje se proměnná návrháře.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AppForm));
             this.CaptioningChecboxImages = new System.Windows.Forms.ImageList(this.components);
             this.DatasetCheckBoxImages = new System.Windows.Forms.ImageList(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
@@ -223,10 +223,10 @@
             // 
             // ImageCaptCheckbox
             // 
+            this.ImageCaptCheckbox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.ImageCaptCheckbox.Appearance = System.Windows.Forms.Appearance.Button;
             this.ImageCaptCheckbox.BackColor = System.Drawing.Color.Transparent;
             this.ImageCaptCheckbox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ImageCaptCheckbox.Dock = System.Windows.Forms.DockStyle.Right;
             this.ImageCaptCheckbox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.ImageCaptCheckbox.FlatAppearance.BorderSize = 0;
             this.ImageCaptCheckbox.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
@@ -272,10 +272,10 @@
             // 
             // DataSetCheckBox
             // 
+            this.DataSetCheckBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.DataSetCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
             this.DataSetCheckBox.BackColor = System.Drawing.Color.Transparent;
             this.DataSetCheckBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.DataSetCheckBox.Dock = System.Windows.Forms.DockStyle.Right;
             this.DataSetCheckBox.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
             this.DataSetCheckBox.FlatAppearance.BorderSize = 0;
             this.DataSetCheckBox.FlatAppearance.CheckedBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(52)))), ((int)(((byte)(67)))), ((int)(((byte)(120)))));
@@ -326,7 +326,7 @@
             this.resolutionBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.resolutionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.resolutionBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.resolutionBox.Location = new System.Drawing.Point(214, 9);
+            this.resolutionBox.Location = new System.Drawing.Point(214, 10);
             this.resolutionBox.Name = "resolutionBox";
             this.resolutionBox.Size = new System.Drawing.Size(121, 24);
             this.resolutionBox.TabIndex = 5;
@@ -620,7 +620,7 @@
             this.ProcessedBar.TabIndex = 1;
             this.ProcessedBar.Visible = false;
             // 
-            // Form1
+            // AppForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -630,7 +630,7 @@
             this.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1242, 725);
-            this.Name = "Form1";
+            this.Name = "AppForm";
             this.Text = "Image Generator";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);

@@ -46,56 +46,16 @@ namespace Image_Generator.Models
         /// <param name="image">Image to draw</param>
         public void DrawImage(Image image, int x, int y, int width, int height)
         {
-            var dimensions = this.GetProportionalDimensions(image, width, height);
-
-            // Shift to next row of images if current row is fully drawn
-            if (x + dimensions.Item1 > this.DrawField.Width)
-            {
-                x = 0;
-                y += height;
-            }
-
             // Finally drawing of the current image
             lock (image)
                 this.MyGraphics.DrawImage(image, x, y, width, height);
         }
 
         /// <summary>
-        /// Resizes given image dimensions to be correctly proportional 
+        /// Method for setting resolution of drawn image
         /// </summary>
-        /// <param name="image">image to be resized</param>
-        /// <param name="width">width of an object</param>
-        /// <param name="height">height of an object</param>
-        /// <returns>Resized dimensions as Tuple</returns>
-        private Tuple<int, int> GetProportionalDimensions(Image image, int width, int height)
-        {
-            int finalW = width,
-                finalH = height;
-
-            int imgWidth, imgHeight;
-            lock (image)
-            {
-                imgWidth = image.Width;
-                imgHeight = image.Height;
-            }
-
-            // Resizing image dimension if image is larger than max width/height
-            if (image.Width > width)
-            {
-                float ratio = width * 1f / imgWidth;
-                finalW = width;
-                finalH = (int)(imgHeight * ratio);
-            }
-            if (finalH > height)
-            {
-                float ratio = height * 1f / finalH;
-                finalH = height;
-                finalW = (int)(finalW * ratio);
-            }
-
-            return Tuple.Create(finalW, finalH);
-        }
-
+        /// <param name="width">width of image</param>
+        /// <param name="height">height of image</param>
         public void SetResolution(int width, int height)
         {
             this.DrawField = new Bitmap(width, height);
