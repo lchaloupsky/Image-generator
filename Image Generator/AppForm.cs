@@ -267,7 +267,7 @@ namespace Image_Generator
             this.ProcessedImages.Visible = true;
             this.ProcessedBar.Visible = true;
             this.ProcessedBar.Value = 0;
-            this.resolutionBox.Enabled = false;
+            this.resolutionBox.Enabled = false;           
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -275,13 +275,14 @@ namespace Image_Generator
                 string str;
                 int counter = 0;
                 this.ProcessedBar.Maximum = File.ReadAllLines(this.DatasetFileName).Count();
+                this.ShowProcessedImagesCount();
 
                 try
                 {
                     while ((str = streamReader.ReadLine()) != null)
                     {
                         counter++;
-                        this.CreateImageGeneratingTask(str, directory, counter).Start();
+                        this.CreateImageGeneratingTask(str, directory, counter);
                     }
                 }
                 catch (IOException)
@@ -292,16 +293,15 @@ namespace Image_Generator
         }
 
         /// <summary>
-        /// Methods that prepare new Thread Task for generating image
+        /// Method that creates new thread Task for generating image
         /// </summary>
         /// <param name="str">Description of image</param>
         /// <param name="directory">Directory to save</param>
         /// <param name="counter">Dataset image number</param>
-        /// <returns></returns>
-        private Task CreateImageGeneratingTask(string str, string directory, int counter)
+        private void CreateImageGeneratingTask(string str, string directory, int counter)
         {
             // Create new task, that will be running in background
-            return new Task(() =>
+            Task.Run(() =>
             {
                 try
                 {
@@ -325,6 +325,7 @@ namespace Image_Generator
                     // update processed image count
                     this.ProcessedImages.BeginInvoke((Action)(() =>
                     {
+                        this.ProcessedBar.Value++;
                         this.ShowProcessedImagesCount();
                     }));
                 }
@@ -463,8 +464,7 @@ namespace Image_Generator
         /// Auxiliray method for showing actual count of processed images
         /// </summary>
         private void ShowProcessedImagesCount()
-        {
-            this.ProcessedBar.Value++;
+        {            
             this.ProcessedImages.Text = "Processed " + this.ProcessedBar.Value + " / " + this.ProcessedBar.Maximum + " images";
 
             if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)

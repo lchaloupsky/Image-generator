@@ -11,7 +11,9 @@ namespace ImageGeneratorInterfaces.Graph.DrawableElement
     /// </summary>
     public interface IDrawableGroup : IDrawable
     {
-        // Indicator if group is still valid
+        /// <summary>
+        /// Indicator if group is still valid
+        /// </summary>
         bool IsValid { get; set; }
     }
 }

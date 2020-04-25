@@ -12,9 +12,21 @@ namespace ImageGeneratorInterfaces.Edges
     /// </summary>
     public interface IPositionateEdge
     {
+        /// <summary>
+        /// Left vertex of the edge
+        /// </summary>
         IDrawable Left { get; set; }
+
+        /// <summary>
+        /// Right vertex of the edge
+        /// </summary>
         IDrawable Right { get; set; }
 
+        /// <summary>
+        /// Method for positioning edge
+        /// </summary>
+        /// <param name="maxWidth">Maximal width of an image</param>
+        /// <param name="maxHeight">Maximal height of an image</param>
         void Positionate(int maxWidth, int maxHeight);
     }
 }
