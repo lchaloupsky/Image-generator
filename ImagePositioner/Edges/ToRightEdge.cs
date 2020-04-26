@@ -9,35 +9,31 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 
 namespace ImagePositioner.Edges
 {
+    /// <summary>
+    /// Represents "to right", etc. relations
+    /// </summary>
     class ToRightEdge : AbsoluteEdge
     {
-        private IDrawable LastElement { get; set; }
-
-        public ToRightEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.VERTICAL) { }
+        public ToRightEdge() : base(PlaceType.VERTICAL) { }
 
         protected override void PositionateAgainstRoot(int maxWidth, int maxHeight)
         {
-            this.Left.Position = new Vector2(maxWidth - this.Left.Width, this.GetShift(maxHeight, this.Left.Height));
+            this.Left.Position = new Vector2(maxWidth - this.Left.Width, this.PositionHelper.GetShiftToCenterVertex(maxHeight, this.Left.Height));
         }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            this.Right.Position = this.Left.Position - new Vector2(this.Right.Width, this.GetShift(this.Right.Height, this.Left.Height));
+            this.Right.Position = this.Left.Position - new Vector2(this.Right.Width, this.PositionHelper.GetShiftToCenterVertex(this.Right.Height, this.Left.Height));
         }
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.Left.Position = this.Right.Position + new Vector2(this.Right.Width, this.GetShift(this.Right.Height, this.Left.Height));
+            this.Left.Position = this.Right.Position + new Vector2(this.Right.Width, this.PositionHelper.GetShiftToCenterVertex(this.Right.Height, this.Left.Height));
         }
 
         public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
         {
-            this.LastElement = this.LastElement ?? this.Left;
-            var newEdge = new UnderEdge();
-            newEdge.Add(this.LastElement, edge.Left);
-            this.LastElement = edge.Left;
-
-            return newEdge;
+            return this.ResolveConflictWithGivenEdge(edge.Left, new UnderEdge());
         }
     }
 }

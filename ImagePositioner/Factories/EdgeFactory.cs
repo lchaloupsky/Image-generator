@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace ImagePositioner.Factories
 {
+    /// <summary>
+    /// Implementation of IEdgeFactory interface
+    /// </summary>
     public class EdgeFactory : IEdgeFactory
     {
         public IAbsolutePositionateEdge Create<T1>(T1 left, List<string> adpositions) where T1 : IDrawable, IProcessable
@@ -50,6 +53,15 @@ namespace ImagePositioner.Factories
             return edge;
         }
 
+        /// <summary>
+        /// Tries to create edge with given adpositions 
+        /// </summary>
+        /// <typeparam name="T1">Left vertex type</typeparam>
+        /// <typeparam name="T2">Right vertex type</typeparam>
+        /// <param name="left">Left vertex</param>
+        /// <param name="right">Right vertex</param>
+        /// <param name="adpositions">Adposition list</param>
+        /// <returns>Edge if exists for given adpositions. Else null.</returns>
         private Edge Create<T1, T2>(T1 left, T2 right, List<string> adpositions)
             where T1 : IDrawable, IProcessable
             where T2 : IDrawable, IProcessable
@@ -67,6 +79,11 @@ namespace ImagePositioner.Factories
             return edge;
         }
 
+        /// <summary>
+        /// Creates absolute edges
+        /// </summary>
+        /// <param name="edgeType">adposition or adpositinal phrase</param>
+        /// <returns>Edge if exists for given edgeType</returns>
         private AbsoluteEdge GetOneSidedEdge(string edgeType)
         {
             switch (edgeType)
@@ -108,6 +125,11 @@ namespace ImagePositioner.Factories
             }
         }
 
+        /// <summary>
+        /// Creates two sided edge if exists
+        /// </summary>
+        /// <param name="edgeType">adposition or adpositional phrase</param>
+        /// <returns>Edge coresponding to edgeType</returns>
         private Edge GetEdge(string edgeType)
         {
             switch (edgeType)
@@ -187,6 +209,11 @@ namespace ImagePositioner.Factories
             }
         }
 
+        /// <summary>
+        /// Method for creating corner edges.
+        /// </summary>
+        /// <param name="type">corner edge type</param>
+        /// <returns>Corner edge or null.</returns>
         private Edge GetCornerEdge(string type)
         {
             switch (type)
@@ -221,6 +248,12 @@ namespace ImagePositioner.Factories
             }
         }
 
+        /// <summary>
+        /// Checks if parameter is subject
+        /// </summary>
+        /// <typeparam name="T1">Vertex type</typeparam>
+        /// <param name="parameter">Vertex</param>
+        /// <returns>True if its subject</returns>
         private bool CheckIfParameterIsSubject<T1>(T1 parameter) where T1 : IDrawable, IProcessable
         {
             return parameter.DependencyType == "nsubj";

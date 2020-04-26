@@ -47,7 +47,6 @@
     <Compile Include="Edges\AtBottomEdge.cs" />
     <Compile Include="Edges\AtEdge.cs" />
     <Compile Include="Edges\BehindEdge.cs" />
-    <Compile Include="Edges\DefaultEdge.cs" />
     <Compile Include="Edges\Edge.cs" />
     <Compile Include="Edges\InCornerEdge.cs" />
     <Compile Include="Edges\InEdge.cs" />
@@ -60,6 +59,9 @@
     <Compile Include="Edges\ToRightEdge.cs" />
     <Compile Include="Edges\UnderEdge.cs" />
     <Compile Include="Factories\EdgeFactory.cs" />
+    <Compile Include="Helpers\ConflictHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
+    <Compile Include="Helpers\PositionHelper.cs" />
     <Compile Include="Positioner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using ImageGeneratorInterfaces.Edges;
+using ImagePositioner.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,33 +9,45 @@ using System.Threading.Tasks;
 
 namespace ImagePositioner.Edges
 {
-    class OnCornerEdge : AbsoluteEdge
+    /// <summary>
+    /// Represents "on corner", "on corner of" relations
+    /// </summary>
+    class OnCornerEdge : Edge
     {
+        // Max left width
         private int MaxWidth { get => (int)(this.Right.Width * 0.75); }
+
+        // Max left height
         private int MaxHeight { get => (int)(this.Right.Height * 0.75); }
 
+        // Enum helper
+        private EnumHelper EnumHelper { get; } = new EnumHelper();
+
+        // Vertical position type
         private VerticalPlace Vertical { get; }
+
+        // Horizontal position type
         private HorizontalPlace Horizontal { get; }
 
-        public OnCornerEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER) 
+        public OnCornerEdge()
         {
-            this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
-            this.Vertical = this.GetRandomEnum<VerticalPlace>();
+            this.Horizontal = this.EnumHelper.GetRandomEnum<HorizontalPlace>();
+            this.Vertical = this.EnumHelper.GetRandomEnum<VerticalPlace>();
         }
 
-        public OnCornerEdge(VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public OnCornerEdge(VerticalPlace vertical)
         {
             this.Vertical = vertical;
-            this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
+            this.Horizontal = this.EnumHelper.GetRandomEnum<HorizontalPlace>();
         }
 
-        public OnCornerEdge(HorizontalPlace horizontal) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public OnCornerEdge(HorizontalPlace horizontal)
         {
             this.Horizontal = horizontal;
-            this.Vertical = this.GetRandomEnum<VerticalPlace>();
+            this.Vertical = this.EnumHelper.GetRandomEnum<VerticalPlace>();
         }
 
-        public OnCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public OnCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical)
         {
             this.Vertical = vertical;
             this.Horizontal = horizontal;
@@ -48,8 +61,8 @@ namespace ImagePositioner.Edges
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
-            this.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
             this.Left.ZIndex++;
             this.PlaceLeft(this.Right.Width, this.Right.Height);
         }
@@ -58,8 +71,8 @@ namespace ImagePositioner.Edges
         {
             // Place it in the middle
             var rightPos = this.Right?.Position ?? new Vector2(0, 0);
-            this.Left.Position = rightPos + new Vector2(this.GetShift(RightWidth, this.Left.Width),
-                                                                   this.GetShift(RightHeight, this.Left.Height));
+            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(RightWidth, this.Left.Width),
+                                                        this.PositionHelper.GetShiftToCenterVertex(RightHeight, this.Left.Height));
 
             // Do shift to the right side
             Vector2 shift = (Vector2)(this.Left.Position - rightPos  + new Vector2(this.Left.Width, this.Left.Height) / 2 );
@@ -69,17 +82,6 @@ namespace ImagePositioner.Edges
                 shift.X *= -1;
 
             this.Left.Position += shift;
-        }
-
-        private T GetRandomEnum<T>()
-        {
-            Array values = Enum.GetValues(typeof(T));
-            return (T)values.GetValue(new Random().Next(values.Length));
-        }
-
-        public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
-        {
-            throw new NotImplementedException();
         }
     }
 }

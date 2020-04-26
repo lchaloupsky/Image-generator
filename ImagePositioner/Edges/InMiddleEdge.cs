@@ -9,19 +9,23 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 
 namespace ImagePositioner.Edges
 {
+    /// <summary>
+    /// Represents "in middle", etc. relations
+    /// </summary>
     class InMiddleEdge : AbsoluteEdge
     {
+        // Max left width
         private int MaxWidth { get => this.Right.Width / 2; }
+
+        // Max left height
         private int MaxHeight { get => this.Right.Height / 2; }
-        private const int MaxInRow = 3;
 
-        private IDrawable LastElement { get; set; } = null;
-
-        public InMiddleEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.MIDDLE) { }
+        public InMiddleEdge() : base(PlaceType.MIDDLE) { }
 
         protected override void PositionateAgainstRoot(int maxWidth, int maxHeight)
         {
-            this.Left.Position = new Vector2(this.GetShift(maxWidth, this.Left.Width), this.GetShift(maxHeight, this.Left.Height));
+            this.Left.Position = new Vector2(this.PositionHelper.GetShiftToCenterVertex(maxWidth, this.Left.Width), 
+                                             this.PositionHelper.GetShiftToCenterVertex(maxHeight, this.Left.Height));
         }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
@@ -32,21 +36,17 @@ namespace ImagePositioner.Edges
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
-            this.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
             this.Left.ZIndex++;
             this.Left.Position = this.Right.Position
-                               + new Vector2(this.GetShift(this.Right.Width, this.Left.Width), this.GetShift(this.Right.Height, this.Left.Height));
+                               + new Vector2(this.PositionHelper.GetShiftToCenterVertex(this.Right.Width, this.Left.Width), 
+                                             this.PositionHelper.GetShiftToCenterVertex(this.Right.Height, this.Left.Height));
         }
 
         public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
         {
-            this.LastElement = this.LastElement ?? this.Left;
-            var newEdge = new ToLeftEdge();
-            newEdge.Add(this.LastElement, edge.Left);
-            this.LastElement = edge.Left;
-
-            return newEdge;
+            return this.ResolveConflictWithGivenEdge(edge.Left, new ToLeftEdge());
         }
     }
 }

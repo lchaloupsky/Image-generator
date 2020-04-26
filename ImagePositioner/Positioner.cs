@@ -1,6 +1,7 @@
 ﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
+using ImagePositioner.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,12 +17,16 @@ namespace ImagePositioner
     /// </summary>
     public class Positioner
     {
-        // properties
-        private PositionHelper Helper { get; }
+        // Position helper
+        private PositionHelper PositionHelper { get; }
+
+        // Helper for resolving conflicts
+        private ConflictHelper ConflictHelper { get; }
 
         public Positioner()
         {
-            this.Helper = new PositionHelper();
+            this.PositionHelper = new PositionHelper();
+            this.ConflictHelper = new ConflictHelper();
         }
 
         /// <summary>
@@ -33,7 +38,7 @@ namespace ImagePositioner
         public void Positionate(ISentenceGraph graph, int width, int height)
         {
             // Setting helpers properties
-            this.Helper.SetProperties(width, height);
+            this.PositionHelper.SetProperties(width, height);
 
             // Positionate all Edges first
             this.PositionateAllEdges(graph, width, height);
@@ -42,12 +47,15 @@ namespace ImagePositioner
             this.ResolveConflicts(graph, width, height);
 
             // Final not abolute positioned vertices centering
-            this.CenterVertices(graph.Groups.Where(g => !g.IsFixed), width, height);
+            this.PositionHelper.CenterVertices(graph.Groups.Where(g => !g.IsFixed), width, height);
 
+            // OPT 1. ?
+            // Center and fit absolute vertices
+            this.PositionHelper.CenterVertices(graph.Groups.Where(g => g.IsFixed), width, height, true);
 
-            this.CenterVertices(graph.Groups.Where(g => g.IsFixed), width, height, true);
+            // OPT 2. ?
             // Rescale absolute vertices
-            //this.RescaleAndFitAbsoluteVertices(graph.Groups.Where(g => g.IsFixed), width, height);
+            //this.PositionHelper.RescaleAndFitAbsoluteVertices(graph.Groups.Where(g => g.IsFixed), width, height);
         }
 
         /// <summary>
@@ -58,71 +66,49 @@ namespace ImagePositioner
         /// <param name="height">screen height</param>
         private void ResolveConflicts(ISentenceGraph graph, int width, int height)
         {
+            // positionate absolute edges and get absolute groups
             var absoluteGroups = this.PositionateAbsoluteEdges(graph, width, height);
-            bool isPositioned = false;
+            bool isPositionedCorrectly = false;
 
             // While there is some conflict, check positions
-            while (!isPositioned)
+            while (!isPositionedCorrectly)
             {
-                isPositioned = true;
+                isPositionedCorrectly = true;
                 foreach (var vertex in graph.Groups)
                 {
-                    // check conflicts ---> repositionate(move)
-                    if (vertex.IsPositioned)
-                    {
-                        var conflicts = this.Helper.GetConflictingVertices(vertex, graph.Groups);
-                        if (conflicts.Count != 0)
-                        {
-                            isPositioned = false;
+                    // skip unpositioned vertices
+                    if (!vertex.IsPositioned)
+                        continue;
 
-                            //move conflicts to the right
-                            foreach (var conflictVertex in conflicts)
-                            {
-                                if (vertex.IsFixed)
-                                    this.ResolveAbsoluteConflict(vertex, conflictVertex, absoluteGroups[vertex], absoluteGroups[conflictVertex], width, height);
-                                else
-                                    conflictVertex.Position += this.Helper.GetShift(vertex, conflictVertex);
-                            }
-                        }
+                    // check conflicts ---> repositionate(move)
+                    var conflicts = this.ConflictHelper.GetConflictingVertices(vertex, graph.Groups);
+
+                    // continue if no conflicts were found
+                    if (conflicts.Count == 0)
+                        continue;
+
+                    // -------resolve conflicts--------
+                    isPositionedCorrectly = false;
+                    foreach (var conflictVertex in conflicts)
+                    {
+                        // resolve absolute conflicts
+                        if (vertex.IsFixed)
+                            this.ConflictHelper.ResolveAbsoluteConflict(vertex, conflictVertex, absoluteGroups[vertex], absoluteGroups[conflictVertex], width, height);
+                        // move conflicts to the right
+                        else
+                            conflictVertex.Position += this.ConflictHelper.GetShift(vertex, conflictVertex);
                     }
                 }
             }
         }
 
-        private void ResolveAbsoluteConflict(IDrawable left, IDrawable right, PlaceType leftPlace, PlaceType rightPlace, int width, int height)
-        {
-            if (leftPlace == PlaceType.CORNER)
-            {
-                if (rightPlace == PlaceType.CORNER)
-                    this.Helper.ResolveCornerConflict(left, right, width, height);
-
-                else if (rightPlace == PlaceType.VERTICAL)
-                    this.Helper.ResolveVerticalConflict(left, right);
-
-                else
-                    this.Helper.ResolveHorizontalConflict(left, right);
-            }
-
-            if (leftPlace == PlaceType.HORIZONTAL)
-            {
-                if (rightPlace == PlaceType.MIDDLE)
-                    this.Helper.ResolveVerticalConflict(left, right);
-                else
-                    this.Helper.ResolveHorizontalConflict(left, right);
-            }
-
-            if (leftPlace == PlaceType.MIDDLE)
-                this.Helper.ResolveHorizontalConflict(left, right);
-
-            if (leftPlace == PlaceType.VERTICAL)
-            {
-                if (rightPlace == PlaceType.MIDDLE)
-                    this.Helper.ResolveHorizontalConflict(left, right);
-                else
-                    this.Helper.ResolveVerticalConflict(left, right);
-            }
-        }
-
+        /// <summary>
+        /// Postionates all absolute edges
+        /// </summary>
+        /// <param name="graph">Sentence graph</param>
+        /// <param name="width">Max width</param>
+        /// <param name="height">Max height</param>
+        /// <returns>Absolute groups of vertices</returns>
         private Dictionary<IDrawable, PlaceType> PositionateAbsoluteEdges(ISentenceGraph graph, int width, int height)
         {
             var dict = new Dictionary<IDrawable, PlaceType>();
@@ -158,7 +144,7 @@ namespace ImagePositioner
 
                 // assign random new position if vertex is independent
                 if (vertex.Position == null)
-                    vertex.Position = this.Helper.GetEmptyPosition();
+                    vertex.Position = this.PositionHelper.GetEmptyPosition(vertex);
             }
 
             // Getting final vertex "groups" after positioning
@@ -203,363 +189,11 @@ namespace ImagePositioner
 
                 // Assign new free position to the right vertex
                 if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
-                    edge.Right.Position = this.Helper.GetEmptyPosition();
+                    edge.Right.Position = this.PositionHelper.GetEmptyPosition(edge.Right);
 
                 // Edge positioning itself
                 edge.Positionate(width, height);
             }
-        }
-
-        /// <summary>
-        /// Method for positionate graph via regular pass
-        /// </summary>
-        /// <param name="graph">Graph to positionate</param>
-        /// <param name="vertex">Vertex to positionate</param>
-        /// <param name="width">sreen width</param>
-        /// <param name="height">screen height</param>
-        public void PositionateRegular(ISentenceGraph graph, IDrawable vertex, int width, int height)
-        {
-            // Linear pass to positionate all vertices and all edges
-            foreach (var edge in graph[vertex])
-            {
-                // Assign new free position to the right vertex
-                if (edge.Right != null && !edge.Right.IsPositioned && !edge.Left.IsPositioned)
-                    edge.Right.Position = this.Helper.GetEmptyPosition();
-
-                // Edge positioning itself
-                edge.Positionate(width, height);
-            }
-
-            // if vertex does not have any connected edges(its groups as itself)
-            if (vertex.Position == null)
-                vertex.Position = this.Helper.GetEmptyPosition();
-
-        }
-
-        /// <summary>
-        /// Help function for centering vertices in image
-        /// </summary>
-        /// <param name="vertices">Vertices to be centered</param>
-        /// <param name="width">Maximal width</param>
-        /// <param name="height">Maximal height</param>
-        private void CenterVertices(IEnumerable<IDrawable> vertices, int width, int height, bool absolute = false)
-        {
-            if (vertices.Count() == 0)
-                return;
-
-            // set inital vertices
-            IDrawable leftMost = vertices.First(),
-                      rightMost = leftMost,
-                      topMost = leftMost,
-                      bottomMost = leftMost;
-
-            // get most edgy vertices
-            foreach (var vertex in vertices)
-            {
-                // skip fixed vertices
-                int vX = (int)vertex.Position.Value.X;
-                int vY = (int)vertex.Position.Value.Y;
-
-                // check most edgy vertices
-                leftMost = leftMost.Position.Value.X < vX ? leftMost : vertex;
-                rightMost = rightMost.Position.Value.X + rightMost.Width > vX + vertex.Width ? rightMost : vertex;
-                topMost = topMost.Position.Value.Y < vY ? topMost : vertex;
-                bottomMost = bottomMost.Position.Value.Y + bottomMost.Height > vY + vertex.Height ? bottomMost : vertex;
-            }
-
-            // if total vertices width is > width --> rescale
-            int totalW = (int)(rightMost.Position.Value.X + rightMost.Width - leftMost.Position.Value.X);
-            if (totalW > width)
-                this.RescaleVertices(vertices, totalW, width);
-
-            // if total vertices height is > height --> rescale
-            int totalH = (int)(bottomMost.Position.Value.Y + bottomMost.Height - topMost.Position.Value.Y);
-            if (totalH > height)
-                this.RescaleVertices(vertices, totalH, height);
-
-            // adding final shift to center vertices
-            Vector2 finalShift;
-            if (!absolute)
-                finalShift = new Vector2(this.GetPaddingX(leftMost, rightMost, width), this.GetPaddingY(topMost, bottomMost, height));
-            else
-                finalShift = new Vector2(Math.Abs(Math.Min(leftMost.Position.Value.X, 0)), Math.Abs(Math.Min(topMost.Position.Value.Y, 0)));
-            foreach (var vertex in vertices)
-            {
-                // shift vertex
-                vertex.Position += finalShift;
-            }
-        }
-
-        public void RescaleAndFitAbsoluteVertices(IEnumerable<IDrawable> vertices, int width, int height)
-        {
-            // Rescale vertices if they are bigger than borders
-            foreach (var vertex in vertices)
-            {
-                if (vertex.Width > width)
-                    RescaleVertex(vertex, width / (vertex.Width * 1f));
-
-                if (vertex.Height > height)
-                    RescaleVertex(vertex, height / (vertex.Height * 1f));
-
-                vertex.Position = new Vector2(Math.Abs(Math.Max(vertex.Position.Value.X, 0)), Math.Abs(Math.Max(vertex.Position.Value.Y, 0)));
-            }
-        }
-
-        /// <summary>
-        /// Help function to get shift to center image in X dimension
-        /// </summary>
-        /// <param name="left">Most left element</param>
-        /// <param name="right">Most right element</param>
-        /// <param name="width">Maximal image width</param>
-        /// <returns>Shift value</returns>
-        private float GetPaddingX(IDrawable left, IDrawable right, int width)
-        {
-            return GetPadding(left.Position.Value.X, right.Position.Value.X, right.Width, width);
-        }
-
-        /// <summary>
-        /// Help function to get shift to center image in Y dimension
-        /// </summary>
-        /// <param name="top">Most left element</param>
-        /// <param name="bottom">Most right element</param>
-        /// <param name="height">Maximal image width</param>
-        /// <returns>Shift value</returns>
-        private float GetPaddingY(IDrawable top, IDrawable bottom, int height)
-        {
-            return GetPadding(top.Position.Value.Y, bottom.Position.Value.Y, bottom.Height, height);
-        }
-
-        /// <summary>
-        /// Help function for calculation shift
-        /// </summary>
-        /// <param name="firstPos">first position</param>
-        /// <param name="secondPos">Second position</param>
-        /// <param name="secondDim">Second dimension value</param>
-        /// <param name="max">Maximal value</param>
-        /// <returns>Calculated shift</returns>
-        private float GetPadding(float firstPos, float secondPos, float secondDim, int max)
-        {
-            if (firstPos == secondPos)
-                return firstPos < 0 ? (max - secondDim) / 2 - firstPos : (max - secondDim) / 2 - firstPos;
-
-            float firstDist = Math.Abs(firstPos);
-            float secondDist = Math.Abs(max - (secondPos + secondDim));
-            float padding = (firstPos > 0 && secondPos + secondDim <= max) ? (firstDist - secondDist) / 2 : (firstDist + secondDist) / 2;
-
-            return firstDist > secondDist ? (firstPos < 0 ? padding : -padding) : (secondPos + secondDim > max ? -padding : padding);
-        }
-
-        /// <summary>
-        /// Help function for rescaling vertices
-        /// </summary>
-        /// <param name="vertices">Verctices to be scaled</param>
-        /// <param name="total">Total value</param>
-        /// <param name="limit">MAximal allowed value</param>
-        private void RescaleVertices(IEnumerable<IDrawable> vertices, int total, int limit)
-        {
-            float factor = (1f * limit) / total;
-
-            // rescale all vertices with factor
-            foreach (var vertex in vertices)
-                RescaleVertex(vertex, factor);
-        }
-
-        private void RescaleVertex(IDrawable vertex, float factor)
-        {
-            vertex.Width = (int)(vertex.Width * factor);
-            vertex.Height = (int)(vertex.Height * factor);
-            vertex.Position *= factor;
-            vertex.Position = new Vector2((float)Math.Floor(vertex.Position.Value.X), (float)Math.Floor(vertex.Position.Value.Y));
-        }
-    }
-
-    /// <summary>
-    /// Helper for position operations
-    /// </summary>
-    class PositionHelper
-    {
-        // screen dimensions
-        public int Width { get; set; }
-        public int Height { get; set; }
-
-        // Default object dimensions
-        private const int defaultWidth = 180;
-        private const int defaultHeight = 120;
-
-        // default shift
-        private const int defaultShiftPadding = 60;
-
-        // other properties
-        private Random Random { get; } = new Random();
-        private Vector2? NewEmptyPosition { get; set; } = null;
-
-        /// <summary>
-        /// Method that returns new empty position
-        /// </summary>
-        /// <returns>new empty position</returns>
-        public Vector2? GetEmptyPosition()
-        {
-            if (this.NewEmptyPosition == null)
-                return this.NewEmptyPosition = new Vector2(this.Width / 2 - (defaultWidth / 2), 2 * this.Height / 3);
-
-            //Stupid move to the right
-            this.NewEmptyPosition += new Vector2(defaultWidth + Random.Next(-defaultShiftPadding, defaultShiftPadding) + 1,
-                                                 Random.Next(-defaultShiftPadding, defaultShiftPadding));
-            // Return new position
-            return this.NewEmptyPosition;
-        }
-
-        /// <summary>
-        /// Return vertices of graph that are in conflict
-        /// </summary>
-        /// <param name="vertex">Vertex to check</param>
-        /// <param name="vertices">All vertices</param>
-        /// <returns>Conflicting vertices</returns>
-        public List<IDrawable> GetConflictingVertices(IDrawable vertex, IEnumerable<IDrawable> vertices)
-        {
-            List<IDrawable> conflicts = new List<IDrawable>();
-            foreach (var vert in vertices)
-            {
-                // skip vertex itself and fixed vertices
-                if (vert == vertex || vert.IsFixed != vertex.IsFixed)
-                    continue;
-
-                // check conflict
-                if (this.CheckConflict(vert, vertex))
-                    conflicts.Add(vert);
-            }
-
-            return conflicts;
-        }
-
-        /// <summary>
-        /// Method for resolving conflicts
-        /// </summary>
-        /// <param name="vertex">Vertex to resolve</param>
-        /// <param name="conflictVertex">Conflict vertex</param>
-        public void ResolveHorizontalConflict(IDrawable vertex, IDrawable conflictVertex)
-        {
-            // Resolving by both vertices shifting by a half
-            IDrawable left = vertex.Position.Value.X <= conflictVertex.Position.Value.X ? vertex : conflictVertex;
-            IDrawable right = left == vertex ? conflictVertex : vertex;
-
-            // shift
-            Vector2 overlap = GetOverlapX(left, right);
-            left.Position -= overlap / 2;
-            right.Position += overlap / 2;
-        }
-
-        /// <summary>
-        /// Method for resolving conflicts
-        /// </summary>
-        /// <param name="vertex">Vertex to resolve</param>
-        /// <param name="conflictVertex">Conflict vertex</param>
-        public void ResolveVerticalConflict(IDrawable vertex, IDrawable conflictVertex)
-        {
-            // Resolving by both vertices shifting by a half
-            IDrawable left = vertex.Position.Value.Y <= conflictVertex.Position.Value.Y ? vertex : conflictVertex;
-            IDrawable right = left == vertex ? conflictVertex : vertex;
-
-            // shift
-            Vector2 overlap = GetOverlapY(left, right);
-            left.Position -= overlap / 2;
-            right.Position += overlap / 2;
-        }
-
-        /// <summary>
-        /// Method for resolving conflicts
-        /// </summary>
-        /// <param name="vertex">Vertex to resolve</param>
-        /// <param name="conflictVertex">Conflict vertex</param>
-        public void ResolveCornerConflict(IDrawable vertex, IDrawable conflictVertex, int width, int height)
-        {
-            var vertexPosition = vertex.Position.Value;
-            var conflictPosition = vertex.Position.Value;
-
-            if ((vertexPosition.Y == 0 && conflictPosition.Y == 0)
-                || (vertexPosition.Y + vertex.Height == height && conflictPosition.Y + conflictVertex.Height == height
-                    && vertex.Height != height && conflictVertex.Height != height))
-                ResolveHorizontalConflict(vertex, conflictVertex);
-
-            if ((vertexPosition.X == 0 && conflictPosition.X == 0)
-                || (vertexPosition.X + vertex.Width == width && conflictPosition.X + conflictVertex.Width == width))
-                ResolveVerticalConflict(vertex, conflictVertex);
-        }
-
-        /// <summary>
-        /// Method that return needed shift
-        /// </summary>
-        /// <param name="vertex1">First vertex</param>
-        /// <param name="vertex2">Second vertex</param>
-        /// <returns>Vector that represents the shift</returns>
-        public Vector2 GetShift(IDrawable vertex1, IDrawable vertex2)
-        {
-            return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding, 0);
-        }
-
-        /// <summary>
-        /// Method that return how much are vertices overlapping in X dimension
-        /// </summary>
-        /// <param name="vertex1">First vertex</param>
-        /// <param name="vertex2">Second vertex</param>
-        /// <returns>Overlap vector</returns>
-        private Vector2 GetOverlapX(IDrawable vertex1, IDrawable vertex2)
-        {
-            return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding), 0);
-        }
-
-        /// <summary>
-        /// Method that return how much are vertices overlapping in X dimension
-        /// </summary>
-        /// <param name="vertex1">First vertex</param>
-        /// <param name="vertex2">Second vertex</param>
-        /// <returns>Overlap vector</returns>
-        private Vector2 GetOverlapY(IDrawable vertex1, IDrawable vertex2)
-        {
-            return new Vector2(0, (float)Math.Ceiling(vertex1.Position.Value.Y + vertex1.Height - vertex2.Position.Value.Y));
-        }
-
-        /// <summary>
-        /// Method that determines if vertices are in conflict
-        /// </summary>
-        /// <param name="vertex1">First vertex</param>
-        /// <param name="vertex2">Second vertex</param>
-        /// <returns>True if they are in conflict</returns>
-        private bool CheckConflict(IDrawable vertex1, IDrawable vertex2)
-        {
-            // initial assigns
-            float x1 = vertex1.Position.Value.X;
-            float y1 = vertex1.Position.Value.Y;
-
-            float x2 = vertex2.Position.Value.X;
-            float y2 = vertex2.Position.Value.Y;
-
-            // If in z-axis are distinct
-            if (vertex1.ZIndex != vertex2.ZIndex)
-                return false;
-
-            // If in x-axis are distinct
-            if (x1 >= x2 + vertex2.Width || x1 + vertex1.Width <= x2)
-                return false;
-
-            // If in y-axis are distinct
-            if (y1 >= y2 + vertex2.Height || y1 + vertex1.Height <= y2)
-                return false;
-
-            // they overlap
-            return true;
-        }
-
-        /// <summary>
-        /// Method that sets properties of helper
-        /// </summary>
-        /// <param name="width">screen width</param>
-        /// <param name="height">screen height</param>
-        public void SetProperties(int width, int height)
-        {
-            this.Width = width;
-            this.Height = height;
-            this.NewEmptyPosition = null;
-        }
+        }   
     }
 }

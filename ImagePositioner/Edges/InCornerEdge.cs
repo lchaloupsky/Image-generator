@@ -6,38 +6,49 @@ using System.Text;
 using System.Threading.Tasks;
 using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
+using ImagePositioner.Helpers;
 
 namespace ImagePositioner.Edges
 {
+    /// <summary>
+    /// Represents "in corner", "in corner of", etc. relation
+    /// </summary>
     class InCornerEdge : AbsoluteEdge
     {
+        // Max left width
         private int MaxWidth { get => this.Right.Width / 2; }
+
+        // Max left height
         private int MaxHeight { get => this.Right.Height / 2; }
 
+        // Enum helper
+        private EnumHelper EnumHelper { get; } = new EnumHelper();
+
+        // Vertical position tyoe
         private VerticalPlace Vertical { get; }
+
+        // Horizontal position type
         private HorizontalPlace Horizontal { get; }
 
-        private IDrawable LastElement { get; set; }
-
-        public InCornerEdge() : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public InCornerEdge() : base(PlaceType.CORNER)
         {
-            this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
-            this.Vertical = this.GetRandomEnum<VerticalPlace>();
+            this.Horizontal = this.EnumHelper.GetRandomEnum<HorizontalPlace>();
+            this.Vertical = this.EnumHelper.GetRandomEnum<VerticalPlace>();
         }
 
-        public InCornerEdge(VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public InCornerEdge(VerticalPlace vertical) : base(PlaceType.CORNER)
         {
             this.Vertical = vertical;
-            this.Horizontal = this.GetRandomEnum<HorizontalPlace>();
+            this.Horizontal = this.EnumHelper.GetRandomEnum<HorizontalPlace>();
         }
 
-        public InCornerEdge(HorizontalPlace horizontal) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public InCornerEdge(HorizontalPlace horizontal) : base(PlaceType.CORNER)
         {
             this.Horizontal = horizontal;
-            this.Vertical = this.GetRandomEnum<VerticalPlace>();
+            this.Vertical = this.EnumHelper.GetRandomEnum<VerticalPlace>();
         }
 
-        public InCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical) : base(ImageGeneratorInterfaces.Edges.PlaceType.CORNER)
+        public InCornerEdge(HorizontalPlace horizontal, VerticalPlace vertical) : base(PlaceType.CORNER)
         {
             this.Vertical = vertical;
             this.Horizontal = horizontal;
@@ -57,8 +68,8 @@ namespace ImagePositioner.Edges
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            this.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
-            this.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxWidth, this.Left.Width, this.Left);
+            this.PositionHelper.RescaleWithMax(this.MaxHeight, this.Left.Height, this.Left);
             this.Left.ZIndex++;
             this.PlaceLeft(this.Right.Width, this.Right.Height);
         }
@@ -67,8 +78,8 @@ namespace ImagePositioner.Edges
         {
             // Place it in the middle
             var rightPos = this.Right?.Position ?? new Vector2(0, 0);
-            this.Left.Position = rightPos + new Vector2(this.GetShift(RightWidth, this.Left.Width),
-                                                                   this.GetShift(RightHeight, this.Left.Height));
+            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(RightWidth, this.Left.Width),
+                                                        this.PositionHelper.GetShiftToCenterVertex(RightHeight, this.Left.Height));
 
             // Do shift to the right side
             Vector2 shift = (Vector2)(this.Left.Position - rightPos);
@@ -80,24 +91,13 @@ namespace ImagePositioner.Edges
             this.Left.Position += shift;
         }
 
-        private T GetRandomEnum<T>()
-        {
-            Array values = Enum.GetValues(typeof(T));
-            return (T)values.GetValue(new Random().Next(values.Length));
-        }
-
         public override IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge)
         {
             var cornerEdge = (InCornerEdge)edge;
             if (cornerEdge.Horizontal != this.Horizontal || cornerEdge.Vertical != this.Vertical)
                 return null;
 
-            this.LastElement = this.LastElement ?? this.Left;
-            var newEdge = new ToLeftEdge();
-            newEdge.Add(this.LastElement, edge.Left);
-            this.LastElement = edge.Left;
-
-            return newEdge;
+            return this.ResolveConflictWithGivenEdge(edge.Left, new ToLeftEdge());
         }
     }
 }
