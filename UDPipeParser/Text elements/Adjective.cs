@@ -9,8 +9,12 @@ using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents adjective part of speech
+    /// </summary>
     public class Adjective : Element
     {
+        // List of extensions to this element
         public List<Element> Extensions { get; }
 
         public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
@@ -18,7 +22,7 @@ namespace UDPipeParsing.Text_elements
             this.Extensions = new List<Element>();
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -33,6 +37,8 @@ namespace UDPipeParsing.Text_elements
 
             return this;
         }
+
+        #region Processing concrete elements
 
         protected virtual IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
@@ -61,9 +67,10 @@ namespace UDPipeParsing.Text_elements
         protected virtual IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
             this.Extensions.Add(adv);
-
             return this;
         }
+
+        #endregion
 
         public override string ToString()
         {

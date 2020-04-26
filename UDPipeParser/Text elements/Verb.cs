@@ -57,7 +57,7 @@ namespace UDPipeParsing.Text_elements
             this.Word = word;
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -74,10 +74,12 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
+        #region Processing concrete elements
+
         private IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
             // check if it is part of this verb
-            if (adv.DependencyType.Contains("compound"))
+            if (this.DependencyHelper.IsCompound(adv.DependencyType))
                 this.PhrasePart = adv;
             else if (adv.Id > this.Id)
                 this.ExtensionsAfter.Add(adv);
@@ -99,7 +101,8 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Adposition adp, ISentenceGraph graph)
         {
-            if (adp.DependencyType.Contains("compound"))
+            // Check if adposition is part of this verb
+            if (this.DependencyHelper.IsCompound(adp.DependencyType))
                 this.PhrasePart = adp;
             else
                 this.DrawableAdposition = adp;
@@ -110,7 +113,7 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
             // if noun is subject, process this
-            if (noun.DependencyType == "nsubj" || noun.DependencyType == "nsubjpass")
+            if (this.DependencyHelper.IsSubject(noun.DependencyType))
             {
                 if (this.DrawableAdposition != null)
                     noun.Process(this.DrawableAdposition, graph);
@@ -119,7 +122,7 @@ namespace UDPipeParsing.Text_elements
             }                
 
             // if noun is object, save it as part of this verb, else save it for future
-            if (noun.DependencyType == "dobj")
+            if (this.DependencyHelper.IsObject(noun.DependencyType))
                 this.Object = noun;
             else
                 this.DependingDrawables.Add(noun);
@@ -129,7 +132,8 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
-            if (nounSet.DependencyType == "nsubj" || nounSet.DependencyType == "nsubjpass")
+            // Check if it is subject
+            if (this.DependencyHelper.IsSubject(nounSet.DependencyType))
             {
                 if (this.DrawableAdposition != null)
                     nounSet.Process(this.DrawableAdposition, graph);
@@ -137,7 +141,8 @@ namespace UDPipeParsing.Text_elements
                 return nounSet.Process(this, graph);
             }
 
-            if (nounSet.DependencyType == "dobj")
+            // Check if it is object
+            if (this.DependencyHelper.IsObject(nounSet.DependencyType))
                 this.Object = nounSet;
             else
                 this.DependingDrawables.Add(nounSet);
@@ -148,19 +153,23 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
             this.RelatedActions.Add(verb);
-            if (verb.DependingDrawables != null)
+
+            // Add depending drawables from dependency tree to future processing
+            if (verb.DependingDrawables.Count != 0)
                 this.DependingDrawables = verb.DependingDrawables;
 
             return this;
         }
 
+        #endregion
+
         public override IProcessable FinalizeProcessing(ISentenceGraph graph)
         {
-            // EXPLORE THIS PROBLEM #281 from dataset -- dobj of verb is supposed to be a subject
+            // Nothing is depending -> return this
             if (this.Object == null && this.DependingDrawables.Count == 0)
                 return this;
 
-            // TEMPORARY
+            // Let depending drawable process this
             if (this.DependingDrawables.Count != 0)
             {
                 var first = this.DependingDrawables.First();
@@ -169,16 +178,17 @@ namespace UDPipeParsing.Text_elements
                 return first.Process(this, graph);
             }
 
+            // Let object process this
             var obj = this.Object;
             this.Object = null;
 
             return obj.Process(this, graph);
-        }
+        }      
 
         /// <summary>
         /// Method that return final string form of this verb
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Constructed final string representation</returns>
         private string GetFinalWordSequence()
         {
             string final = "";

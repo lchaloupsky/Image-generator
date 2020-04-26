@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents coordination conjuction in the sentence
+    /// </summary>
     public class Coordination : Element
     {
         public Coordination(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
@@ -15,7 +18,7 @@ namespace UDPipeParsing.Text_elements
              this.CoordinationType = (CoordinationType)Enum.Parse(typeof(CoordinationType),Lemma.ToUpper());
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             return this;
         }
@@ -26,6 +29,11 @@ namespace UDPipeParsing.Text_elements
         }
     }
 
+    /// <summary>
+    /// Enum representing coordination type
+    /// </summary>
     public enum CoordinationType
-    { AND, OR, NOR, FOR, SO, YET, BUT, BOTH }
+    {
+        AND, OR, NOR, FOR, SO, YET, BUT, BOTH
+    }
 }

@@ -8,12 +8,16 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents negation in the sentence
+    /// </summary>
     public class Negation : Element
     {
         public Negation(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency){}
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
+            // Depending elements are ommited because they are negated
             return this;
         }
 

@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents adverb element in the sentence
+    /// </summary>
     public class Adverb : Element
     {
+        // Extending adverbs
         public List<Adverb> ExtendingAdverbs { get; }
 
         public Adverb(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
@@ -17,7 +21,7 @@ namespace UDPipeParsing.Text_elements
             this.ExtendingAdverbs = new List<Adverb>();
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -32,6 +36,8 @@ namespace UDPipeParsing.Text_elements
 
             return this;
         }
+
+        #region Processing concrete elements
 
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
@@ -56,9 +62,10 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
             this.ExtendingAdverbs.Add(adv);
-
             return this;
         }
+
+        #endregion
 
         public override string ToString()
         {

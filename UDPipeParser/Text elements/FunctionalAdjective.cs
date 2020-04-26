@@ -9,16 +9,23 @@ using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents functional adjective in the sentence (big, small, etc.)
+    /// </summary>
     public class FunctionalAdjective : Adjective
     {
-        public float Scale { get; set; }
+        // Scale modifiers
+        private static HashSet<string> ScaleModifiers { get; } = new HashSet<string>() { "very", "extremely", "quite", "really", "terribly", "too" };
 
-        private HashSet<string> ScaleModifiers { get; } = new HashSet<string>() { "very", "extremely", "quite", "really", "terribly", "too" };
+        // Size scale
+        public float Scale { get; set; }
 
         public FunctionalAdjective(int Id, string Lemma, string Dependency, float scale) : base(Id, Lemma, Dependency)
         {
             this.Scale = scale;
         }
+
+        #region Processing conrete elements
 
         protected sealed override IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
@@ -30,6 +37,7 @@ namespace UDPipeParsing.Text_elements
 
         protected sealed override IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
+            // Go through all adverbs and find modifier ones
             adv.ExtendingAdverbs.SelectMany(advs => advs.ExtendingAdverbs).Select(ad => 
             {
                 if(this.ChangeScale(ad))
@@ -42,11 +50,16 @@ namespace UDPipeParsing.Text_elements
                 this.Extensions.Add(adv);
 
             return this;
-        }
+        }       
 
+        /// <summary>
+        /// Changes scale if adverb is change scale modifier
+        /// </summary>
+        /// <param name="adv">Adverb</param>
+        /// <returns>True if scale was changed</returns>
         private bool ChangeScale(Adverb adv)
         {
-            if (this.ScaleModifiers.Contains(adv.Lemma))
+            if (ScaleModifiers.Contains(adv.Lemma))
             {
                 this.Scale = this.Scale > 1 ? this.Scale * 1.75f : this.Scale / 1.75f;
                 return true;
@@ -54,5 +67,7 @@ namespace UDPipeParsing.Text_elements
 
             return false;
         }
+
+        #endregion
     }
 }

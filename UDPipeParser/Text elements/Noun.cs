@@ -102,7 +102,7 @@ namespace UDPipeParsing.Text_elements
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -122,7 +122,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
-            if (verb.DependencyType == "cop")
+            if (this.DependencyHelper.IsCopula(verb.DependencyType))
                 return this;
 
             if(!verb.IsNegated)
@@ -148,16 +148,16 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
-            if (num.DependencyType == "appos")
+            if (this.DependencyHelper.IsAppositional(num.DependencyType))
                 return this.Process(num.DependingDrawable, graph);
 
-            if (this.DependencyType == "nmod:npmod")
+            if (this.DependencyHelper.IsNounPhrase(this.DependencyType))
             {
                 this.Extensions.Add(num);
                 return this;
             }
 
-            if (num.DependencyType != "nummod")
+            if (!this.DependencyHelper.IsNumeralModifier(num.DependencyType))
             {
                 if (num.Id > this.Id)
                     this.Suffixes.Add(num);
@@ -197,7 +197,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
-            if (noun.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            if (this.DependencyHelper.IsConjuction(noun.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
             {
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
@@ -211,16 +211,16 @@ namespace UDPipeParsing.Text_elements
                 return this.ElementFactory.Create(this, noun, graph);
             }
 
-            if (noun.DependencyType == "compound" || noun.DependencyType == "nmod:npmod")
+            if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNounPhrase(noun.DependencyType))
             {
                 this.Extensions.Add(noun);
                 return this;
             }
 
-            if (noun.DependencyType.Contains(":poss"))
+            if (this.DependencyHelper.IsPossesive(noun.DependencyType))
                 return this;
 
-            if (this.IsNegated && this.DependencyType == "dobj")
+            if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return noun;
 
             // Processing relationship between noun and this
@@ -268,7 +268,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
-            if (nounSet.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            if (this.DependencyHelper.IsConjuction(nounSet.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
             {
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
@@ -287,13 +287,13 @@ namespace UDPipeParsing.Text_elements
                 return nounSet;
             }
 
-            if (nounSet.DependencyType == "compound")
+            if (this.DependencyHelper.IsCompound(nounSet.DependencyType))
             {
                 this.Extensions.Add(nounSet);
                 return this;
             }
 
-            if (this.IsNegated && this.DependencyType == "dobj")
+            if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return nounSet;
 
             // Processing relationship between noun and this

@@ -8,9 +8,15 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents one adposition element in the sentence
+    /// </summary>
     public class Adposition : Element
     {
+        // Depending adpositions in the dependency tree
         private List<Adposition> DependingAdpositions { get; set; }
+
+        // List of extensions
         private List<Adjective> Extensions { get; }
 
         public Adposition(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
@@ -19,6 +25,10 @@ namespace UDPipeParsing.Text_elements
             this.DependingAdpositions = new List<Adposition>();
         }
 
+        /// <summary>
+        /// Returns collection of all dependending (even recursively depending) adpositions
+        /// </summary>
+        /// <returns>Collection of adpositions</returns>
         public IEnumerable<Adposition> GetAdpositions()
         {
             return this.DependingAdpositions.Count == 0 ?
@@ -26,7 +36,7 @@ namespace UDPipeParsing.Text_elements
                     new List<Adposition>(DependingAdpositions) { this };
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -42,16 +52,17 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
+        #region Processing conrete elements
+
         private IProcessable ProcessElement(Adposition adp, ISentenceGraph graph)
         {
             this.DependingAdpositions.Add(adp);
-
             return this;
         }
 
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
-            if (noun.DependencyType == "compound" || noun.DependencyType == "nmod:poss")
+            if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNominalPossesive(noun.DependencyType))
                 noun.DependencyType = this.DependencyType;
 
             return noun.Process(this, graph);
@@ -70,9 +81,10 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
             this.Extensions.Add(adj);
-
             return this;
         }
+
+        #endregion
 
         public override string ToString()
         {

@@ -319,6 +319,7 @@ namespace Image_Generator
                 {
                     Console.Error.WriteLine("__________ERROR__________" + counter);
                     Console.Error.WriteLine(e.Message);
+                    Console.WriteLine(e);
                 }
                 finally
                 {

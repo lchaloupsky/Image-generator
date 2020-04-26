@@ -60,6 +60,7 @@
     <Compile Include="Text elements\Auxiliary.cs" />
     <Compile Include="Text elements\Coordination.cs" />
     <Compile Include="Text elements\Element.cs" />
+    <Compile Include="Text elements\Helpers\DependencyTypeHelper.cs" />
     <Compile Include="Text elements\Helpers\ImageCombineHelper.cs" />
     <Compile Include="Text elements\Helpers\VerbFormHelper.cs" />
     <Compile Include="Text elements\MetaNoun.cs" />

@@ -17,6 +17,7 @@ using UDPipeParsing.Factories;
 using UDPipeParsing.Interfaces;
 using UDPipeParsing.Preprocessors;
 using UDPipeParsing.Text_elements;
+using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing
 {
@@ -25,7 +26,6 @@ namespace UDPipeParsing
     /// </summary>
     public class UDPipeParser
     {
-        // properties
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
         private List<IPreprocessor> Preprocessors { get; }
@@ -74,8 +74,9 @@ namespace UDPipeParsing
             this.Comparer.Tree = dependencyTree;
             IProcessable element = CompressDependencyTree(dependencyTree, graph, root).FinalizeProcessing(graph);
 
+            // Adding last processed vertex (is added only if its only vertex in sentence)
             if (element is IDrawable)
-                graph.AddVertex((IDrawable)element); // Adding last processed vertex (is added only if its only vertex in sentence)
+                graph.AddVertex((IDrawable)element); 
 
             return graph;
         }
@@ -116,6 +117,7 @@ namespace UDPipeParsing
             IProcessable element;
             Dictionary<int, List<IProcessable>> tree = new Dictionary<int, List<IProcessable>>();
 
+            // Each line defines one sentence element
             foreach (string line in validLines)
             {
                 parts = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
@@ -158,6 +160,7 @@ namespace UDPipeParsing
             if (!tree.ContainsKey(element.Id))
                 return element;
 
+            // Adpositions have different priorities
             if (element is Adposition)
                 this.Comparer.IsAdposition = true;
             else
@@ -182,6 +185,8 @@ namespace UDPipeParsing
 
             public bool IsAdposition { get; set; }
 
+            private DependencyTypeHelper DependencyTypeHelper { get; } = new DependencyTypeHelper();
+
             /// <summary>
             /// Overriden method for comparing elements
             /// </summary>
@@ -191,33 +196,36 @@ namespace UDPipeParsing
             public int Compare(IProcessable x, IProcessable y)
             {
                 // Numerals modificating number of elements are a priority 
-                if (x is Numeral && x.DependencyType == "nummod")
+                if (x is Numeral && this.DependencyTypeHelper.IsNumeralModifier(x.DependencyType))
                     return -1;
 
-                if (y is Numeral && y.DependencyType == "nummod")
+                if (y is Numeral && this.DependencyTypeHelper.IsNumeralModifier(y.DependencyType))
                     return 1;
 
                 // Direct object nouns of verbs has to be processed first
-                if ((x is Noun || x is NounSet) && x.DependencyType == "dobj")
+                if ((x is Noun || x is NounSet) && this.DependencyTypeHelper.IsObject(x.DependencyType))
                     return -1;
 
-                if ((y is Noun || y is NounSet) && y.DependencyType == "dobj")
+                if ((y is Noun || y is NounSet) && this.DependencyTypeHelper.IsObject(y.DependencyType))
                     return 1;
 
+                // Check objects priorities
                 bool isFirstPrior = this.IsPriority(x) && !this.Tree.ContainsKey(x.Id);
                 bool isSecondPrior = this.IsPriority(y) && !this.Tree.ContainsKey(y.Id);
 
+                // Both are prior -> return by original sentence order
                 if (isFirstPrior && isSecondPrior)
                     return x.Id < y.Id ? -1 : 1;
 
+                // Sort by priority or by original sentence order
                 return isFirstPrior ? -1 : (isSecondPrior ? 1 : (x.Id < y.Id ? -1 : 1));
-
-                // Little hack in comparing adpositions, putting forward only "simple" ones like (on, under, etc.)
-                //return this.IsPriority(x) ? (!this.Tree.ContainsKey(x.Id) ? -1 : 1) :
-                //      (this.IsPriority(y) ? (!this.Tree.ContainsKey(y.Id) ? 1 : -1) :
-                //      (x.Id < y.Id ? -1 : 1));
             }
 
+            /// <summary>
+            /// Checks if element has priority
+            /// </summary>
+            /// <param name="x">Elements to check</param>
+            /// <returns>True if it is prior</returns>
             private bool IsPriority(IProcessable x)
             {
                 if (this.IsAdposition)

@@ -96,6 +96,8 @@ namespace UDPipeParsing.Text_elements
 
         private bool IsFinalized { get; set; } = false;
 
+        private DependencyTypeHelper DependencyTypeHelper { get; } = new DependencyTypeHelper();
+
         public Image Image
         {
             get
@@ -197,10 +199,10 @@ namespace UDPipeParsing.Text_elements
             if (element.IsNegated && !(element is Verb))
                 return this;
 
-            if (this.IsNegated && element.DependencyType == "nsubj")
+            if (this.IsNegated && this.DependencyTypeHelper.IsSubject(element.DependencyType))
                 return element;
 
-            if (!this.IsAllowedCoordination() && element.DependencyType == "conj")
+            if (!this.IsAllowedCoordination() && this.DependencyTypeHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
                 return this;
@@ -230,7 +232,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
-            if (verb.DependencyType == "cop")
+            if (this.DependencyTypeHelper.IsCopula(verb.DependencyType))
                 return this;
 
             if (verb.DependingDrawables.Count != 0)
@@ -262,14 +264,14 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
-            if (num.DependencyType == "appos" && num.GetValue() < this.NumberOfInstances)
+            if (this.DependencyTypeHelper.IsAppositional(num.DependencyType) && num.GetValue() < this.NumberOfInstances)
             {
                 this.Nouns[num.GetValue() - 1 + LastProcessedNoun].Process(num.DependingDrawable, graph);
                 LastProcessedNoun += num.GetValue();
                 return this;
             }
 
-            if (num.DependencyType != "nummod")
+            if (!this.DependencyTypeHelper.IsNumeralModifier(num.DependencyType))
             {
                 this.Nouns.ForEach(noun => noun.Process(num, graph));
                 return this;
@@ -282,7 +284,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
-            if (noun.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            if (this.DependencyTypeHelper.IsConjuction(noun.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
             {
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
@@ -300,16 +302,16 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            if (noun.DependencyType.Contains(":poss"))
+            if (this.DependencyTypeHelper.IsPossesive(noun.DependencyType))
                 return this;
 
-            if (noun.DependencyType == "nmod:npmod" || noun.DependencyType == "compound")
+            if (this.DependencyTypeHelper.IsNounPhrase(noun.DependencyType) || this.DependencyTypeHelper.IsCompound(noun.DependencyType))
             {
                 this.Nouns.ForEach(n => n.Process(noun, graph));
                 return this;
             }
 
-            if (this.IsNegated && this.DependencyType == "dobj")
+            if (this.IsNegated && this.DependencyTypeHelper.IsObject(this.DependencyType))
                 return noun;
 
             // Processing relationship between noun and this
@@ -323,7 +325,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
-            if (nounSet.DependencyType == "conj" && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            if (this.DependencyTypeHelper.IsConjuction(nounSet.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
             {
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
@@ -342,7 +344,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            if (this.IsNegated && this.DependencyType == "dobj")
+            if (this.IsNegated && this.DependencyTypeHelper.IsObject(this.DependencyType))
                 return nounSet;
 
             // Processing relationship between nounset and this

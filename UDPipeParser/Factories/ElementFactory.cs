@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UDPipeParsing.Text_elements;
+using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing.Factories
 {
@@ -16,26 +17,32 @@ namespace UDPipeParsing.Factories
     /// </summary>
     public class ElementFactory
     {
-        private const int DEFAULT_OBJECT_WIDTH = 180;
-        private const int DEFAULT_OBJECT_HEIGHT = 120;
+        // Negation for adjectives
         private const string ADJECTIVE_NEGATION = "no";
 
         private IEdgeFactory EdgeFactory { get; }
         private IImageManager Manager { get; }
+        private int DrawableObjectWidth { get; } = 180;
+        private int DrawableObjectHeight { get; } = 120;
+        private DependencyTypeHelper DependencyTypeHelper { get; } = new DependencyTypeHelper();
 
+        // List of negations
         private HashSet<string> Negations { get; } = new HashSet<string>() {
             "not", "neither", "n't", "'t", "never"
         };
 
+        // Known cases of nouns and adverbs to map to the adpositions
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
             "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind"
         };
 
+        // Functional adjectives, that are scaling up
         private HashSet<string> UpScales { get; } = new HashSet<string>()
         {
             "big", "large", "tall", "great", "gigantic", "tremendous", "huge", "massive"
         };
 
+        // Functional adjectives, that are scaling down
         private HashSet<string> DownScales { get; } = new HashSet<string>()
         {
             "small", "short", "miniature", "slight", "tiny", "little", "mini"
@@ -47,16 +54,33 @@ namespace UDPipeParsing.Factories
             this.Manager = manager;
         }
 
+        public ElementFactory(IImageManager manager, IEdgeFactory edgeFactory, int defaultWidth, int defaultHeight) : this(manager, edgeFactory)
+        {
+            this.DrawableObjectWidth = defaultWidth;
+            this.DrawableObjectHeight = defaultHeight;
+        }
+
+        /// <summary>
+        /// Creates root element
+        /// </summary>
+        /// <param name="sentence">Input description sentence</param>
+        /// <returns>New Root</returns>
         public Root CreateRoot(string sentence)
         {
             return new Root(sentence, this.Manager);
         }
 
+        /// <summary>
+        /// Method for creating new text elements
+        /// </summary>
+        /// <param name="parts">UDPipe service response line</param>
+        /// <returns>New text element</returns>
         public IProcessable Create(string[] parts)
         {
-            IProcessable part = null;
-
+            // Map known cases
             this.MapKnownCases(parts[2], ref parts[3]);
+
+            IProcessable part = null;
             switch (parts[3])
             {
                 case "PROPN":
@@ -91,13 +115,19 @@ namespace UDPipeParsing.Factories
             return part;
         }
 
+        /// <summary>
+        /// Processes verb response line 
+        /// </summary>
+        /// <param name="parts">response line</param>
+        /// <returns>Verb or Auxiliary</returns>
         private IProcessable ProcessVerb(string[] parts)
         {
+            // for "be" word lemma return auxiliary
             if (parts[2] == "be")
                 return new Auxiliary(int.Parse(parts[0]), parts[2], parts[7]);
 
+            // Assign correct verb form
             VerbForm form = VerbForm.NORMAL;
-
             if (parts[5].Contains("VerbForm=Part"))
                 form = VerbForm.PARTICIPLE;
 
@@ -107,42 +137,71 @@ namespace UDPipeParsing.Factories
             return new Verb(int.Parse(parts[0]), parts[2], parts[7], form, parts[1].ToLower());
         }
 
+        /// <summary>
+        /// Processes noun response line
+        /// </summary>
+        /// <param name="parts">response line</param>
+        /// <returns>Noun or NounSet</returns>
         private IProcessable ProcessNoun(string[] parts)
         {
-            var noun = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DEFAULT_OBJECT_WIDTH, DEFAULT_OBJECT_HEIGHT);
+            var noun = new Noun(int.Parse(parts[0]), parts[2], parts[7], this.EdgeFactory, this, this.Manager, DrawableObjectWidth, DrawableObjectHeight);
 
-            if (parts[5].Contains("Number=Plur") && parts[7] != "nmod:npmod")
+            // Check if noun is plural -> create new nounset
+            if (parts[5].Contains("Number=Plur") && !this.DependencyTypeHelper.IsNounPhrase(parts[7]))
                 return new NounSet(this, this.EdgeFactory, noun, parts[1]);
 
             return noun;
         }
 
+        /// <summary>
+        /// Creates new NounSet from given nouns
+        /// </summary>
+        /// <param name="left">First noun</param>
+        /// <param name="right">Second noun</param>
+        /// <param name="graph">Graph</param>
+        /// <returns>New NounSet</returns>
         public IProcessable Create(Noun left, Noun right, ISentenceGraph graph)
         {
             return new NounSet(this, this.EdgeFactory, graph, left, right);
         }
 
+        /// <summary>
+        /// Processes adjective response line
+        /// </summary>
+        /// <param name="parts">Response line</param>
+        /// <returns>New Adjective or FunctionalAdjective</returns>
         private IProcessable ProcessAdj(string[] parts)
         {
+            // Check upscales adjectives
             if (this.UpScales.Contains(parts[2].ToLower()))
                 return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 1.5f);
 
+            // Check downscales adjectives
             if (this.DownScales.Contains(parts[2].ToLower()))
                 return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 0.75f);
 
+            // return default adjective
             return new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
         }
 
+        /// <summary>
+        /// Maps know word cases to different element type
+        /// </summary>
+        /// <param name="lemma">word lemma</param>
+        /// <param name="type">words part of speech</param>
         private void MapKnownCases(string lemma, ref string type)
         {
             string lemmaToFind = lemma.ToLower();
 
+            // Check know cases
             if ((type == "NOUN" || type == "ADV") && this.KnownCasesToMap.Contains(lemmaToFind))
                 type = "ADP";
 
+            // Check adjective
             if (lemmaToFind == ADJECTIVE_NEGATION)
                 type = "ADJ";
 
+            // Map negations
             if (this.Negations.Contains(lemmaToFind))
                 type = "NEG";
         }

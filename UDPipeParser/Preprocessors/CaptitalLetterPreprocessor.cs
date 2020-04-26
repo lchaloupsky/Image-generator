@@ -7,6 +7,9 @@ using UDPipeParsing.Interfaces;
 
 namespace UDPipeParsing.Preprocessors
 {
+    /// <summary>
+    /// Changes the first letter of sentence to upper case
+    /// </summary>
     public class CaptitalLetterPreprocessor : IPreprocessor
     {
         public string Preprocess(string sentence)

@@ -8,13 +8,17 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents numeral element in the sentence
+    /// </summary>
     public class Numeral : Element
     {
+        // Dependant drawable in the tree
         public IProcessable DependingDrawable { get; set; }
 
         public Numeral(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
             switch (element)
             {
@@ -27,30 +31,26 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
-        private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
+        #region Processing concrete elements
+
+        private IProcessable ProcessElement<T>(T drawable, ISentenceGraph graph) where T : IProcessable
         {
-            if (this.DependencyType == "appos")
+            if (this.DependencyHelper.IsAppositional(this.DependencyType))
             {
-                this.DependingDrawable = noun;
+                this.DependingDrawable = drawable;
                 return this;
             }
 
             this.DependencyType = "nummod";
-            return noun.Process(this, graph);
+            return drawable.Process(this, graph);
         }
 
-        private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
-        {
-            if (this.DependencyType == "appos")
-            {
-                this.DependingDrawable = nounSet;
-                return this;
-            }
+        #endregion
 
-            this.DependencyType = "nummod";
-            return nounSet.Process(this, graph);
-        }
-
+        /// <summary>
+        /// Gets numerical value of numeral
+        /// </summary>
+        /// <returns>Numerical value of this numeral</returns>
         public int GetValue()
         {
             return int.Parse(this.Lemma);

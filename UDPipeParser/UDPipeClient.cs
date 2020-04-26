@@ -10,12 +10,17 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing
 {
+    /// <summary>
+    /// Class for REST API calls to UDPIPE service
+    /// </summary>
     public class UDPipeClient
     {
+        // Service constants
         private const string BASE_URL = "http://lindat.mff.cuni.cz/services/udpipe/api/process?";
         private const string CONST_PARAMS = "&tokenizer&tagger&parser&output=conllu&";
         private const string MODEL_PARAM = "model=";
         private const string DATA_PARAM = "data=";
+
         private string Model { get; }
         private SemaphoreSlim SemaphoreSlim { get; }
 
@@ -25,23 +30,30 @@ namespace UDPipeParsing
             this.SemaphoreSlim = new SemaphoreSlim(4, 4);
         }
 
+        /// <summary>
+        /// Method for getting response from UDPipe
+        /// </summary>
+        /// <param name="sentence">Sentence to request</param>
+        /// <returns>List of reponse lines without comments</returns>
         public List<string> GetResponse(string sentence)
         {
+            // wait until resource is free to use
             SemaphoreSlim.Wait();
 
-            string json = null;
-
             // REST API call with given text
+            string json = null;
             using (WebClient client = new WebClient())
             {
                 while (json == null)
                 {
                     try
                     {
+                        // Do the REST API call
                         json = client.DownloadString(ConstructURL(sentence));
                     }
                     catch (WebException we)
                     {
+                        // Too much requests -> try again
                         var code = (we.Response as HttpWebResponse)?.StatusCode;
                         if (code != null && (int)code == 429)
                         {
@@ -54,6 +66,7 @@ namespace UDPipeParsing
                 }
             }
 
+            // This wait is because we do not want to overload the service
             Thread.Sleep(200);
             SemaphoreSlim.Release();
 

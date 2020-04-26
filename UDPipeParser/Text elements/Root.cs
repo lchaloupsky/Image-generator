@@ -13,15 +13,19 @@ using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
+    /// <summary>
+    /// Represents safe root element.
+    /// That is whole sentence. If none drawable is found, then is used this element for the final image.
+    /// </summary>
     public class Root : Element, IDrawable
     {
+        // IDrawable properties
         public Vector2? Position { get; set; }
         public int ZIndex { get; set; } = 0;
         public int Width { get; set; }
         public int Height { get; set; }
         public bool IsPositioned { get; } = true;
         public bool IsFixed { get; set; } = true;
-
         public IDrawableGroup Group { get; set; }
         public Image Image { get; set; }
 
@@ -33,19 +37,16 @@ namespace UDPipeParsing.Text_elements
             this.Manager = manager;
         }
 
-        public void SetSizes(int width, int height)
-        {
-            this.Width = width;
-            this.Height = height;
-        }
-
         public void Draw(IRenderer renderer, IImageManager manager)
         {
+            // Set sizes
             Width = renderer.Width;
             Height = renderer.Height;
 
+            // Resize to fit preserve width/height ratio
             this.ResizeToImage();
 
+            // Draw image across whole canvas
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, renderer.Width, renderer.Height);
         }
 
@@ -54,8 +55,9 @@ namespace UDPipeParsing.Text_elements
             return;
         }
 
-        public override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
+        protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
+            // If last element finalized element is not drawable return this 
             element = element.FinalizeProcessing(graph);
             return element is IDrawable ? element : this;
         }
@@ -63,7 +65,6 @@ namespace UDPipeParsing.Text_elements
         public override IProcessable FinalizeProcessing(ISentenceGraph graph)
         {
             this.Image = this.Manager.GetImage(this.Lemma, null);
-
             return this;
         }
 
