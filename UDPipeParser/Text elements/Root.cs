@@ -10,6 +10,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing.Text_elements
 {
@@ -19,7 +20,7 @@ namespace UDPipeParsing.Text_elements
     /// </summary>
     public class Root : Element, IDrawable
     {
-        // IDrawable properties
+        //----IDrawable properties----
         public Vector2? Position { get; set; }
         public int ZIndex { get; set; } = 0;
         public int Width { get; set; }
@@ -29,12 +30,15 @@ namespace UDPipeParsing.Text_elements
         public IDrawableGroup Group { get; set; }
         public Image Image { get; set; }
 
+        //----Private props----
         private IImageManager Manager { get; }
+        private DrawableHelper DrawableHelper { get; }
 
         public Root(string text, IImageManager manager) : base(0, text, "root")
         {
             this.Position = new Vector2(0, 0);
             this.Manager = manager;
+            this.DrawableHelper = new DrawableHelper();
         }
 
         public void Draw(IRenderer renderer, IImageManager manager)
@@ -44,7 +48,7 @@ namespace UDPipeParsing.Text_elements
             Height = renderer.Height;
 
             // Resize to fit preserve width/height ratio
-            this.ResizeToImage();
+            this.DrawableHelper.ResizeToImage(this);
 
             // Draw image across whole canvas
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, renderer.Width, renderer.Height);
@@ -71,13 +75,6 @@ namespace UDPipeParsing.Text_elements
         public void Dispose()
         {
             this.Image = null;
-        }
-
-        private void ResizeToImage()
-        {
-            //TODO helper
-            var ratio = this.Image.Width * 1f / Image.Height;
-            this.Width = (int)(this.Height * ratio);
         }
     }
 }

@@ -28,12 +28,16 @@ namespace UDPipeParsing.Text_elements
         // Helper for resolving dependency types
         protected DependencyTypeHelper DependencyHelper { get; }
 
+        // Helper for resolving coordination types
+        protected CoordinationTypeHelper CoordinationTypeHelper { get; }
+
         public Element(int Id, string Lemma, string DependencyType)
         {
             this.Id = Id;
             this.Lemma = Lemma;
             this.DependencyType = DependencyType;
             this.DependencyHelper = new DependencyTypeHelper();
+            this.CoordinationTypeHelper = new CoordinationTypeHelper();
         }
 
         public override string ToString()
@@ -68,7 +72,7 @@ namespace UDPipeParsing.Text_elements
             if (this.IsNegated && this.DependencyHelper.IsSubject(element.DependencyType))
                 return element;
 
-            if (!this.IsAllowedCoordination() && this.DependencyHelper.IsConjuction(element.DependencyType))
+            if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
                 return this;
@@ -95,15 +99,6 @@ namespace UDPipeParsing.Text_elements
         {
             this.CoordinationType = coordination.CoordinationType;
             return this;
-        }
-
-        /// <summary>
-        /// Check if actual coordination type between elements is allowed
-        /// </summary>
-        /// <returns>True if allowed</returns>
-        protected bool IsAllowedCoordination()
-        {
-            return this.CoordinationType != CoordinationType.OR && this.CoordinationType != CoordinationType.BUT;
         }
 
         /// <summary>

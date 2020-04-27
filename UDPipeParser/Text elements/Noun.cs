@@ -13,6 +13,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using UDPipeParsing.Factories;
+using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing.Text_elements
 {
@@ -25,18 +26,22 @@ namespace UDPipeParsing.Text_elements
         // Noun actions
         public List<Verb> Actions { get; }
 
-        // Tree dependencies of this noun
-        public List<IPositionateEdge> Dependencies { get; }
-
         // List of adpositions belonging to this noun
         public List<Adposition> Adpositions { get; set; }
 
-        // Number of instances of this noun, if its plural
-        public int Number { get; set; }
+        // Noun extensions
+        public List<IProcessable> Extensions { get; }
+
+        // suffix extensions of noun (some numerals, propernouns..)
+        public List<Element> Suffixes { get; }
 
         // Flag idicating if noun is plural or not
         public bool IsPlural { get; set; } = false;
 
+        // Scale of Noun
+        public float Scale { get; set; } = 1;
+
+        // -------IDrawable interface props-------
         // Noun image
         public Image Image { get; set; }
 
@@ -61,18 +66,9 @@ namespace UDPipeParsing.Text_elements
         // Flag indicating if noun is fixed
         public bool IsFixed { get; set; } = false;
 
-        // Scale of Noun
-        public float Scale { get; set; } = 1;
-
         // -------Private properties--------
         // Default number for plurals
         private const int NUMBER_OF_INSTANCES = 3;
-
-        // Future also propnouns, adverbs?..
-        private List<IProcessable> Extensions { get; }
-
-        // suffix extensions of noun (some numerals, propernouns..)
-        private List<Element> Suffixes { get; }
 
         // Factory for creating edges
         private IEdgeFactory EdgeFactory { get; }
@@ -83,24 +79,58 @@ namespace UDPipeParsing.Text_elements
         // Image manager for getting images
         private IImageManager Manager { get; }
 
+        private DrawableHelper DrawableHelper { get; }
+
         public Noun(int Id, string Lemma, string Dependency, IEdgeFactory factory, ElementFactory elementFactory, IImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
         {
             this.Extensions = new List<IProcessable>();
             this.Suffixes = new List<Element>();
             this.Actions = new List<Verb>();
-            this.Dependencies = new List<IPositionateEdge>();
             this.Adpositions = new List<Adposition>();
             this.EdgeFactory = factory;
             this.ElementFactory = elementFactory;
             this.Manager = manager;
             this.Width = width;
             this.Height = height;
+            this.DrawableHelper = new DrawableHelper();
         }
+
+        #region Public methods
 
         public void Draw(IRenderer renderer, IImageManager manager)
         {
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
+
+        /// <summary>
+        /// Returns copy of this noun
+        /// </summary>
+        /// <returns>Copy of this</returns>
+        public Noun Copy()
+        {
+            var noun = new Noun(this.Id, this.Lemma, this.DependencyType, this.EdgeFactory, this.ElementFactory, this.Manager, this.Width, this.Height);
+
+            noun.Extensions.AddRange(this.Extensions);
+            noun.Suffixes.AddRange(this.Suffixes);
+            noun.Actions.AddRange(this.Actions);
+            noun.Scale = this.Scale;
+
+            return noun;
+        }
+
+        public override string ToString()
+        {
+            return this.GetFinalWordSequence();
+        }
+
+        public void Dispose()
+        {
+            this.Image = null;
+        }
+
+        #endregion
+
+        #region Processing elements
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
@@ -122,24 +152,30 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
+            // skip copula
             if (this.DependencyHelper.IsCopula(verb.DependencyType))
                 return this;
 
+            // Dont process negated verb
             if(!verb.IsNegated)
                 this.Actions.Add(verb);
 
+            // Process all depending drawables
             if (verb.DependingDrawables.Count != 0)
             {
                 verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
                 verb.DependingDrawables.Clear();
             }
 
+            // Process all related actions
             verb.RelatedActions.ForEach(ra => this.Process(ra, graph));
             verb.RelatedActions.Clear();
 
+            // Process unprocessed adposition
             if (verb.DrawableAdposition != null)
                 this.Process(verb.DrawableAdposition, graph);
 
+            // Replace verb object in the graph
             if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
                 graph.ReplaceVertex(this, (IDrawable)verb.Object);
 
@@ -148,15 +184,18 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
+            // Process appositinal
             if (this.DependencyHelper.IsAppositional(num.DependencyType))
                 return this.Process(num.DependingDrawable, graph);
 
+            // Process numeral expressing part of noun phrase
             if (this.DependencyHelper.IsNounPhrase(this.DependencyType))
             {
                 this.Extensions.Add(num);
                 return this;
             }
 
+            // Add extension if numeral is not modifying number of instances
             if (!this.DependencyHelper.IsNumeralModifier(num.DependencyType))
             {
                 if (num.Id > this.Id)
@@ -167,6 +206,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
+            // Create new noun with given number of values
             return new NounSet(this.ElementFactory, this.EdgeFactory, this, num.GetValue());
         }
 
@@ -182,6 +222,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
+            // Use the scale of the functional adjective
             if (adj is FunctionalAdjective)
                 this.Scale *= ((FunctionalAdjective)adj).Scale;
 
@@ -197,8 +238,10 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
-            if (this.DependencyHelper.IsConjuction(noun.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            // Process merging coordination type
+            if (this.DependencyHelper.IsConjuction(noun.DependencyType) && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
+                // Try to create edge between elements
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
                 {
@@ -208,23 +251,31 @@ namespace UDPipeParsing.Text_elements
                     return this;
                 }
 
+                // If no edge was found create new nounset
                 return this.ElementFactory.Create(this, noun, graph);
             }
 
+            // Part of noun phrase
             if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNounPhrase(noun.DependencyType))
             {
                 this.Extensions.Add(noun);
                 return this;
             }
 
+            // Skip possesive relation
             if (this.DependencyHelper.IsPossesive(noun.DependencyType))
                 return this;
 
+            // Return depending drawable if this is negated
             if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return noun;
 
-            // Processing relationship between noun and this
-            this.ProcessEdge(graph, noun, noun.Adpositions);
+            // Processing relationship between nounset and this
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, () =>
+            {
+                // Add to extensions
+                this.Extensions.Add(noun);
+            });
 
             // Finalize processed noun
             noun.FinalizeProcessing(graph);
@@ -232,44 +283,12 @@ namespace UDPipeParsing.Text_elements
             return this;
         }
 
-        private bool ProcessEdge<T>(ISentenceGraph graph, T drawable, List<Adposition> adpositions) where T : IProcessable, IDrawable
-        {
-            // Get adpositions from adpositions combinations
-            List<string> leftAdp = this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
-            List<string> rightAdp = adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
-            IPositionateEdge edge = this.EdgeFactory.Create(this, drawable, leftAdp, rightAdp);
-
-            // Clear used adpositions
-            if (leftAdp.Count == 0)
-                this.Adpositions.Clear();
-            if (rightAdp.Count == 0)
-                adpositions.Clear();
-
-            // Add only not null edge
-            if (edge != null)
-                graph.AddEdge(edge);
-            else
-            {
-                // Check if drawable contains "of" -> then it is an extension of this
-                if (adpositions.Count == 1 && adpositions[0].ToString() == "of")
-                {
-                    // replace vertex
-                    graph.ReplaceVertex(this, drawable);
-
-                    // Add to extensions
-                    this.Extensions.Add(drawable);
-                }
-                else
-                    graph.AddVertex(drawable);
-            }
-
-            return edge != null;
-        }
-
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
-            if (this.DependencyHelper.IsConjuction(nounSet.DependencyType) && (this.CoordinationType == CoordinationType.AND || this.CoordinationType == CoordinationType.NOR))
+            // Process merging coordination type
+            if (this.DependencyHelper.IsConjuction(nounSet.DependencyType) && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
+                // Try to create edge between elements
                 IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (newEdge != null)
                 {
@@ -279,6 +298,7 @@ namespace UDPipeParsing.Text_elements
                     return this;
                 }
 
+                // If no edge was found insert this noun into the nounset
                 nounSet.DependencyType = this.DependencyType;
                 nounSet.Nouns.Insert(0, this);
                 nounSet.Adpositions.AddRange(this.Adpositions);
@@ -287,17 +307,23 @@ namespace UDPipeParsing.Text_elements
                 return nounSet;
             }
 
-            if (this.DependencyHelper.IsCompound(nounSet.DependencyType))
+            // Part of this noun
+            if (this.DependencyHelper.IsCompound(nounSet.DependencyType) || this.DependencyHelper.IsNounPhrase(nounSet.DependencyType))
             {
                 this.Extensions.Add(nounSet);
                 return this;
             }
 
+            // Skip negated
             if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return nounSet;
 
-            // Processing relationship between noun and this
-            this.ProcessEdge(graph, nounSet, nounSet.Adpositions);
+            // Processing relationship between nounset and this
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, () =>
+            {
+                // Add to extensions
+                this.Extensions.Add(nounSet);
+            });
 
             // Finalize processed noun
             nounSet.FinalizeProcessing(graph);
@@ -312,6 +338,7 @@ namespace UDPipeParsing.Text_elements
 
             this.GetImage();
 
+            // If this is plural finalize wih nounset
             IPositionateEdge newEdge;
             if (this.IsPlural)
             {
@@ -320,11 +347,12 @@ namespace UDPipeParsing.Text_elements
                 return finalizingElement;
             }
 
+            // Try to create new absolute edge
             newEdge = this.EdgeFactory.Create(this, this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
             if (newEdge != null)
                 graph.AddEdge(newEdge);
 
-            // Scaling
+            // Scaling from accumulated scale
             this.Width = (int)(this.Width * this.Scale);
             this.Height = (int)(this.Height * this.Scale);
 
@@ -333,60 +361,29 @@ namespace UDPipeParsing.Text_elements
 
         public void CombineIntoGroup(IDrawable drawable)
         {
-            if (drawable is MetaNoun)
-            {
-                drawable.CombineIntoGroup(this);
-                this.Group = (MetaNoun)drawable;
-                return;
-            }
-
-            IDrawableGroup group = null;
-            if (this.Group == null && drawable.Group == null)
-                group = new MetaNoun(this, drawable);
-            else if (this.Group == null)
-            {
-                group = drawable.Group;
-                group.CombineIntoGroup(this);
-            }
-            else
-            {
-                group = this.Group;
-                group.CombineIntoGroup(drawable);
-            }
-
-            this.Group = group;
-            drawable.Group = group;
+            this.DrawableHelper.CombineIntoGroup(this, drawable);
         }
 
-        public Noun Copy()
-        {
-            var noun = new Noun(this.Id, this.Lemma, this.DependencyType, this.EdgeFactory, this.ElementFactory, this.Manager, this.Width, this.Height);
+        #endregion
 
-            noun.Extensions.AddRange(this.Extensions);
-            noun.Suffixes.AddRange(this.Suffixes);
-            noun.Actions.AddRange(this.Actions);
-            noun.Scale = this.Scale;
+        #region Rest of private methods
 
-            return noun;
-        }
-
+        /// <summary>
+        /// Gets image from image manager
+        /// </summary>
+        /// <returns>Image</returns>
         private Image GetImage()
         {
             this.Image = this.Manager.GetImage(this.GetFinalWordSequence(), this.Lemma);
-            this.ResizeToImage();
+            this.DrawableHelper.ResizeToImage(this);
 
             return this.Image;
         }
 
-        private void ResizeToImage()
-        {
-            float ratio;
-            lock (this.Image)
-                ratio = this.Image.Width * 1f / Image.Height;
-
-            this.Width = (int)(this.Height * ratio);
-        }
-
+        /// <summary>
+        /// Gets final string word seuqence
+        /// </summary>
+        /// <returns>String representation</returns>
         private string GetFinalWordSequence()
         {
             string final = "";
@@ -404,14 +401,6 @@ namespace UDPipeParsing.Text_elements
             return final;
         }
 
-        public override string ToString()
-        {
-            return this.GetFinalWordSequence();
-        }
-
-        public void Dispose()
-        {
-            this.Image = null;
-        }
+        #endregion
     }
 }
