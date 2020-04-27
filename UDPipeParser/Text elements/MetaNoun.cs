@@ -42,6 +42,9 @@ namespace UDPipeParsing.Text_elements
 
         public IDrawableGroup Group { get; set; }
 
+        // String representation of this group
+        private string StringRepresentation { get; set; }
+      
         public void Draw(IRenderer renderer, IImageManager manager)
         {
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
@@ -53,6 +56,7 @@ namespace UDPipeParsing.Text_elements
             this.SetNewCoordinatesAndDimensions(rect.Item1, rect.Item2, rect.Item3, Math.Min(drawable1.ZIndex, drawable2.ZIndex));
             this.Image = this.CombineImages(drawable1, drawable2, this.Position.Value, this.Width, this.Height);
             this.IsFixed = drawable1.IsFixed || drawable2.IsFixed;
+            this.StringRepresentation = $"{drawable1}, {drawable2}";
         }
 
         /// <summary>
@@ -80,6 +84,9 @@ namespace UDPipeParsing.Text_elements
 
             // check if is fixed
             drawable.IsFixed = this.IsFixed || drawable.IsFixed;
+
+            // Update string representation
+            this.StringRepresentation = $"{this}, {drawable}";
         }
 
         /// <summary>
@@ -158,6 +165,11 @@ namespace UDPipeParsing.Text_elements
             }
 
             return bitmap;
+        }
+
+        public override string ToString()
+        {
+            return this.StringRepresentation;
         }
 
         public void Dispose()
