@@ -16,7 +16,7 @@ namespace ImagePositioner.Factories
     /// </summary>
     public class EdgeFactory : IEdgeFactory
     {
-        public IAbsolutePositionateEdge Create<T1>(T1 left, List<string> adpositions) where T1 : IDrawable, IProcessable
+        public IAbsolutePositionateEdge Create(IDrawable left, List<string> adpositions)
         {
             AbsoluteEdge edge = this.GetOneSidedEdge(string.Join(" ", adpositions));
             edge?.Add(left, null);
@@ -24,22 +24,20 @@ namespace ImagePositioner.Factories
             return edge;
         }
 
-        public IPositionateEdge Create<T1, T2>(T1 left, T2 right, List<string> leftAdpositions, List<string> rightAdpositions)
-            where T1 : IDrawable, IProcessable
-            where T2 : IDrawable, IProcessable
+        public IPositionateEdge Create(IDrawable left, IDrawable right, List<string> leftAdpositions, List<string> rightAdpositions, bool isRightSubject)
         {
-            Edge edge = this.Create(left, right, leftAdpositions.Concat(rightAdpositions).ToList());
+            Edge edge = this.Create(left, right, leftAdpositions.Concat(rightAdpositions).ToList(), isRightSubject);
             if (edge == null)
             {
-                if (this.CheckIfParameterIsSubject(right))
+                if (isRightSubject)
                 {
-                    edge = this.Create(left, right, leftAdpositions);
+                    edge = this.Create(left, right, leftAdpositions, isRightSubject);
                     if (edge != null)
                         leftAdpositions.Clear();
                 }
                 else
                 {
-                    edge = this.Create(left, right, rightAdpositions);
+                    edge = this.Create(left, right, rightAdpositions, isRightSubject);
                     if (edge != null)
                         rightAdpositions.Clear();
                 }
@@ -56,22 +54,19 @@ namespace ImagePositioner.Factories
         /// <summary>
         /// Tries to create edge with given adpositions 
         /// </summary>
-        /// <typeparam name="T1">Left vertex type</typeparam>
-        /// <typeparam name="T2">Right vertex type</typeparam>
         /// <param name="left">Left vertex</param>
         /// <param name="right">Right vertex</param>
         /// <param name="adpositions">Adposition list</param>
+        /// <param name="isRightSubject">Flag if right is subject</param>
         /// <returns>Edge if exists for given adpositions. Else null.</returns>
-        private Edge Create<T1, T2>(T1 left, T2 right, List<string> adpositions)
-            where T1 : IDrawable, IProcessable
-            where T2 : IDrawable, IProcessable
+        private Edge Create(IDrawable left, IDrawable right, List<string> adpositions, bool isRightSubject)
         {
             Edge edge = GetEdge(string.Join(" ", adpositions).ToLower());
 
             if (edge == null)
                 return null;
 
-            if (this.CheckIfParameterIsSubject(right))
+            if (isRightSubject)
                 edge.Add(right, left);
             else
                 edge.Add(left, right);
@@ -246,17 +241,6 @@ namespace ImagePositioner.Factories
                 case "on corner": return new OnCornerEdge();
                 default: return null;
             }
-        }
-
-        /// <summary>
-        /// Checks if parameter is subject
-        /// </summary>
-        /// <typeparam name="T1">Vertex type</typeparam>
-        /// <param name="parameter">Vertex</param>
-        /// <returns>True if its subject</returns>
-        private bool CheckIfParameterIsSubject<T1>(T1 parameter) where T1 : IDrawable, IProcessable
-        {
-            return parameter.DependencyType == "nsubj";
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ImageGeneratorInterfaces.ImageManager;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
@@ -71,7 +72,7 @@ namespace ImageManagment
                     {
                         // Image was deleted
                         return false;
-                    }                   
+                    }
                 }
 
                 return true;
@@ -153,30 +154,33 @@ namespace ImageManagment
     internal class LimitedDictionary<K, V> where V : IDisposable
     {
         private int Limit { get; set; }
-        private Dictionary<K, V> Dictionary { get; }
-        private Queue<K> KeyQueue { get; }
+        private ConcurrentDictionary<K, V> Dictionary { get; }
+        private ConcurrentQueue<K> KeyQueue { get; set; }
         private Dictionary<K, object> Locks { get; }
 
         public LimitedDictionary(int limit, Dictionary<K, object> locks)
         {
             this.Limit = limit;
-            this.Dictionary = new Dictionary<K, V>();
-            this.KeyQueue = new Queue<K>();
+            this.Dictionary = new ConcurrentDictionary<K, V>();
+            this.KeyQueue = new ConcurrentQueue<K>();
             this.Locks = locks;
         }
 
         public void Add(K key, V value)
         {
             if (this.Limit == KeyQueue.Count)
-                this.Remove(KeyQueue.Dequeue());
+            {
+                KeyQueue.TryDequeue(out K dequeValue);
+                this.Remove(dequeValue);
+            }
 
             KeyQueue.Enqueue(key);
-            Dictionary.Add(key, value);
+            Dictionary.TryAdd(key, value);
         }
 
         public void RemoveAll()
         {
-            this.KeyQueue.Clear();
+            this.KeyQueue = new ConcurrentQueue<K>();
             foreach (var key in this.Dictionary.Keys)
                 this.Dictionary[key].Dispose();
 
@@ -187,7 +191,7 @@ namespace ImageManagment
         {
             lock (this.Locks[key])
             {
-                this.Dictionary.Remove(key);
+                this.Dictionary.TryRemove(key, out _);
             }
 
             return true;

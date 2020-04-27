@@ -16,25 +16,20 @@ namespace ImageGeneratorInterfaces.Edges.Factory
         /// <summary>
         /// Method for creating abosolute positioning edges from adpositions.
         /// </summary>
-        /// <typeparam name="T1">Type of object</typeparam>
-        /// <param name="left">Object to be positioned</param>
+        /// <param name="left">Vertex to be positioned</param>
         /// <param name="adpositions">List of adpositions</param>
         /// <returns>Absolute edge</returns>
-        IAbsolutePositionateEdge Create<T1>(T1 left, List<string> adpositions) 
-            where T1 : IDrawable, IProcessable;
+        IAbsolutePositionateEdge Create(IDrawable left, List<string> adpositions);
 
         /// <summary>
         /// Method for creating relative positioning edges from adpositions.
         /// </summary>
-        /// <typeparam name="T1">First object type</typeparam>
-        /// <typeparam name="T2">Second object type</typeparam>
         /// <param name="left">Left vertex of edge</param>
         /// <param name="right">Right vertex of edge</param>
         /// <param name="leftAdpositions">List of left adpositions</param>
         /// <param name="rightAdpositions">List of right adpositions</param>
+        /// <param name="isRightSubject">Flag if right vertex is subject</param>
         /// <returns>Relative edge</returns>
-        IPositionateEdge Create<T1, T2>(T1 left, T2 right, List<string> leftAdpositions, List<string> rightAdpositions) 
-            where T1 : IDrawable, IProcessable
-            where T2 : IDrawable, IProcessable;
+        IPositionateEdge Create(IDrawable left, IDrawable right, List<string> leftAdpositions, List<string> rightAdpositions, bool isRightSubject);
     }
 }

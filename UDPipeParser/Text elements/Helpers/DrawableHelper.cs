@@ -19,23 +19,20 @@ namespace UDPipeParsing.Text_elements.Helpers
         /// Tries to create edge between them.
         /// Also checks other options.
         /// </summary>
-        /// <typeparam name="T">Type of first vertex</typeparam>
-        /// <typeparam name="U">Type of second vertex</typeparam>
         /// <param name="graph">Sentence graph</param>
         /// <param name="left">left vertex</param>
         /// <param name="right">right vertex</param>
         /// <param name="leftAdpositions">left adpositions</param>
         /// <param name="rightAdpositions">right adpositions</param>
         /// <param name="finalAction">Actial to do if "of" is found</param>
-        /// <returns></returns>
-        public bool ProcessEdge<T, U>(ISentenceGraph graph, IEdgeFactory edgeFactory, T left, U right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions, Action finalAction)
-            where T : IProcessable, IDrawable
-            where U : IProcessable, IDrawable
+        /// <param name="isRightSubject">Flag if right vertex is subject</param>
+        /// <returns>New edge or null</returns>
+        public bool ProcessEdge(ISentenceGraph graph, IEdgeFactory edgeFactory, IDrawable left, IDrawable right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions, bool isRightSubject, Action finalAction)
         {
             // Get adpositions from adpositions combinations
             List<string> leftAdp = leftAdpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
             List<string> rightAdp = rightAdpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
-            IPositionateEdge edge = edgeFactory.Create(left, right, leftAdp, rightAdp);
+            IPositionateEdge edge = edgeFactory.Create(left, right, leftAdp, rightAdp, isRightSubject);
 
             // Clear used adpositions
             if (leftAdp.Count == 0)

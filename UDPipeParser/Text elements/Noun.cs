@@ -157,7 +157,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
 
             // Dont process negated verb
-            if(!verb.IsNegated)
+            if (!verb.IsNegated)
                 this.Actions.Add(verb);
 
             // Process all depending drawables
@@ -242,7 +242,14 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsConjuction(noun.DependencyType) && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
                 // Try to create edge between elements
-                IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                IPositionateEdge newEdge = this.EdgeFactory.Create(
+                    this, 
+                    noun, 
+                    new List<string>(), 
+                    noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(), 
+                    this.DependencyHelper.IsSubject(noun.DependencyType)
+                );
+
                 if (newEdge != null)
                 {
                     noun.Adpositions.Clear();
@@ -271,11 +278,11 @@ namespace UDPipeParsing.Text_elements
                 return noun;
 
             // Processing relationship between nounset and this
-            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, () =>
-            {
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, this.DependencyHelper.IsSubject(noun.DependencyType), () =>
+             {
                 // Add to extensions
                 this.Extensions.Add(noun);
-            });
+             });
 
             // Finalize processed noun
             noun.FinalizeProcessing(graph);
@@ -289,7 +296,14 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsConjuction(nounSet.DependencyType) && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
                 // Try to create edge between elements
-                IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                IPositionateEdge newEdge = this.EdgeFactory.Create(
+                    this,
+                    nounSet,
+                    new List<string>(),
+                    nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(),
+                    this.DependencyHelper.IsSubject(nounSet.DependencyType)
+                );
+
                 if (newEdge != null)
                 {
                     nounSet.Adpositions.Clear();
@@ -319,7 +333,7 @@ namespace UDPipeParsing.Text_elements
                 return nounSet;
 
             // Processing relationship between nounset and this
-            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, () =>
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, this.DependencyHelper.IsSubject(nounSet.DependencyType), () =>
             {
                 // Add to extensions
                 this.Extensions.Add(nounSet);

@@ -22,7 +22,7 @@ namespace UDPipeParsing.Text_elements
     /// Älso represents plural form of nouns.
     /// </summary>
     public class NounSet : IDrawable, IProcessable
-    {     
+    {
         // ---- IDrawable interface properties ----
         public Vector2? Position
         {
@@ -109,7 +109,7 @@ namespace UDPipeParsing.Text_elements
         public List<Adposition> Adpositions { get; set; }
 
         // ---- Private properties -----
-        private bool IsFinalized { get; set; } = false;       
+        private bool IsFinalized { get; set; } = false;
         private int LastProcessedNoun { get; set; } = 0;
         private string PluralForm { get; }
         private ElementFactory ElementFactory { get; }
@@ -286,7 +286,7 @@ namespace UDPipeParsing.Text_elements
                 graph.ReplaceVertex(this, (IDrawable)verb.Object);
 
             // Process only non negated verbs
-            if(!verb.IsNegated)
+            if (!verb.IsNegated)
                 foreach (var noun in this.Nouns)
                     noun.Process(verb, graph);
 
@@ -298,7 +298,7 @@ namespace UDPipeParsing.Text_elements
             // Appositinal represents offset to nouns in the set
             if (this.DependencyTypeHelper.IsAppositional(num.DependencyType) && num.GetValue() < this.NumberOfInstances)
             {
-                for(int i = this.LastProcessedNoun; i < num.GetValue() - 1 + LastProcessedNoun; i++)
+                for (int i = this.LastProcessedNoun; i < num.GetValue() - 1 + LastProcessedNoun; i++)
                     this.Nouns[i].Process(num.DependingDrawable, graph);
 
                 LastProcessedNoun += num.GetValue();
@@ -321,11 +321,18 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Noun noun, ISentenceGraph graph)
         {
             // If noun is in coordination relation
-            if (this.DependencyTypeHelper.IsConjuction(noun.DependencyType) 
+            if (this.DependencyTypeHelper.IsConjuction(noun.DependencyType)
                 && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
                 // Try to create new edge between elements
-                IPositionateEdge newEdge = this.EdgeFactory.Create(this, noun, new List<string>(), noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                IPositionateEdge newEdge = this.EdgeFactory.Create(
+                    this,
+                    noun,
+                    new List<string>(),
+                    noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(),
+                    this.DependencyTypeHelper.IsSubject(noun.DependencyType)
+                );
+
                 if (newEdge != null)
                 {
                     noun.Adpositions.Clear();
@@ -358,8 +365,8 @@ namespace UDPipeParsing.Text_elements
                 return noun;
 
             // Processing relationship between noun and this
-            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, () =>
-            { 
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, this.DependencyTypeHelper.IsSubject(noun.DependencyType), () =>
+            {
                 // Add to extensions
                 noun.DependencyType = "compound";
                 this.Nouns.ForEach(n => n.Process(noun, graph));
@@ -374,11 +381,18 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
             // If nouset is in coordination relation
-            if (this.DependencyTypeHelper.IsConjuction(nounSet.DependencyType) 
+            if (this.DependencyTypeHelper.IsConjuction(nounSet.DependencyType)
                 && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
                 // Try create edge between elements
-                IPositionateEdge newEdge = this.EdgeFactory.Create(this, nounSet, new List<string>(), nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
+                IPositionateEdge newEdge = this.EdgeFactory.Create(
+                    this,
+                    nounSet,
+                    new List<string>(),
+                    nounSet.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(),
+                    this.DependencyTypeHelper.IsSubject(nounSet.DependencyType)
+                );
+
                 if (newEdge != null)
                 {
                     nounSet.Adpositions.Clear();
@@ -400,7 +414,7 @@ namespace UDPipeParsing.Text_elements
                 return nounSet;
 
             // Processing relationship between nounset and this
-            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, () =>
+            this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, this.DependencyTypeHelper.IsSubject(nounSet.DependencyType), () =>
             {
                 // Add to extensions
                 nounSet.DependencyType = "compound";
