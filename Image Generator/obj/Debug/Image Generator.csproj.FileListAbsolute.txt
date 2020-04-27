@@ -130,3 +130,6 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipePars
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.AppForm.resources
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.config

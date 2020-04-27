@@ -7,3 +7,5 @@ C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePos
 C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.csproj.CopyComplete
 C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.dll
 C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.pdb
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\NLog.dll
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\NLog.xml

@@ -14,6 +14,8 @@ namespace ImagePositioner.Edges
     /// </summary>
     abstract class Edge : IPositionateEdge
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         // left vertex
         public IDrawable Left { get; set; }
 
@@ -68,8 +70,8 @@ namespace ImagePositioner.Edges
             // Fix both vertices into one group.
             this.Left.CombineIntoGroup(this.Right);
 
-            //debug log.
-            Console.WriteLine(this); 
+            // Log this positioning
+            Logger.Info(this);
         }
 
         /// <summary>

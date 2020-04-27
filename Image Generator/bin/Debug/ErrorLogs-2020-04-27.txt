@@ -1,0 +1,23 @@
+2020-04-27 21:20:27.4822|ERROR|Image_Generator.AppForm|Error while generating image for view
+2020-04-27 21:24:31.5143|ERROR|Image_Generator.AppForm|Error while generating image for view
+System.Net.WebException: Vzdálený název nelze rozpoznat: 'api.flickr.com'
+   v System.Net.WebClient.UploadDataInternal(Uri address, String method, Byte[] data, WebRequest& request)
+   v System.Net.WebClient.UploadString(Uri address, String method, String data)
+   v System.Net.WebClient.UploadString(String address, String data)
+   v FlickrNet.FlickrResponder.<>c__DisplayClass10_0.<DownloadData>b__0()
+   v FlickrNet.FlickrResponder.DownloadData(String method, String baseUrl, String data, String contentType, String authHeader)
+   v FlickrNet.FlickrResponder.GetDataResponseOAuth(Flickr flickr, String baseUrl, Dictionary`2 parameters)
+   v FlickrNet.FlickrResponder.GetDataResponse(Flickr flickr, String baseUrl, Dictionary`2 parameters)
+   v FlickrNet.Flickr.GetResponse[T](Dictionary`2 parameters, TimeSpan cacheTimeout)
+   v FlickrNet.Flickr.PhotosSearch(PhotoSearchOptions options)
+   v ImageManagment.Downloader.DownloadImage(String imageName, String element, Boolean useImageCaptioning) v C:\Users\lukas\source\repos\Image Generator\ImageManager\Downloader.cs:øádek 106
+   v ImageManagment.ImageManager.GetImage(String imageName, String element) v C:\Users\lukas\source\repos\Image Generator\ImageManager\ImageManager.cs:øádek 101
+   v UDPipeParsing.Text_elements.Noun.GetImage() v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\Text elements\Noun.cs:øádek 391
+   v UDPipeParsing.Text_elements.Noun.FinalizeProcessing(ISentenceGraph graph) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\Text elements\Noun.cs:øádek 353
+   v UDPipeParsing.Text_elements.Root.ProcessElement(IProcessable element, ISentenceGraph graph) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\Text elements\Root.cs:øádek 65
+   v UDPipeParsing.Text_elements.Element.Process(IProcessable element, ISentenceGraph graph) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\Text elements\Element.cs:øádek 81
+   v UDPipeParsing.UDPipeParser.CompressDependencyTree(Dictionary`2 tree, SentenceGraph graph, IProcessable element) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\UDPipeParser.cs:øádek 174
+   v UDPipeParsing.UDPipeParser.ParseSentence(String sentence) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\UDPipeParser.cs:øádek 75
+   v UDPipeParsing.UDPipeParser.ParseText(String text, Int32 width, Int32 height) v C:\Users\lukas\source\repos\Image Generator\UDPipeParser\UDPipeParser.cs:øádek 51
+   v Image_Generator.AppForm.GenerateImage(String description) v C:\Users\lukas\source\repos\Image Generator\Image Generator\AppForm.cs:øádek 408
+   v Image_Generator.AppForm.<GenerateImageForView>b__39_0() v C:\Users\lukas\source\repos\Image Generator\Image Generator\AppForm.cs:øádek 366

@@ -101,16 +101,13 @@ namespace ImageManagment
                 }
                 catch (WebException ex)
                 {
-                    // 500 INTERNAL!
-                    Console.WriteLine("Network Error");
-
                     // Not connected to the internet
                     if (ex.Status == WebExceptionStatus.NameResolutionFailure)
                         throw;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Console.WriteLine("Unknown" + ex.Message);
+                    // Try use imagename substring
                     imageFind = this.GetImageNameSubstring(imageFind, element);
                 }
             }
@@ -175,9 +172,17 @@ namespace ImageManagment
                     {
                         captions = this.IBMCaptioner.GetCaptionsFromImage(image, fileName);
                     }
+                    catch (WebException e)
+                    {
+                        if (e.Status == WebExceptionStatus.NameResolutionFailure)
+                            throw;
+
+                        Thread.Sleep(1000);
+                        continue;
+                    }
                     catch (Exception e)
                     {
-                        if (e is WebException || e is AggregateException)
+                        if (e is AggregateException)
                         {
                             Thread.Sleep(1000);
                             continue;

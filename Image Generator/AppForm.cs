@@ -23,6 +23,8 @@ namespace Image_Generator
     /// </summary>
     public partial class AppForm : Form
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         // properties
         private IImageManager ImageManager { get; }
         private Renderer Renderer { get; }
@@ -51,7 +53,8 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void GenerateButton_Click(object sender, EventArgs e)
         {
-            this.StartGeneration(this.GenerateImageForView);
+            Logger.Info("Generating image for view");
+            this.StartGeneration(this.GenerateImageForView);           
         }
 
         /// <summary>
@@ -61,7 +64,8 @@ namespace Image_Generator
         /// <param name="e"></param>
         private void GenerateDatasetButton_Click(object sender, EventArgs e)
         {
-            this.StartGeneration(this.GenerateImagesForDataset);
+            Logger.Info("Generating dataset images");
+            this.StartGeneration(this.GenerateImagesForDataset);          
         }
 
         /// <summary>
@@ -91,8 +95,8 @@ namespace Image_Generator
             }
             catch (IOException ex)
             {
-                Console.WriteLine(ex.Message);
                 ShowErrorMessage("You have to wait until program drops all references to images.\n Try it later please.");
+                Logger.Error(ex, "Error while deleting saved images");
             }
         }
 
@@ -122,7 +126,9 @@ namespace Image_Generator
                 else if (ex is ArgumentNullException)
                     ShowErrorMessage("You have to specify name of newly generated image");
                 else
-                    ShowErrorMessage("Unknown error\n" + ex.Message);
+                    ShowErrorMessage("Unknown error");
+
+                Logger.Error(ex, "Error while saving image\n" + ex);
             }
         }
 
@@ -195,6 +201,8 @@ namespace Image_Generator
             this.ImageCaptCheckbox.Checked = !this.ImageCaptCheckbox.Checked;
             this.ImageManager.UseImageCaptioning = this.ImageCaptCheckbox.Checked;
             this.ImageCaptCheckbox.ImageIndex = 1 - this.ImageCaptCheckbox.ImageIndex;
+
+            Logger.Info("Using image captioning: " + this.ImageCaptCheckbox.Checked);
         }
 
         #endregion
@@ -285,9 +293,10 @@ namespace Image_Generator
                         this.CreateImageGeneratingTask(str, directory, counter);
                     }
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
                     ShowErrorMessage("Error while reading from loaded dataset.");
+                    Logger.Error(ex, "Error while reading dataset\n" + ex);
                 }
             }
         }
@@ -317,9 +326,7 @@ namespace Image_Generator
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine("__________ERROR__________" + counter);
-                    Console.Error.WriteLine(e.Message);
-                    Console.WriteLine(e);
+                    Logger.Error(e, "Error while generating image for dataset. Image number #" + counter + "\n" + e);
                 }
                 finally
                 {
@@ -376,11 +383,9 @@ namespace Image_Generator
                     else if (ex is IOException)
                         ShowErrorMessage("IO error");
                     else
-                    {
                         ShowErrorMessage("Unknown exception");
-                        Console.WriteLine(ex.Message);
-                    }
 
+                    Logger.Error(ex, "Error while generating image for view\n" + ex);
                     this.SetProcessStatus("Failed to generate image");
                 }
                 finally
@@ -495,8 +500,15 @@ namespace Image_Generator
         /// <returns>True if connected to internet</returns>
         private bool CheckConnection()
         {
-            var pingReply = new Ping().Send("www.google.com.mx");
-            return pingReply != null && pingReply.Status == IPStatus.Success;
+            try
+            {
+                var pingReply = new Ping().Send("www.google.com.mx");
+                return pingReply != null && pingReply.Status == IPStatus.Success;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         /// <summary>
