@@ -28,14 +28,14 @@ namespace UDPipeParsing.Text_elements.Helpers
         /// <param name="rightAdpositions">right adpositions</param>
         /// <param name="finalAction">Actial to do if "of" is found</param>
         /// <returns></returns>
-        public bool ProcessEdge<T, U>(ISentenceGraph graph, IEdgeFactory factory, T left, U right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions, Action finalAction)
+        public bool ProcessEdge<T, U>(ISentenceGraph graph, IEdgeFactory edgeFactory, T left, U right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions, Action finalAction)
             where T : IProcessable, IDrawable
             where U : IProcessable, IDrawable
         {
             // Get adpositions from adpositions combinations
             List<string> leftAdp = leftAdpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
             List<string> rightAdp = rightAdpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList();
-            IPositionateEdge edge = this.EdgeFactory.Create(left, right, leftAdp, rightAdp);
+            IPositionateEdge edge = edgeFactory.Create(left, right, leftAdp, rightAdp);
 
             // Clear used adpositions
             if (leftAdp.Count == 0)
