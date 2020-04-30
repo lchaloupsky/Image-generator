@@ -223,36 +223,80 @@ namespace UDPipeParsing.Preprocessors
                 .ToList();
         }
 
+        /// <summary>
+        /// Checks if the given word is adjective or adverb
+        /// </summary>
+        /// <param name="partOfSpeech">Part of speech of the word</param>
+        /// <returns>True if satisfied</returns>
         private bool IsExtension(string partOfSpeech)
         {
             return partOfSpeech == "ADJ" || partOfSpeech == "ADV";
         }
 
+        /// <summary>
+        /// Checks if the first element in the sentence is standalone verb, thus is incorrectly tagged
+        /// </summary>
+        /// <param name="partofSpeech">Word part of speech</param>
+        /// <param name="id">Word id</param>
+        /// <param name="verbParams">Other word params from UDPipe</param>
+        /// <returns>True if satisfied</returns>
         private bool IsStandAloneVerb(string partofSpeech, int id, string verbParams)
         {
             return partofSpeech == "VERB" && id == 1 && verbParams.Contains("Mood=Imp");
         }
 
+        /// <summary>
+        /// Checks if word is verb extending a noun
+        /// </summary>
+        /// <param name="partOfSpeech">Words part of speech</param>
+        /// <param name="id">Word id</param>
+        /// <param name="verbParams">Other verb params</param>
+        /// <returns>True if satisfied</returns>
         private bool IsVerbExtension(string partOfSpeech, int id, string verbParams)
         {
             return partOfSpeech == "VERB" && id == 1 && verbParams.Contains("VerbForm=Ger");
         }
 
+        /// <summary>
+        /// Checks if word is verb extending a noun
+        /// </summary>
+        /// <param name="partOfSpeech">Words part of speech</param>
+        /// <param name="relation">Words dependency tree relation</param>
+        /// <returns>True if satisfied</returns>
         private bool IsVerbExtension(string partOfSpeech, string relation)
         {
             return partOfSpeech == "VERB" && this.DependencyTypeHelper.IsAdjectivalModifier(relation);
         }
 
+        /// <summary>
+        /// Checks if word is adposition or adpositional particle
+        /// </summary>
+        /// <param name="partOfSpeech">Word part of speech</param>
+        /// <param name="lemma">Word lemma</param>
+        /// <param name="dependencyType">Word dependency tree relation</param>
+        /// <returns>True if satisfied</returns>
         private bool IsAdposition(string partOfSpeech, string lemma, string dependencyType)
         {
             return partOfSpeech == "ADP" || (partOfSpeech == "PART" && this.IsAllowedParticle(lemma, dependencyType));
         }
 
+        /// <summary>
+        /// Checks if word is allowed particle
+        /// </summary>
+        /// <param name="lemma">Word lemma</param>
+        /// <param name="dependencyType">Word dependency tree relation</param>
+        /// <returns>True if satisfied</returns>
         private bool IsAllowedParticle(string lemma, string dependencyType)
         {
             return !lemma.Contains("'") && lemma != "not" && !this.DependencyTypeHelper.IsMark(dependencyType);
         }
 
+        /// <summary>
+        /// Checks if word is determiner(article)
+        /// </summary>
+        /// <param name="partOfSpeech">Words part of speech</param>
+        /// <param name="relation">Word dependency tree relation</param>
+        /// <returns>True if satisfied</returns>
         private bool IsDeterminer(string partOfSpeech, string relation)
         {
             return partOfSpeech == "DET"
@@ -260,11 +304,21 @@ namespace UDPipeParsing.Preprocessors
                     || partOfSpeech == "NOUN") && this.DependencyTypeHelper.IsNominalPossesive(relation));
         }
 
+        /// <summary>
+        /// Checks if given noun params indicating singular form of a noun
+        /// </summary>
+        /// <param name="otherParams">Noun params from UDPipe</param>
+        /// <returns>True if satisfied</returns>
         private bool IsSingular(string otherParams)
         {
             return otherParams.Contains("Number=Sing");
         }
 
+        /// <summary>
+        /// Checks if word describing a noun extending another noun
+        /// </summary>
+        /// <param name="relationType">Word dependency tree relation</param>
+        /// <returns>True if satisfied</returns>
         private bool IsNounExtension(string relationType)
         {
             return this.DependencyTypeHelper.IsCompound(relationType)
@@ -272,6 +326,11 @@ namespace UDPipeParsing.Preprocessors
                 || this.DependencyTypeHelper.IsName(relationType);
         }
 
+        /// <summary>
+        /// Checks if word is Noun or Proper noun -> thus is "subject"
+        /// </summary>
+        /// <param name="partOfSpeech">Words part of speech</param>
+        /// <returns>True if satisfied</returns>
         private bool IsSubject(string partOfSpeech)
         {
             return partOfSpeech == "NOUN" || partOfSpeech == "PROPN";

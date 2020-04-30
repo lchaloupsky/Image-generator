@@ -17,8 +17,9 @@ namespace UDPipeParsing.Factories
     /// </summary>
     public class ElementFactory
     {
-        // Negation for adjectives
         private const string ADJECTIVE_NEGATION = "no";
+        private const float UP_SCALE = 1.5f;
+        private const float DOWN_SCALE = 0.75f;
 
         private IEdgeFactory EdgeFactory { get; }
         private IImageManager Manager { get; }
@@ -37,15 +38,27 @@ namespace UDPipeParsing.Factories
         };
 
         // Functional adjectives, that are scaling up
-        private HashSet<string> UpScales { get; } = new HashSet<string>()
+        private HashSet<string> DefaultUpScales { get; } = new HashSet<string>()
         {
-            "big", "large", "tall", "great", "gigantic", "tremendous", "huge", "massive"
+            "big", "large", "tall", "great", "widespread", "wide", "grand", "broad"
+        };
+
+        // Functional adjectives, that are scaling up
+        private HashSet<string> LargeUpScales { get; } = new HashSet<string>()
+        {
+             "gigantic", "tremendous", "huge", "massive", "enormous", "giant", "immense", "vast", "robust", "mighty"
         };
 
         // Functional adjectives, that are scaling down
-        private HashSet<string> DownScales { get; } = new HashSet<string>()
+        private HashSet<string> DefaultDownScales { get; } = new HashSet<string>()
         {
-            "small", "short", "miniature", "slight", "tiny", "little", "mini"
+            "small", "short", "slight", "little", "low", "minor", "baby", "compact"
+        };
+
+        // Functional adjectives, that are scaling down a lot
+        private HashSet<string> TinyDownScales { get; } = new HashSet<string>()
+        {
+            "miniature", "tiny", "mini", "petite", "puny", "micro"
         };
 
         public ElementFactory(IImageManager manager, IEdgeFactory edgeFactory)
@@ -173,12 +186,18 @@ namespace UDPipeParsing.Factories
         private IProcessable ProcessAdj(string[] parts)
         {
             // Check upscales adjectives
-            if (this.UpScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 1.5f);
+            if (this.DefaultUpScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], UP_SCALE);
+
+            if (this.LargeUpScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 2 * UP_SCALE);
 
             // Check downscales adjectives
-            if (this.DownScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 0.75f);
+            if (this.DefaultDownScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DOWN_SCALE);
+
+            if (this.TinyDownScales.Contains(parts[2].ToLower()))
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DOWN_SCALE / 2);
 
             // return default adjective
             return new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
