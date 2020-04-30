@@ -100,9 +100,6 @@ namespace UDPipeParsing.Preprocessors
                 var index = int.Parse(parts[6]);
                 i--;
 
-                if(parts[1] == "sifting")
-                    Console.WriteLine();
-
                 finalPartsToJoin.Add(parts[1]);
 
                 if (this.IsSubject(parts[3]))
