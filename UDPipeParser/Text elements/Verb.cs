@@ -116,7 +116,10 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsSubject(noun.DependencyType))
             {
                 if (this.DrawableAdposition != null)
+                {
                     noun.Process(this.DrawableAdposition, graph);
+                    this.DrawableAdposition = null;
+                }
 
                 return noun.Process(this, graph);
             }                
@@ -136,7 +139,10 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsSubject(nounSet.DependencyType))
             {
                 if (this.DrawableAdposition != null)
+                {
                     nounSet.Process(this.DrawableAdposition, graph);
+                    this.DrawableAdposition = null;
+                }
 
                 return nounSet.Process(this, graph);
             }

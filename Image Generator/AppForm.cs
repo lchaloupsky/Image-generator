@@ -382,6 +382,8 @@ namespace Image_Generator
                         ShowErrorMessage("Internet connection failure");
                     else if (ex is IOException)
                         ShowErrorMessage("IO error");
+                    else if (ex is ArgumentException)
+                        ShowErrorMessage(ex.Message);
                     else
                         ShowErrorMessage("Unknown exception");
 

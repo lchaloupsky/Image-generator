@@ -26,6 +26,8 @@ namespace UDPipeParsing
     /// </summary>
     public class UDPipeParser
     {
+        private const int MAX_SENTENCE_LENGTH = 1500;
+
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
         private List<IPreprocessor> Preprocessors { get; }
@@ -48,7 +50,12 @@ namespace UDPipeParsing
         {
             var parts = new List<ISentenceGraph>();
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (line.Length > MAX_SENTENCE_LENGTH)
+                    throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MAX_SENTENCE_LENGTH} characters.");
+
                 parts.Add(ParseSentence(PreprocessText($"{line}.")));
+            }
 
             return parts;
         }

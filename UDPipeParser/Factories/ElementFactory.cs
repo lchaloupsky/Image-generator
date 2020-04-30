@@ -33,7 +33,7 @@ namespace UDPipeParsing.Factories
 
         // Known cases of nouns and adverbs to map to the adpositions
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
-            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind"
+            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind", "up", "opposite", "to"
         };
 
         // Functional adjectives, that are scaling up
@@ -194,7 +194,7 @@ namespace UDPipeParsing.Factories
             string lemmaToFind = lemma.ToLower();
 
             // Check know cases
-            if ((type == "NOUN" || type == "ADV") && this.KnownCasesToMap.Contains(lemmaToFind))
+            if ((type == "NOUN" || type == "ADV" || type == "PART") && this.KnownCasesToMap.Contains(lemmaToFind))
                 type = "ADP";
 
             // Check adjective

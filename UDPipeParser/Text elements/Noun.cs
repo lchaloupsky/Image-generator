@@ -263,7 +263,7 @@ namespace UDPipeParsing.Text_elements
             }
 
             // Part of noun phrase
-            if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNounPhrase(noun.DependencyType))
+            if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNounPhrase(noun.DependencyType) || this.DependencyHelper.IsName(noun.DependencyType))
             {
                 this.Extensions.Add(noun);
                 return this;
@@ -322,7 +322,7 @@ namespace UDPipeParsing.Text_elements
             }
 
             // Part of this noun
-            if (this.DependencyHelper.IsCompound(nounSet.DependencyType) || this.DependencyHelper.IsNounPhrase(nounSet.DependencyType))
+            if (this.DependencyHelper.IsCompound(nounSet.DependencyType) || this.DependencyHelper.IsNounPhrase(nounSet.DependencyType) || this.DependencyHelper.IsName(nounSet.DependencyType))
             {
                 this.Extensions.Add(nounSet);
                 return this;

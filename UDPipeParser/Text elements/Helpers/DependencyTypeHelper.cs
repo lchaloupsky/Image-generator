@@ -120,5 +120,35 @@ namespace UDPipeParsing.Text_elements.Helpers
         {
             return dependencyType == "amod";
         }
+
+        /// <summary>
+        /// Checks if dependency expresses "root" relation of the whole dependency tree
+        /// </summary>
+        /// <param name="dependencyType">dependency type</param>
+        /// <returns>True if satisfied</returns>
+        public bool IsRoot(string dependencyType)
+        {
+            return dependencyType == "root";
+        }
+
+        /// <summary>
+        /// Checks if dependency expresses "name" relation
+        /// </summary>
+        /// <param name="dependencyType">dependency type</param>
+        /// <returns>True if satisfied</returns>
+        public bool IsName(string dependencyType)
+        {
+            return dependencyType == "name";
+        }
+
+        /// <summary>
+        /// Checks if dependency expresses "mark" relation
+        /// </summary>
+        /// <param name="dependencyType">dependency type</param>
+        /// <returns>True if satisfied</returns>
+        public bool IsMark(string dependencyType)
+        {
+            return dependencyType == "mark";
+        }
     }
 }

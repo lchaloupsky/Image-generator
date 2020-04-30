@@ -354,7 +354,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
 
             // Let each noun process nounphrase
-            if (this.DependencyTypeHelper.IsNounPhrase(noun.DependencyType) || this.DependencyTypeHelper.IsCompound(noun.DependencyType))
+            if (this.DependencyTypeHelper.IsNounPhrase(noun.DependencyType) || this.DependencyTypeHelper.IsCompound(noun.DependencyType) || this.DependencyTypeHelper.IsName(noun.DependencyType))
             {
                 this.Nouns.ForEach(n => n.Process(noun, graph));
                 return this;

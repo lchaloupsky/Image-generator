@@ -84,6 +84,8 @@ namespace ImagePositioner.Factories
             switch (edgeType)
             {
                 case "at top":
+                case "down from top":
+                case "from top":
                 case "on top": return new OnTopEdge();
                 case "on left": return new ToLeftEdge();
                 case "on right": return new ToRightEdge();
@@ -133,46 +135,57 @@ namespace ImagePositioner.Factories
                 case "up":
                 case "upon":
                 case "over":
+                case "onto":
                 case "on": return new OnEdge();
                 case "inside":
                 case "within":
                 case "into":
-                case "through":
                 case "in": return new InEdge();
                 case "at": return new AtEdge();
                 case "below":
                 case "beneath":
                 case "underneath":
+                case "down":
                 case "under": return new UnderEdge();
                 case "on edge of":
                 case "at top of":
+                case "down from top of":
+                case "from top of":
                 case "on top of": return new OnTopEdge();
                 case "in midst of":
                 case "between":
                 case "among":
+                case "across":
+                case "through":
                 case "in middle of": return new InMiddleEdge();
                 case "beside":
                 case "by":
                 case "to":
                 case "against":
                 case "from":
+                case "towards":
+                case "after":
                 case "to left of": return new ToLeftEdge();
                 case "near":
                 case "next to":
                 case "with":
                 case "along":
                 case "for":
+                case "along with":
                 case "to right of": return new ToRightEdge();
                 case "at bottom of": return new AtBottomEdge();
                 case "outside":
                 case "outside of":
                 case "around":
                 case "out of":
+                case "out from":
                 case "in front of": return new InFrontEdge();
                 case "past":
                 case "beyond":
                 case "in behind of":
                 case "in behind from":
+                case "opposite":
+                case "opposite of":
                 case "behind": return new BehindEdge();
                 case "in behind": return new BehindEdge(true);
                 case "in left top corner of":

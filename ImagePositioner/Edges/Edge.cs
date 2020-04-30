@@ -50,6 +50,9 @@ namespace ImagePositioner.Edges
             // Positionate absolute edge
             if (this is AbsoluteEdge && this.Right == null)
             {
+                // Log this positioning
+                Logger.Info(this);
+
                 this.PositionateAgainstRoot(maxWidth, maxHeight);
                 this.Left.IsFixed = true;
                 return;
@@ -58,6 +61,9 @@ namespace ImagePositioner.Edges
             // If right has already grou, use it
             if (this.Right.Group != null)
                 this.Right = this.Right.Group;
+
+            // Log this positioning
+            Logger.Info(this);
 
             // Positionate non positioned vertex
             if (!this.Left.IsPositioned)
@@ -69,9 +75,6 @@ namespace ImagePositioner.Edges
 
             // Fix both vertices into one group.
             this.Left.CombineIntoGroup(this.Right);
-
-            // Log this positioning
-            Logger.Info(this);
         }
 
         /// <summary>
