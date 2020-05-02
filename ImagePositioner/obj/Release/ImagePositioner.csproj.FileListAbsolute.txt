@@ -1,0 +1,11 @@
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\ImagePositioner.dll
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\ImagePositioner.pdb
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\ImageGeneratorInterfaces.dll
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\ImageGeneratorInterfaces.pdb
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.csprojAssemblyReference.cache
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.csproj.CoreCompileInputs.cache
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.csproj.CopyComplete
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.dll
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\obj\Release\ImagePositioner.pdb
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\NLog.dll
+C:\Users\lukas\source\repos\Image Generator\ImagePositioner\bin\Release\NLog.xml

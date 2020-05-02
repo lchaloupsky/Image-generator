@@ -1,5 +1,14 @@
+# visual studio folder
 .vs/
 
-Image Generator/Models/Images/*
-!Image Generator/Models/Images/.gitkeep.txt
+# all images
+Image\ Generator/Models/Images/*
+Image\ Generator/bin/Debug/Images/*
+Image\ Generator/bin/Release/Images/*
+Image\ Generator/bin/Debug/Logs/
+Image\ Generator/bin/Release/Logs/
 
+# empty secret file, just to folder can be commited to repo
+!Image\ Generator/Models/Images/.lockfile
+!Image\ Generator/bin/Debug/Images/.lockfile
+!Image\ Generator/bin/Release/Images/.lockfile
