@@ -32,6 +32,7 @@ namespace Image_Generator
         private Positioner Positioner { get; }
         private ResolutionItem ImageResolution { get; set; }
         private string DatasetFileName { get; set; }
+        private string DatasetDestinationDirectory { get; set; }
         private GeneratorState State { get; set; } = GeneratorState.IDLE;
 
         public AppForm()
@@ -261,10 +262,9 @@ namespace Image_Generator
             }
 
             // choosing directory
-            string directory;
             var dialog = ReturnConfiguredFolderBrowserDialog();
             if (dialog.ShowDialog() == DialogResult.OK)
-                directory = dialog.SelectedPath;
+                this.DatasetDestinationDirectory = dialog.SelectedPath;
             else
             {
                 this.State = GeneratorState.IDLE;
@@ -281,7 +281,6 @@ namespace Image_Generator
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
             {
                 string str;
-                int counter = 0;
                 this.ProcessedBar.Maximum = File.ReadAllLines(this.DatasetFileName).Count();
                 this.ShowProcessedImagesCount();
 
@@ -289,8 +288,10 @@ namespace Image_Generator
                 {
                     while ((str = streamReader.ReadLine()) != null)
                     {
-                        counter++;
-                        this.CreateImageGeneratingTask(str, directory, counter);
+                        if (string.IsNullOrWhiteSpace(str))
+                            continue;
+
+                        this.CreateImageGeneratingTask(str);
                     }
                 }
                 catch (IOException ex)
@@ -307,26 +308,29 @@ namespace Image_Generator
         /// <param name="str">Description of image</param>
         /// <param name="directory">Directory to save</param>
         /// <param name="counter">Dataset image number</param>
-        private void CreateImageGeneratingTask(string str, string directory, int counter)
+        private void CreateImageGeneratingTask(string str)
         {
             // Create new task, that will be running in background
             Task.Run(() =>
-            {
+            {               
                 try
                 {
-                    var result = this.GenerateImage(str.Substring(str.IndexOf(str.First(c => char.IsWhiteSpace(c))) + 1));
+                    var index = str.IndexOf(str.First(c => char.IsWhiteSpace(c)));
+                    var strId = str.Substring(0, index);
+                    var result = this.GenerateImage(str.Substring(index + 1));
+
                     lock (this.Renderer)
                     {
                         // Draw image
                         this.DrawImage(result);
 
                         // SaveImage
-                        this.ImageManager.SaveImage(this.Renderer.GetImage(), Path.Combine(directory, counter + ".jpg"));
+                        this.ImageManager.SaveImage(this.Renderer.GetImage(), Path.Combine(this.DatasetDestinationDirectory, strId + ".jpg"));
                     }
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e, "Error while generating image for dataset. Image number #" + counter + "\n" + e);
+                    Logger.Error(e, "Error while generating image for dataset. Image description from dataset: " + str + "\n" + e);
                 }
                 finally
                 {
@@ -554,7 +558,8 @@ namespace Image_Generator
             return new FolderBrowserDialog()
             {
                 Description = "Choose directory for saving images",
-                ShowNewFolderButton = true
+                ShowNewFolderButton = true,
+                SelectedPath = this.DatasetDestinationDirectory
             };
         }
 

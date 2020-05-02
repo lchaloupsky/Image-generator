@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,17 +65,17 @@ namespace ImageManagment
         /// <param name="imageName"></param>
         /// <returns>New downloaded image</returns>
         public Image DownloadImage(string imageName, string element, bool useImageCaptioning = false)
-        {       
+        {
             Image image = null;
 
             // Get tags
+            var imageFind = imageName;
             var tags = this.GetTags(imageName);
-            var imageFind = imageName;      
 
             int tryCount = 0;
             while (image == null)
             {
-               
+
                 tryCount++;
 
                 // throw away tags, if Flickr cannot find and image after some number of trials
@@ -145,7 +146,8 @@ namespace ImageManagment
         private Image GetBestImage(PhotoCollection photos, string imageName)
         {
             Image bestImage = null;
-            long bestRating = int.MaxValue;
+            float bestRating = float.MaxValue;
+            string imageTextToCompare = this.GetTextWithoutArticles(imageName.ToLower());
 
             // wait until semaphore is free to use
             Semaphore.Wait();
@@ -165,7 +167,7 @@ namespace ImageManagment
                 var fileName = imageName.ToLower() + '.' + Converter.ConvertToString(image.RawFormat);
 
                 // Get captions form IBM captioner
-                List<ImageCaption> captions = null;                
+                List<ImageCaption> captions = null;
                 while (captions == null)
                 {
                     try
@@ -192,20 +194,14 @@ namespace ImageManagment
                     }
                 }
 
-                // Rate received captions
-                long br = int.MaxValue;
-                float probSum = captions.Sum(capt => capt.Probability);             
-                foreach (var capt in captions)
-                {
-                    long rating = (long)(this.LDistanceMeter.CalculateStringDistance(imageName, capt.Caption) / (capt.Probability / probSum));
-                    br = rating < br ? rating : br;
-                }
+                // rate received image captions                
+                var imageRating = this.RateCaptionsForImage(imageTextToCompare, captions);
 
-                // Checks best rating
-                if (br < bestRating)
+                // Checks total best rating from all captions
+                if (imageRating < bestRating)
                 {
                     bestImage = image;
-                    bestRating = br;
+                    bestRating = imageRating;
                 }
                 else
                     image.Dispose();
@@ -220,6 +216,47 @@ namespace ImageManagment
 
             // return best image
             return bestImage;
+        }
+
+        /// <summary>
+        /// Rates given captions with given text to compare with
+        /// </summary>
+        /// <param name="imageTextToCompare">Text to compare captions with</param>
+        /// <param name="captions">Captions to rate</param>
+        /// <returns>Best rating from given captions</returns>
+        private float RateCaptionsForImage(string imageTextToCompare, List<ImageCaption> captions)
+        {
+            float bestActualRating = float.MaxValue;
+
+            // Rate received captions
+            foreach (var capt in captions)
+            {
+                string captionToCompare = this.GetTextWithoutArticles(capt.Caption);
+
+                // Normalized Levenshtein distance
+                float rating = (this.LDistanceMeter.CalculateStringDistance(imageTextToCompare, captionToCompare) * 1f)
+                                / Math.Max(imageTextToCompare.Length, captionToCompare.Length) / capt.Probability;
+
+                // Choose best actual rating
+                if (rating < bestActualRating)
+                    bestActualRating = rating;
+            }
+
+            return bestActualRating;
+        }
+
+        /// <summary>
+        /// Get rid of articles in given text in lower case
+        /// </summary>
+        /// <param name="text">Text to delete articles</param>
+        /// <returns>Text without articles</returns>
+        private string GetTextWithoutArticles(string text)
+        {
+            return new StringBuilder(Regex.Replace(text, "^(a |an |the )", ""))
+                .Replace(" a ", " ")
+                .Replace(" an ", " ")
+                .Replace(" the ", " ")
+                .ToString();
         }
 
         /// <summary>

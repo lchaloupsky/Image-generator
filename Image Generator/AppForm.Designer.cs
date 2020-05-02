@@ -327,7 +327,7 @@
             this.resolutionBox.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.resolutionBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.resolutionBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.resolutionBox.Location = new System.Drawing.Point(205, 10);
+            this.resolutionBox.Location = new System.Drawing.Point(205, 9);
             this.resolutionBox.Name = "resolutionBox";
             this.resolutionBox.Size = new System.Drawing.Size(130, 24);
             this.resolutionBox.TabIndex = 5;
