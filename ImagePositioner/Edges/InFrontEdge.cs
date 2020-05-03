@@ -12,22 +12,42 @@ namespace ImagePositioner.Edges
     /// </summary>
     class InFrontEdge : Edge
     {
-        // Max left width
-        private int MaxWidth { get => this.Right.Width / 2; }
+        // Flag if it is reversed relation
+        private bool IsReversed { get; }
 
-        // Max left height
-        private int MaxHeight { get => this.Right.Height / 2; }
+        public InFrontEdge()
+        {
+            this.IsReversed = false;
+        }
+
+        public InFrontEdge(bool reversed)
+        {
+            this.IsReversed = reversed;
+        }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            this.CopyPosition(this.Left, this.Right);
-            this.PositionateLeft(MaxWidth, maxHeight);
+            if (this.IsReversed)
+            {
+                this.SwitchVertices();
+                this.CopyPosition(this.Right, this.Left);
+            }
+            else
+                this.CopyPosition(this.Left, this.Right);
+
+            this.PositionateLeft(maxWidth, maxHeight);
         }
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
+            if (this.IsReversed && this.Left.Position == null)
+            {
+                this.CopyPosition(this.Right, this.Left);
+                this.SwitchVertices();
+            }
+
             this.Left.ZIndex++;
-            this.Left.Position = this.Right.Position + new Vector2(- this.Left.Width + this.MaxWidth, this.MaxHeight);
+            this.Left.Position = this.Right.Position + new Vector2(-this.Left.Width / 2, this.Right.Height - this.Left.Height / 2);
         }
     }
 }

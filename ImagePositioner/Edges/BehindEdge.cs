@@ -12,12 +12,6 @@ namespace ImagePositioner.Edges
     /// </summary>
     class BehindEdge : Edge
     {
-        // Max left width
-        private int MaxWidth { get => this.Right.Width / 2; }
-
-        // Max left height
-        private int MaxHeight { get => this.Right.Height / 2; }
-
         // Flag if it is reversed relation
         private bool IsReversed { get; }
 
@@ -41,7 +35,7 @@ namespace ImagePositioner.Edges
             else
                 this.CopyPosition(this.Left, this.Right);
 
-            this.PositionateLeft(MaxWidth, maxHeight);
+            this.PositionateLeft(maxWidth, maxHeight);
         }
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
@@ -53,7 +47,7 @@ namespace ImagePositioner.Edges
             }
 
             this.Right.ZIndex++;
-            this.Left.Position = this.Right.Position + new Vector2(this.MaxWidth, - this.MaxHeight);
+            this.Left.Position = this.Right.Position + new Vector2(this.Right.Width - this.Left.Width / 2, -this.Left.Height / 2);
         }
     }
 }

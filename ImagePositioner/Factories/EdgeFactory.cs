@@ -147,6 +147,11 @@ namespace ImagePositioner.Factories
                 case "underneath":
                 case "down":
                 case "under": return new UnderEdge();
+                case "at below":
+                case "with below":
+                case "into below":
+                case "in below":
+                case "to below": return new UnderEdge(true);
                 case "on edge of":
                 case "at top of":
                 case "down from top of":
@@ -180,6 +185,9 @@ namespace ImagePositioner.Factories
                 case "out of":
                 case "out from":
                 case "in front of": return new InFrontEdge();
+                case "in front with":
+                case "with in front":
+                case "in front": return new InFrontEdge(true);
                 case "past":
                 case "beyond":
                 case "in behind of":
@@ -187,6 +195,8 @@ namespace ImagePositioner.Factories
                 case "opposite":
                 case "opposite of":
                 case "behind": return new BehindEdge();
+                case "from behind":
+                case "with behind":
                 case "in behind": return new BehindEdge(true);
                 case "in left top corner of":
                 case "in top left corner of":

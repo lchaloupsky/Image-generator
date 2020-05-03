@@ -62,9 +62,6 @@ namespace ImagePositioner.Edges
             if (this.Right.Group != null)
                 this.Right = this.Right.Group;
 
-            // Log this positioning
-            Logger.Info(this);
-
             // Positionate non positioned vertex
             if (!this.Left.IsPositioned)
                 this.PositionateLeft(maxWidth, maxHeight);
@@ -72,6 +69,9 @@ namespace ImagePositioner.Edges
                 this.PositionateRight(maxWidth, maxHeight);
             else
                 this.PositionateLeft(maxWidth, maxHeight);
+
+            // Log this positioning
+            Logger.Info(this);
 
             // Fix both vertices into one group.
             this.Left.CombineIntoGroup(this.Right);

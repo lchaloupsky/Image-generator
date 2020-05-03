@@ -34,7 +34,7 @@ namespace UDPipeParsing.Factories
 
         // Known cases of nouns and adverbs to map to the adpositions
         private HashSet<string> KnownCasesToMap { get; } = new HashSet<string> {
-            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind", "up", "opposite", "to"
+            "top", "front", "down", "middle", "left", "right", "next", "midst", "bottom", "corner", "outside", "near", "edge", "behind", "up", "opposite", "to", "below"
         };
 
         // Functional adjectives, that are scaling up

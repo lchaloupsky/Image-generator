@@ -57,7 +57,7 @@ namespace UDPipeParsing.Preprocessors
 
                 // Remember last determiner index
                 // in the second part of condition -- "to" is forbiden in other cases
-                if (this.IsAdposition(parts[3], parts[2], parts[7]) || (i > 0 && parts[2] == "to" && responseLines[i-1][2] == "next"))
+                if (this.IsAdposition(parts[3], parts[2], parts[7]) || (i > 0 && parts[2] == "to" && responseLines[i - 1][2] == "next"))
                 {
                     wasAdp = true;
                     lastDetIndex = i + 1;
@@ -129,7 +129,7 @@ namespace UDPipeParsing.Preprocessors
 
                     // Check belonging indices ??? check this change
                     if (nounsWithArticle.ContainsKey(index))
-                        finalIndex[index] = i;                
+                        finalIndex[index] = i;
                     else if (nounsWithArticle.ContainsKey(idx))
                         finalIndex[idx] = i;
                 }
