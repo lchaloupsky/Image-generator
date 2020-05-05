@@ -112,6 +112,7 @@ namespace UDPipeParsing.Text_elements
         private bool IsFinalized { get; set; } = false;
         private int LastProcessedNoun { get; set; } = 0;
         private string PluralForm { get; }
+        private string BaseNounLemma { get; }
         private ElementFactory ElementFactory { get; }
         private IEdgeFactory EdgeFactory { get; }
         private CoordinationType CoordinationType { get; set; } = CoordinationType.AND;
@@ -160,6 +161,7 @@ namespace UDPipeParsing.Text_elements
             this.Id = noun.Id;
             this.DependencyType = noun.DependencyType;
             this.PluralForm = pluralForm;
+            this.BaseNounLemma = noun.Lemma;
             this.Nouns.Add(noun);
         }
 
@@ -193,7 +195,12 @@ namespace UDPipeParsing.Text_elements
 
         public override string ToString()
         {
-            return this.PluralForm ?? string.Join(", ", this.Nouns);
+            var diff = this.Nouns.Where(noun => noun.ToString() != this.BaseNounLemma).ToList();
+            return this.PluralForm != null ?
+                (diff.Count == 0 ?
+                    this.PluralForm :
+                    $"{this.PluralForm}, " + string.Join(", ", diff)) :
+                string.Join(", ", this.Nouns);
         }
 
         public void Dispose()
