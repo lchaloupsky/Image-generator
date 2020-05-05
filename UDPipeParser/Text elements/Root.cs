@@ -3,13 +3,8 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
 using ImageGeneratorInterfaces.Rendering;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing.Text_elements

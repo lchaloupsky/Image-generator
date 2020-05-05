@@ -2,12 +2,8 @@
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Rendering;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
@@ -44,7 +40,7 @@ namespace UDPipeParsing.Text_elements
 
         // String representation of this group
         private string StringRepresentation { get; set; }
-      
+
         public void Draw(IRenderer renderer, IImageManager manager)
         {
             renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);

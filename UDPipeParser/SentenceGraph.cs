@@ -1,11 +1,8 @@
 ﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UDPipeParsing
 {
@@ -26,7 +23,7 @@ namespace UDPipeParsing
         public IEnumerable<IDrawable> Vertices => this.Graph.Keys;
         public IEnumerable<IPositionateEdge> Edges => this.Graph.Values.SelectMany(edge => edge);
         public IEnumerable<IPositionateEdge> this[IDrawable vertex] => this.Graph.ContainsKey(vertex) ? this.Graph[vertex] : null;
-       
+
         public SentenceGraph()
         {
             this.Graph = new Dictionary<IDrawable, List<IPositionateEdge>>();
@@ -104,7 +101,7 @@ namespace UDPipeParsing
         {
             foreach (var vertex in this.Vertices)
             {
-                if(vertex.Image != null)
+                if (vertex.Image != null)
                     vertex.Dispose();
             }
 

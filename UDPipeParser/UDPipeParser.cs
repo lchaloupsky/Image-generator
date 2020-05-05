@@ -3,16 +3,8 @@ using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using UDPipeParsing.Factories;
 using UDPipeParsing.Interfaces;
 using UDPipeParsing.Preprocessors;
@@ -83,7 +75,7 @@ namespace UDPipeParsing
 
             // Adding last processed vertex (is added only if its only vertex in sentence)
             if (element is IDrawable)
-                graph.AddVertex((IDrawable)element); 
+                graph.AddVertex((IDrawable)element);
 
             return graph;
         }

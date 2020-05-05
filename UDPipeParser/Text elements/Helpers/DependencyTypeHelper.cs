@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UDPipeParsing.Text_elements.Helpers
+﻿namespace UDPipeParsing.Text_elements.Helpers
 {
     /// <summary>
     /// Helper for checking dependency types

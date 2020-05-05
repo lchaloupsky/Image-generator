@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Numerics;
-using ImageGeneratorInterfaces.Edges;
+﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
-using ImageGeneratorInterfaces.ImageManager;
-using ImageGeneratorInterfaces.Rendering;
 using ImagePositioner.Edges;
 using ImagePositioner.Factories;
 using ImagePositionerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 
 namespace ImagePositionerTests
 {
@@ -254,7 +250,7 @@ namespace ImagePositionerTests
             var edge = this.Factory.Create(this.Left, this.Right, new List<string>() { "at" }, new List<string>() { "below" }, false);
             AssertRelativeEdge(edge, type);
             underEdge = (UnderEdge)edge;
-            Assert.IsTrue(underEdge.IsReversed); 
+            Assert.IsTrue(underEdge.IsReversed);
 
             edge = this.Factory.Create(this.Right, this.Left, new List<string>() { "in", "below" }, new List<string>(), true);
             AssertRelativeEdge(edge, type);
@@ -297,7 +293,7 @@ namespace ImagePositionerTests
             var type = typeof(AtBottomEdge);
             AssertRelativeEdge(this.Factory.Create(this.Left, this.Right, new List<string>(), new List<string>() { "at", "bottom", "of" }, false), type);
         }
-        
+
         [TestMethod]
         public void CreateRelativeEdgeInFrontEdge()
         {
@@ -346,7 +342,7 @@ namespace ImagePositionerTests
             inFrontEdge = (BehindEdge)edge;
             Assert.IsTrue(inFrontEdge.IsReversed);
 
-            edge = this.Factory.Create(this.Right, this.Left, new List<string>() {"in", "behind" }, new List<string>(), true);
+            edge = this.Factory.Create(this.Right, this.Left, new List<string>() { "in", "behind" }, new List<string>(), true);
             AssertRelativeEdge(edge, type);
             inFrontEdge = (BehindEdge)edge;
             Assert.IsTrue(inFrontEdge.IsReversed);

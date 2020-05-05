@@ -1,13 +1,12 @@
-﻿using System;
+﻿using ImageManagment;
+using ImageManagment.Captioning;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using ImageManagment;
-using ImageManagment.Captioning;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ImageManagerTests
 {
@@ -19,7 +18,7 @@ namespace ImageManagerTests
 
         private FileManager FileManager { get; set; }
         private Downloader Downloader { get; set; }
-        private ImageManager ImageManager { get; set; }       
+        private ImageManager ImageManager { get; set; }
         private IBMCaptioner IBMCaptioner { get; }
         private LDistanceMeter LDistanceMeter { get; }
 

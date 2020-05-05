@@ -1,10 +1,7 @@
 ﻿using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Parsing;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UDPipeParsing.Text_elements.Helpers;
 
 namespace UDPipeParsing.Text_elements
@@ -17,7 +14,7 @@ namespace UDPipeParsing.Text_elements
         // --------Public properties--------
         // Related actions of this verb
         public List<Verb> RelatedActions { get; }
-        
+
         // Original form of verb
         public string Word { get; }
 
@@ -83,7 +80,7 @@ namespace UDPipeParsing.Text_elements
                 this.PhrasePart = adv;
             else if (adv.Id > this.Id)
                 this.ExtensionsAfter.Add(adv);
-            else 
+            else
                 this.ExtensionsBefore.Add(adv);
 
             return this;
@@ -122,7 +119,7 @@ namespace UDPipeParsing.Text_elements
                 }
 
                 return noun.Process(this, graph);
-            }                
+            }
 
             // if noun is object, save it as part of this verb, else save it for future
             if (this.DependencyHelper.IsObject(noun.DependencyType))
@@ -189,7 +186,7 @@ namespace UDPipeParsing.Text_elements
             this.Object = null;
 
             return obj.Process(this, graph);
-        }      
+        }
 
         /// <summary>
         /// Method that return final string form of this verb

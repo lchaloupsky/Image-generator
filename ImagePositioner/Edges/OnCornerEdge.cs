@@ -1,11 +1,5 @@
-﻿using ImageGeneratorInterfaces.Edges;
-using ImagePositioner.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ImagePositioner.Helpers;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImagePositioner.Edges
 {
@@ -75,7 +69,7 @@ namespace ImagePositioner.Edges
                                                         this.PositionHelper.GetShiftToCenterVertex(RightHeight, this.Left.Height));
 
             // Do shift to the right side
-            Vector2 shift = (Vector2)(this.Left.Position - rightPos  + new Vector2(this.Left.Width, this.Left.Height) / 2 );
+            Vector2 shift = (Vector2)(this.Left.Position - rightPos + new Vector2(this.Left.Width, this.Left.Height) / 2);
             if (this.Vertical == VerticalPlace.TOP)
                 shift.Y *= -1;
             if (this.Horizontal == HorizontalPlace.LEFT)

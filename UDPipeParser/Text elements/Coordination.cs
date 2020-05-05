@@ -1,10 +1,6 @@
 ﻿using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Parsing;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UDPipeParsing.Text_elements
 {
@@ -15,7 +11,7 @@ namespace UDPipeParsing.Text_elements
     {
         public Coordination(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
         {
-             this.CoordinationType = (CoordinationType)Enum.Parse(typeof(CoordinationType),Lemma.ToUpper());
+            this.CoordinationType = (CoordinationType)Enum.Parse(typeof(CoordinationType), Lemma.ToUpper());
         }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)

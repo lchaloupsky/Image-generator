@@ -4,6 +4,8 @@ C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\Microsof
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\cs\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.resources.dll
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\cs\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.resources.dll
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\cs\Microsoft.VisualStudio.TestPlatform.TestFramework.resources.dll
+C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\test_image.jpg
+C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\ImageManagerTests.dll.config
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\ImageManagerTests.dll
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\ImageManagerTests.pdb
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\ImageGeneratorInterfaces.dll
@@ -30,5 +32,3 @@ C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\obj\Debug\ImageMan
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\obj\Debug\ImageManagerTests.csproj.CopyComplete
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\obj\Debug\ImageManagerTests.dll
 C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\obj\Debug\ImageManagerTests.pdb
-C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\ImageManagerTests.dll.config
-C:\Users\lukas\source\repos\Image Generator\ImageManagerTests\bin\Debug\test_image.jpg

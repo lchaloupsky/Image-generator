@@ -1,21 +1,7 @@
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.config
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe.config
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.exe
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Image Generator.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Properties.Resources.resources
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.GenerateResource.cache
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CoreCompileInputs.cache
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.exe
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\FlickrNet.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Configuration.ConfigurationManager.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.AccessControl.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Permissions.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Principal.Windows.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CopyComplete
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.xml
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csprojAssemblyReference.cache
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.exe.config
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Microsoft.Win32.Primitives.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\netstandard.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.AppContext.dll
@@ -112,24 +98,43 @@ C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Xml
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Xml.XmlSerializer.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Xml.XPath.dll
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Xml.XPath.XDocument.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.AsyncEx.Context.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.AsyncEx.Tasks.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Disposables.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Collections.Immutable.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.AsyncEx.Context.xml
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.AsyncEx.Tasks.xml
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Disposables.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Nito.Disposables.xml
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Collections.Immutable.xml
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageGeneratorInterfaces.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageGeneratorInterfaces.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageManager.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageManager.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.dll
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.pdb
-C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.AppForm.resources
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Buffers.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Collections.Immutable.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Configuration.ConfigurationManager.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Memory.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Numerics.Vectors.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.AccessControl.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Permissions.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Principal.Windows.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\FlickrNet.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.dll
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageGeneratorInterfaces.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImageManager.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\ImagePositioner.pdb
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\UDPipeParser.pdb
 C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.xml
-C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\NLog.config
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Buffers.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Collections.Immutable.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Configuration.ConfigurationManager.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Memory.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Numerics.Vectors.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.AccessControl.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Permissions.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\System.Security.Principal.Windows.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\bin\Debug\Newtonsoft.Json.xml
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csprojAssemblyReference.cache
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.exe.config
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.AppForm.resources
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image_Generator.Properties.Resources.resources
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.GenerateResource.cache
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CoreCompileInputs.cache
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.csproj.CopyComplete
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.exe
+C:\Users\lukas\source\repos\Image Generator\Image Generator\obj\Debug\Image Generator.pdb

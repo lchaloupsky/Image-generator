@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UDPipeParsing.Text_elements;
-
-namespace UDPipeParsing.Text_elements.Helpers
+﻿namespace UDPipeParsing.Text_elements.Helpers
 {
     /// <summary>
     /// Helping with coordination types and their semantics

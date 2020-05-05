@@ -1,11 +1,7 @@
-﻿using System;
+﻿using ImageGeneratorInterfaces.Graph;
+using ImageGeneratorInterfaces.Parsing;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ImageGeneratorInterfaces.Graph;
-using ImageGeneratorInterfaces.Parsing;
-using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing.Text_elements
 {
@@ -41,9 +37,9 @@ namespace UDPipeParsing.Text_elements
         protected sealed override IProcessable ProcessElement(Adverb adv, ISentenceGraph graph)
         {
             // Go through all adverbs and find modifier ones
-            adv.ExtendingAdverbs.SelectMany(advs => advs.ExtendingAdverbs).Select(ad => 
+            adv.ExtendingAdverbs.SelectMany(advs => advs.ExtendingAdverbs).Select(ad =>
             {
-                if(this.ChangeScale(ad))
+                if (this.ChangeScale(ad))
                     this.Extensions.Add(ad);
 
                 return ad;
@@ -53,7 +49,7 @@ namespace UDPipeParsing.Text_elements
                 this.Extensions.Add(adv);
 
             return this;
-        }       
+        }
 
         /// <summary>
         /// Changes scale if adverb is change scale modifier

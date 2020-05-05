@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ImageGeneratorInterfaces.Graph;
+﻿using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Parsing;
-using UDPipeParsing.Text_elements;
+using System.Collections.Generic;
 
 namespace UDPipeParsing.Text_elements
 {

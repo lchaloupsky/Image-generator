@@ -1,10 +1,10 @@
-﻿using System;
-using System.Numerics;
-using ImageGeneratorInterfaces.Edges;
+﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImagePositioner.Edges;
 using ImagePositionerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Numerics;
 
 namespace ImagePositionerTests
 {

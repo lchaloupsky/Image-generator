@@ -1,13 +1,8 @@
 ﻿using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Rendering;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImagePositionerTests.Mocks
 {

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImageGeneratorInterfaces.ImageManager
 {
@@ -17,7 +13,7 @@ namespace ImageGeneratorInterfaces.ImageManager
         /// Flag indicating if image captioning is used 
         /// </summary>
         bool UseImageCaptioning { get; set; }
-        
+
         /// <summary>
         /// Method for checking if image already exists in the manageer
         /// </summary>

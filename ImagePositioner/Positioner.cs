@@ -2,13 +2,8 @@
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImagePositioner.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImagePositioner
 {
@@ -194,6 +189,6 @@ namespace ImagePositioner
                 // Edge positioning itself
                 edge.Positionate(width, height);
             }
-        }   
+        }
     }
 }

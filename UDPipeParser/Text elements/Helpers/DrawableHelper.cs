@@ -2,13 +2,9 @@
 using ImageGeneratorInterfaces.Edges.Factory;
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
-using ImageGeneratorInterfaces.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing.Text_elements.Helpers
 {

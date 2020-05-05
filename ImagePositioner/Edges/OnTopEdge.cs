@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ImageGeneratorInterfaces.Edges;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using ImageGeneratorInterfaces.Edges;
-using ImageGeneratorInterfaces.Graph.DrawableElement;
 
 namespace ImagePositioner.Edges
 {

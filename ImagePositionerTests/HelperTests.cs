@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using ImageGeneratorInterfaces.Graph.DrawableElement;
+﻿using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImagePositioner.Helpers;
 using ImagePositionerTests.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace ImagePositionerTests
 {
@@ -191,7 +190,8 @@ namespace ImagePositionerTests
             IDrawable topMost = list[0];
             IDrawable bottomMost = list[0];
             IDrawable rightMost = list[0];
-            list.ForEach(vertex => {
+            list.ForEach(vertex =>
+            {
                 int vX = (int)vertex.Position.Value.X;
                 int vY = (int)vertex.Position.Value.Y;
 

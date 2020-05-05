@@ -1,9 +1,8 @@
-﻿using System;
-using System.Drawing;
-using System.Linq;
-using ImageGeneratorInterfaces.Edges.Factory;
+﻿using ImageGeneratorInterfaces.Edges.Factory;
 using ImageGeneratorInterfaces.ImageManager;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Drawing;
+using System.Linq;
 using UDPipeParserTests.Mocks;
 using UDPipeParsing;
 using UDPipeParsing.Factories;

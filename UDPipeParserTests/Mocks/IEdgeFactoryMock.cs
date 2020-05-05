@@ -1,11 +1,7 @@
 ﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Edges.Factory;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UDPipeParserTests.Mocks
 {

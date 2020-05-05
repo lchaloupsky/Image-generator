@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ImageGeneratorInterfaces.Edges;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using ImageGeneratorInterfaces.Edges;
-using ImageGeneratorInterfaces.Graph.DrawableElement;
 
 namespace ImagePositioner.Edges
 {
@@ -18,7 +12,7 @@ namespace ImagePositioner.Edges
 
         protected override void PositionateAgainstRoot(int maxWidth, int maxHeight)
         {
-            this.Left.Position = new Vector2(0, this.PositionHelper.GetShiftToCenterVertex(maxHeight ,this.Left.Height));
+            this.Left.Position = new Vector2(0, this.PositionHelper.GetShiftToCenterVertex(maxHeight, this.Left.Height));
         }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)

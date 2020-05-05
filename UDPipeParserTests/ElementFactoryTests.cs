@@ -1,6 +1,6 @@
-﻿using System;
-using ImageGeneratorInterfaces.Parsing;
+﻿using ImageGeneratorInterfaces.Parsing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using UDPipeParserTests.Mocks;
 using UDPipeParsing;
 using UDPipeParsing.Factories;

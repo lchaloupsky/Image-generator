@@ -5,13 +5,10 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
 using ImageGeneratorInterfaces.Rendering;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 using UDPipeParsing.Factories;
 using UDPipeParsing.Text_elements.Helpers;
 
@@ -243,10 +240,10 @@ namespace UDPipeParsing.Text_elements
             {
                 // Try to create edge between elements
                 IPositionateEdge newEdge = this.EdgeFactory.Create(
-                    this, 
-                    noun, 
-                    new List<string>(), 
-                    noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(), 
+                    this,
+                    noun,
+                    new List<string>(),
+                    noun.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList(),
                     this.DependencyHelper.IsSubject(noun.DependencyType)
                 );
 
@@ -280,8 +277,8 @@ namespace UDPipeParsing.Text_elements
             // Processing relationship between nounset and this
             this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, this.DependencyHelper.IsSubject(noun.DependencyType), () =>
              {
-                // Add to extensions
-                this.Extensions.Add(noun);
+                 // Add to extensions
+                 this.Extensions.Add(noun);
              });
 
             // Finalize processed noun

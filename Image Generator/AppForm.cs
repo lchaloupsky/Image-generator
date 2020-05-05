@@ -7,7 +7,6 @@ using ImagePositioner.Factories;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -55,7 +54,7 @@ namespace Image_Generator
         private void GenerateButton_Click(object sender, EventArgs e)
         {
             Logger.Info("Generating image for view");
-            this.StartGeneration(this.GenerateImageForView);           
+            this.StartGeneration(this.GenerateImageForView);
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace Image_Generator
         private void GenerateDatasetButton_Click(object sender, EventArgs e)
         {
             Logger.Info("Generating dataset images");
-            this.StartGeneration(this.GenerateImagesForDataset);          
+            this.StartGeneration(this.GenerateImagesForDataset);
         }
 
         /// <summary>
@@ -275,7 +274,7 @@ namespace Image_Generator
             this.ProcessedImages.Visible = true;
             this.ProcessedBar.Visible = true;
             this.ProcessedBar.Value = 0;
-            this.resolutionBox.Enabled = false;           
+            this.resolutionBox.Enabled = false;
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -312,7 +311,7 @@ namespace Image_Generator
         {
             // Create new task, that will be running in background
             Task.Run(() =>
-            {               
+            {
                 try
                 {
                     var index = str.IndexOf(str.First(c => char.IsWhiteSpace(c)));
@@ -476,7 +475,7 @@ namespace Image_Generator
         /// Auxiliray method for showing actual count of processed images
         /// </summary>
         private void ShowProcessedImagesCount()
-        {            
+        {
             this.ProcessedImages.Text = "Processed " + this.ProcessedBar.Value + " / " + this.ProcessedBar.Maximum + " images";
 
             if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)

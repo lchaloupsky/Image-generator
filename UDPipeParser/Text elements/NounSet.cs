@@ -1,17 +1,15 @@
-﻿using System;
+﻿using ImageGeneratorInterfaces.Edges;
+using ImageGeneratorInterfaces.Edges.Factory;
+using ImageGeneratorInterfaces.Graph;
+using ImageGeneratorInterfaces.Graph.DrawableElement;
+using ImageGeneratorInterfaces.ImageManager;
+using ImageGeneratorInterfaces.Parsing;
+using ImageGeneratorInterfaces.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-using ImageGeneratorInterfaces.Parsing;
-using ImageGeneratorInterfaces.Edges;
-using ImageGeneratorInterfaces.Graph.DrawableElement;
-using ImageGeneratorInterfaces.ImageManager;
-using ImageGeneratorInterfaces.Rendering;
-using ImageGeneratorInterfaces.Graph;
-using ImageGeneratorInterfaces.Edges.Factory;
 using UDPipeParsing.Factories;
 using UDPipeParsing.Text_elements.Helpers;
 
