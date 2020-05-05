@@ -12,7 +12,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "to right", etc. relations
     /// </summary>
-    class ToRightEdge : AbsoluteEdge
+    public class ToRightEdge : AbsoluteEdge
     {
         public ToRightEdge() : base(PlaceType.VERTICAL) { }
 

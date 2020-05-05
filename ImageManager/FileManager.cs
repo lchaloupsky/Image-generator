@@ -23,12 +23,15 @@ namespace ImageManagment
         // allowed image extensions
         private HashSet<string> AllowedExtenstions { get; } = new HashSet<string>() { ".jpg", ".jpeg", ".png", ".gif" };
 
+        // lockfile stream
+        private FileStream FileStream { get; set; }
+
         public FileManager(string location)
         {
             this.Location = location;
             this.CreateFolderIfNotExists();
             if (!this.CreateLockFileIfNotExists())
-                File.OpenWrite(Path.Combine(this.Location, LOCKFILENAME));
+                this.FileStream = File.OpenWrite(Path.Combine(this.Location, LOCKFILENAME));
         }
 
         /// <summary>
@@ -102,6 +105,15 @@ namespace ImageManagment
         }
 
         /// <summary>
+        /// Closes lock file
+        /// </summary>
+        public void Close()
+        {
+            this.FileStream.Close();
+            this.FileStream.Dispose();
+        }
+
+        /// <summary>
         /// Creates Image folder if it does not exist yet
         /// </summary>
         private void CreateFolderIfNotExists()
@@ -119,7 +131,7 @@ namespace ImageManagment
             var lockFilePath = Path.Combine(this.Location, LOCKFILENAME);
             if (!File.Exists(lockFilePath))
             {
-                File.Create(lockFilePath);
+                this.FileStream = File.Create(lockFilePath);
                 File.SetAttributes(lockFilePath, FileAttributes.Hidden);
                 return true;
             }

@@ -10,7 +10,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "on" relation
     /// </summary>
-    class OnEdge : Edge
+    public class OnEdge : Edge
     {
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {

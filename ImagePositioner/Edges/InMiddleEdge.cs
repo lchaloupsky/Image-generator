@@ -12,7 +12,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "in middle", etc. relations
     /// </summary>
-    class InMiddleEdge : AbsoluteEdge
+    public class InMiddleEdge : AbsoluteEdge
     {
         // Max left width
         private int MaxWidth { get => this.Right.Width / 2; }

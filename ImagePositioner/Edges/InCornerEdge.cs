@@ -13,7 +13,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "in corner", "in corner of", etc. relation
     /// </summary>
-    class InCornerEdge : AbsoluteEdge
+    public class InCornerEdge : AbsoluteEdge
     {
         // Max left width
         private int MaxWidth { get => this.Right.Width / 2; }
@@ -25,10 +25,10 @@ namespace ImagePositioner.Edges
         private EnumHelper EnumHelper { get; } = new EnumHelper();
 
         // Vertical position tyoe
-        private VerticalPlace Vertical { get; }
+        public VerticalPlace Vertical { get; }
 
         // Horizontal position type
-        private HorizontalPlace Horizontal { get; }
+        public HorizontalPlace Horizontal { get; }
 
         public InCornerEdge() : base(PlaceType.CORNER)
         {

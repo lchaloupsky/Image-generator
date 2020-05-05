@@ -10,10 +10,10 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "behind" relation
     /// </summary>
-    class BehindEdge : Edge
+    public class BehindEdge : Edge
     {
         // Flag if it is reversed relation
-        private bool IsReversed { get; }
+        public bool IsReversed { get; private set; }
 
         public BehindEdge()
         {

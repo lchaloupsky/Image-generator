@@ -222,6 +222,7 @@ namespace ImagePositioner.Factories
                 case "on bottom right corner of":
                 case "on right corner of":
                 case "on left corner of":
+                case "on top corner of":
                 case "on bottom corner of": return GetCornerEdge(edgeType.Replace(" of", ""));
                 default: return null;
             }

@@ -12,7 +12,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "on top", etc. relations
     /// </summary>
-    class OnTopEdge : AbsoluteEdge
+    public class OnTopEdge : AbsoluteEdge
     {
         public OnTopEdge() : base(PlaceType.HORIZONTAL) { }
 

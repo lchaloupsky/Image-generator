@@ -12,7 +12,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Abstract edge as base class for all edges
     /// </summary>
-    abstract class Edge : IPositionateEdge
+    abstract public class Edge : IPositionateEdge
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 

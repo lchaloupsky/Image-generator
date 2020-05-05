@@ -11,13 +11,13 @@ namespace ImagePositioner.Helpers
     /// <summary>
     /// Helper for position and dimension operations
     /// </summary>
-    class PositionHelper
+    public class PositionHelper
     {
         // default shift
         private const int defaultShiftPadding = 60;
 
         // Default object dimensions
-        private int LastObjectWidth { get; set; } 
+        private int LastObjectWidth { get; set; }
         private int LastObjectHeight { get; set; }
 
         // screen dimensions
@@ -43,7 +43,7 @@ namespace ImagePositioner.Helpers
             }
 
             //Stupid move to the right
-            this.NewEmptyPosition += new Vector2(this.LastObjectWidth + Random.Next(-defaultShiftPadding, defaultShiftPadding) + 1,
+            this.NewEmptyPosition += new Vector2(this.LastObjectWidth + Random.Next(0, defaultShiftPadding) + 1,
                                                  Random.Next(-defaultShiftPadding, defaultShiftPadding));
             // Return new position
             return this.NewEmptyPosition;

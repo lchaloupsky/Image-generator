@@ -12,7 +12,7 @@ using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing.Text_elements.Helpers
 {
-    class DrawableHelper
+    public class DrawableHelper
     {
         /// <summary>
         /// Processes two drawable elements.

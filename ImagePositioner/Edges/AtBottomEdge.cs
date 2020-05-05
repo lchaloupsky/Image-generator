@@ -12,7 +12,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Class representing "at bottom", "at bottom of" relation
     /// </summary>
-    class AtBottomEdge : AbsoluteEdge
+    public class AtBottomEdge : AbsoluteEdge
     {
         // Max width of left vertex
         private int MaxWidth { get => this.Right.Width / 2; }

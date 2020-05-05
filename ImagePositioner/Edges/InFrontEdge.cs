@@ -10,10 +10,10 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "in front", "in front of" relation
     /// </summary>
-    class InFrontEdge : Edge
+    public class InFrontEdge : Edge
     {
         // Flag if it is reversed relation
-        private bool IsReversed { get; }
+        public bool IsReversed { get; private set; }
 
         public InFrontEdge()
         {

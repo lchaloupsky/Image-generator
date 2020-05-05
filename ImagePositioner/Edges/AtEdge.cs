@@ -10,7 +10,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "at" relation
     /// </summary>
-    class AtEdge : Edge
+    public class AtEdge : Edge
     {
         // Max left width
         private int MaxWidth { get => this.Right.Width / 2; }

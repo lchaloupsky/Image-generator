@@ -10,26 +10,26 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Represents "under", etc. relations
     /// </summary>
-    class UnderEdge : Edge
+    public class UnderEdge : Edge
     {
         // Flag if the relation is reversed
-        private bool Reversed { get; set; }
+        public bool IsReversed { get; private set; }
 
         public UnderEdge()
         {
-            this.Reversed = false;
+            this.IsReversed = false;
         }
 
         public UnderEdge(bool reversed)
         {
-            this.Reversed = true;
+            this.IsReversed = true;
         }
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {
-            if (this.Reversed)
+            if (this.IsReversed)
             {
-                this.Reversed = false;
+                this.IsReversed = false;
                 this.SwitchVertices();
                 this.PositionateLeft(maxWidth, maxHeight);
                 return;
@@ -40,9 +40,9 @@ namespace ImagePositioner.Edges
 
         protected override void PositionateLeft(int maxWidth, int maxHeight)
         {
-            if (this.Reversed)
+            if (this.IsReversed)
             {
-                this.Reversed = false;
+                this.IsReversed = false;
                 this.SwitchVertices();
                 this.PositionateRight(maxWidth, maxHeight);
                 return;

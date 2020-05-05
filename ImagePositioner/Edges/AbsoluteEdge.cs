@@ -11,7 +11,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Abstract class for all possibly absolute edges.
     /// </summary>
-    abstract class AbsoluteEdge : Edge, IAbsolutePositionateEdge
+    abstract public class AbsoluteEdge : Edge, IAbsolutePositionateEdge
     {
         // Absolute edge place type
         public PlaceType Type { get; }

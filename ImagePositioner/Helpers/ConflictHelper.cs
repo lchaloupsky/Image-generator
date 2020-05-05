@@ -12,7 +12,7 @@ namespace ImagePositioner.Helpers
     /// <summary>
     /// Helper class for resolving conflicts
     /// </summary>
-    class ConflictHelper
+    public class ConflictHelper
     {
         // default shift
         private const int defaultShiftPadding = 60;

@@ -268,6 +268,9 @@ namespace ImageManagment
         /// <returns>Image name substring</returns>
         private string GetImageNameSubstring(string imageName, string element)
         {
+            if (!imageName.Contains(' '))
+                return imageName;
+
             var lastCut = imageName.Substring(Math.Max(0, imageName.LastIndexOf(' ')));
             if (lastCut == element)
                 return imageName.Substring(imageName.IndexOf(' '));

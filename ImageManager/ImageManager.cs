@@ -37,6 +37,14 @@ namespace ImageManagment
             this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
         }
 
+        public ImageManager(string location)
+        {
+            this.ImageDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
+            this.FileManager = new FileManager(location);
+            this.Locks = new Dictionary<string, object>();
+            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
+        }
+
         /// <summary>
         /// Function for checking if image is in cache or if is already stored
         /// </summary>
@@ -143,6 +151,14 @@ namespace ImageManagment
                 this.Cache.RemoveAll();
                 this.FileManager.DeleteAll();
             }
+        }
+
+        /// <summary>
+        /// Closes lock for the local repository
+        /// </summary>
+        public void Close()
+        {
+            this.FileManager.Close();
         }
     }
 

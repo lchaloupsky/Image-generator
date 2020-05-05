@@ -33,16 +33,16 @@ namespace UDPipeParsing.Text_elements
         // Form of verb
         public VerbForm Form { get; }
 
-        // -------Private properties--------
         // Extensions before verb
-        private List<Element> ExtensionsBefore { get; }
+        public List<Element> ExtensionsBefore { get; }
 
         // Extensions after verb
-        private List<Element> ExtensionsAfter { get; }
+        public List<Element> ExtensionsAfter { get; }
 
         // Phrase part after verb
-        private Element PhrasePart { get; set; }    
+        public Element PhrasePart { get; set; }
 
+        // -------Private properties--------  
         // Helper for constructing final verb form
         private VerbFormHelper VerbFormHelper { get; }
 

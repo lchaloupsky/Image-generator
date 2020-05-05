@@ -32,13 +32,13 @@ namespace UDPipeParsing.Preprocessors
         {"quintillion",1000000000000000000}};
 
         private Dictionary<string, long> SmallCollections { get; } = new Dictionary<string, long>
-        {{"several",2}, {"few",2},{"many",5},{"a few", 20},{"very few", 1},{"a bit",2},{"some",2}};
+        {{"several",2}, {"few",2},{"many",5},{"a few", 2},{"very few", 1},{"a bit",2},{"some",2}};
 
         private Dictionary<string, long> BigCollections { get; } = new Dictionary<string, long>
         {{ "hundreds",100}, {"thousands",1000},{"millions",1000000},{"billions",1000000000},
         {"trillions",1000000000000},{"quadrillions",1000000000000000},
         {"quintillions",1000000000000000000},{"plenty",10},{"a lot", 10},{"a lot of",10},{"lots of",10},
-        { "a large number of", 20},{"a great number of", 20},{"a large quatity of", 20},{"a large amount of", 20},
+        { "a large number of", 20},{"a great number of", 20},{"a large quantity of", 20},{"a large amount of", 20},
         {"very many",7},{"a number of",5},{"plenty of",10}};
 
         private Random Random { get; } = new Random();
@@ -111,6 +111,12 @@ namespace UDPipeParsing.Preprocessors
                 }
 
                 wasNegation = false;
+            }
+
+            if (wasNumber || result != 0)
+            {
+                result += scale;
+                builder.Append(Clamp(result));
             }
 
             return builder.ToString();

@@ -174,7 +174,7 @@ namespace ImagePositioner
         /// <param name="vertex">Vertex to positionate</param>
         /// <param name="width">sreen width</param>
         /// <param name="height">screen height</param>
-        public void PositionateDFS(ISentenceGraph graph, IDrawable vertex, int width, int height)
+        private void PositionateDFS(ISentenceGraph graph, IDrawable vertex, int width, int height)
         {
             // positionate all edges of vertex
             foreach (var edge in graph[vertex])
