@@ -510,8 +510,9 @@ namespace Image_Generator
                 var pingReply = new Ping().Send("www.google.com.mx");
                 return pingReply != null && pingReply.Status == IPStatus.Success;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Logger.Error(e, "Internet connection failure");
                 return false;
             }
         }
