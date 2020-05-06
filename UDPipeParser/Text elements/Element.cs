@@ -1,4 +1,5 @@
 ﻿using ImageGeneratorInterfaces.Graph;
+using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.Parsing;
 using UDPipeParsing.Text_elements.Helpers;
 
@@ -70,6 +71,9 @@ namespace UDPipeParsing.Text_elements
             if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
+                if (element is IDrawable)
+                    graph.RemoveVertex((IDrawable)element, true);
+
                 return this;
             }
 

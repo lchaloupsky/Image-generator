@@ -8,6 +8,8 @@ namespace UDPipeParsing.Text_elements
     /// </summary>
     public class Numeral : Element
     {
+        private static readonly int DEFAULT_NUMBER = 3;
+
         // Dependant drawable in the tree
         public IProcessable DependingDrawable { get; set; }
 
@@ -48,7 +50,7 @@ namespace UDPipeParsing.Text_elements
         /// <returns>Numerical value of this numeral</returns>
         public int GetValue()
         {
-            return int.Parse(this.Lemma);
+            return int.TryParse(this.Lemma, out int outValue) ? outValue : DEFAULT_NUMBER;
         }
     }
 }

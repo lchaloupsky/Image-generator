@@ -122,7 +122,7 @@ namespace UDPipeParsing.Text_elements
             }
 
             // if noun is object, save it as part of this verb, else save it for future
-            if (this.DependencyHelper.IsObject(noun.DependencyType))
+            if (this.DependencyHelper.IsObject(noun.DependencyType) && this.Object == null)
                 this.Object = noun;
             else
                 this.DependingDrawables.Add(noun);
@@ -145,7 +145,7 @@ namespace UDPipeParsing.Text_elements
             }
 
             // Check if it is object
-            if (this.DependencyHelper.IsObject(nounSet.DependencyType))
+            if (this.DependencyHelper.IsObject(nounSet.DependencyType) && this.Object == null)
                 this.Object = nounSet;
             else
                 this.DependingDrawables.Add(nounSet);

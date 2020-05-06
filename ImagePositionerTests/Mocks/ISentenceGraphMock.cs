@@ -17,7 +17,7 @@ namespace ImagePositionerTests.Mocks
         public void AddEdge(IPositionateEdge edge) { }
         public void AddVertex(IDrawable vertex) { }
         public void Dispose() { }
-        public void RemoveVertex(IDrawable vertex) { }
+        public void RemoveVertex(IDrawable vertex, bool recursive) { }
         public void ReplaceVertex(IDrawable vertex, IDrawable vertexToReplace) { }
     }
 }

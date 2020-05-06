@@ -19,8 +19,8 @@ namespace UDPipeParsing.Factories
 
         private IEdgeFactory EdgeFactory { get; }
         private IImageManager Manager { get; }
-        private int DrawableObjectWidth { get; } = 180;
-        private int DrawableObjectHeight { get; } = 120;
+        private int DrawableObjectWidth { get; } = 240;
+        private int DrawableObjectHeight { get; } = 180;
         private DependencyTypeHelper DependencyTypeHelper { get; } = new DependencyTypeHelper();
 
         // List of negations

@@ -63,8 +63,18 @@ namespace UDPipeParsing
         /// Removes vertex and all its edges from graph
         /// </summary>
         /// <param name="vertex">Vertex to remove</param>
-        public void RemoveVertex(IDrawable vertex)
+        public void RemoveVertex(IDrawable vertex, bool removeRecursive = false)
         {
+            if (!this.Graph.ContainsKey(vertex))
+                return;
+
+            if (removeRecursive)
+            {
+                var vertices = this.Graph[vertex].Select(edge => edge.Right).ToList();
+                for (int i = 0; i < vertices.Count(); i++)
+                    this.RemoveVertex(vertices[i], true);             
+            }
+
             this.Graph.Remove(vertex);
             foreach (var edges in this.Graph.Values)
                 edges.RemoveAll(edge => edge.Right == vertex);
@@ -78,6 +88,9 @@ namespace UDPipeParsing
         /// <param name="vertexToReplace">Vertex to replace</param>
         public void ReplaceVertex(IDrawable vertex, IDrawable vertexToReplace)
         {
+            if (!this.Graph.ContainsKey(vertexToReplace))
+                return;
+
             // Get all edges belonging to the vertex
             var newEdges = this.Edges
                 .Where(e => e.Left.Equals(vertexToReplace))

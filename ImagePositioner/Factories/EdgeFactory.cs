@@ -168,6 +168,7 @@ namespace ImagePositioner.Factories
                 case "after":
                 case "to left of": return new ToLeftEdge();
                 case "near":
+                case "near to":
                 case "next to":
                 case "with":
                 case "along":

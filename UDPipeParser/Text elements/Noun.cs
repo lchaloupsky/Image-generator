@@ -192,6 +192,10 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
+            // We dont process time
+            if (this.DependencyHelper.IsTime(num.DependencyType))
+                return this;
+
             // Add extension if numeral is not modifying number of instances
             if (!this.DependencyHelper.IsNumeralModifier(num.DependencyType))
             {
@@ -202,6 +206,10 @@ namespace UDPipeParsing.Text_elements
 
                 return this;
             }
+
+            // no need to create noun set
+            if (num.GetValue() <= 1)
+                return this;
 
             // Create new noun with given number of values
             return new NounSet(this.ElementFactory, this.EdgeFactory, this, num.GetValue());

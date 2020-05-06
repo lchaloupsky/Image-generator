@@ -144,5 +144,15 @@
         {
             return dependencyType == "mark";
         }
+
+        /// <summary>
+        /// Checks if dependency expresses "*tmod" relation
+        /// </summary>
+        /// <param name="dependencyType">dependency type</param>
+        /// <returns>True if satisfied</returns>
+        public bool IsTime(string dependencyType)
+        {
+            return dependencyType.Contains("tmod");
+        }
     }
 }

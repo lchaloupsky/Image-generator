@@ -110,7 +110,7 @@ namespace UDPipeParsing.Text_elements
         private bool IsFinalized { get; set; } = false;
         private int LastProcessedNoun { get; set; } = 0;
         private string PluralForm { get; }
-        private string BaseNounLemma { get; }
+        private Noun BaseNoun { get; }
         private ElementFactory ElementFactory { get; }
         private IEdgeFactory EdgeFactory { get; }
         private CoordinationType CoordinationType { get; set; } = CoordinationType.AND;
@@ -159,7 +159,7 @@ namespace UDPipeParsing.Text_elements
             this.Id = noun.Id;
             this.DependencyType = noun.DependencyType;
             this.PluralForm = pluralForm;
-            this.BaseNounLemma = noun.Lemma;
+            this.BaseNoun = noun;
             this.Nouns.Add(noun);
         }
 
@@ -193,12 +193,16 @@ namespace UDPipeParsing.Text_elements
 
         public override string ToString()
         {
-            var diff = this.Nouns.Where(noun => noun.ToString() != this.BaseNounLemma).ToList();
-            return this.PluralForm != null ?
-                (diff.Count == 0 ?
-                    this.PluralForm :
-                    $"{this.PluralForm}, " + string.Join(", ", diff)) :
-                string.Join(", ", this.Nouns);
+            var diff = this.PluralForm == null ? null : this.Nouns.Where(noun => noun.ToString() != this.BaseNoun.ToString()).FirstOrDefault();
+            var finalPluralForm = this.PluralForm == null ? null : this.BaseNoun.ToString().Replace(this.BaseNoun.Lemma, this.PluralForm);
+
+            return finalPluralForm != null ?
+                (diff == null ?
+                    finalPluralForm :
+                    $"{finalPluralForm}, " + string.Join(", ", diff)) :
+                this.DependencyTypeHelper.IsObject(this.DependencyType) ? 
+                    string.Join(", ", this.Nouns.Select(n => n.ToString()).Distinct()) : 
+                    string.Join(", ", this.Nouns);
         }
 
         public void Dispose()
@@ -235,6 +239,9 @@ namespace UDPipeParsing.Text_elements
             if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyTypeHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
+                if (element is IDrawable)
+                    graph.RemoveVertex((IDrawable)element, true);
+
                 return this;
             }
 
@@ -309,6 +316,10 @@ namespace UDPipeParsing.Text_elements
                 LastProcessedNoun += num.GetValue();
                 return this;
             }
+
+            // We dont process time
+            if (this.DependencyTypeHelper.IsTime(num.DependencyType))
+                return this;
 
             // Process if not numeral modifier
             if (!this.DependencyTypeHelper.IsNumeralModifier(num.DependencyType))

@@ -202,6 +202,10 @@ namespace UDPipeParsing
                     return 1;
 
                 // Direct object nouns of verbs has to be processed first
+                if ((x is Noun || x is NounSet) && this.DependencyTypeHelper.IsObject(x.DependencyType) 
+                    && (y is Noun || y is NounSet) && this.DependencyTypeHelper.IsObject(y.DependencyType))
+                    return x.Id < y.Id ? -1 : 1;
+
                 if ((x is Noun || x is NounSet) && this.DependencyTypeHelper.IsObject(x.DependencyType))
                     return -1;
 

@@ -49,7 +49,8 @@ namespace ImageGeneratorInterfaces.Graph
         /// Method for removing vertex from the graph
         /// </summary>
         /// <param name="vertex">Vertex to be removed</param>
-        void RemoveVertex(IDrawable vertex);
+        /// <param name="removeRecursive">Flag if recursive dependendent vertices should be removed too</param>
+        void RemoveVertex(IDrawable vertex, bool removeRecursive);
 
         /// <summary>
         /// Method for replacing vertex in the graph with another vertex.
