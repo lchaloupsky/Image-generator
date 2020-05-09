@@ -18,7 +18,8 @@ namespace UDPipeParsing
     /// </summary>
     public class UDPipeParser
     {
-        private const int MAX_SENTENCE_LENGTH = 1500;
+        private static readonly char[] UNSUPPORTED_CHARS = new char[] { '\'', '\"', '`','\\', '/', '>', '<', '|' };
+        private static readonly int MAX_SENTENCE_LENGTH = 1500;
 
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
@@ -41,8 +42,12 @@ namespace UDPipeParsing
         public List<ISentenceGraph> ParseText(string text, int width, int height)
         {
             var parts = new List<ISentenceGraph>();
+            text = this.RemoveUnsupportedCharsFromSentence(text);
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
             {
+                if (line.Trim() == string.Empty)
+                    continue;
+
                 if (line.Length > MAX_SENTENCE_LENGTH)
                     throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MAX_SENTENCE_LENGTH} characters.");
 
@@ -72,6 +77,10 @@ namespace UDPipeParsing
             // compressing dependency tree into graph
             this.Comparer.Tree = dependencyTree;
             IProcessable element = CompressDependencyTree(dependencyTree, graph, root).FinalizeProcessing(graph);
+
+            // Clear grapg if nothing were found for safety
+            if (element is Root)
+                graph.Clear();
 
             // Adding last processed vertex (is added only if its only vertex in sentence)
             if (element is IDrawable)
@@ -176,6 +185,16 @@ namespace UDPipeParsing
         }
 
         /// <summary>
+        /// Removes unwanted characters from sentence.
+        /// </summary>
+        /// <param name="sentence">Sentence to be processed</param>
+        /// <returns>Modified string</returns>
+        private string RemoveUnsupportedCharsFromSentence(string sentence)
+        {
+            return string.Join(string.Empty, sentence.Split(UNSUPPORTED_CHARS, StringSplitOptions.RemoveEmptyEntries));
+        }
+
+        /// <summary>
         /// Comparer class for sorting dependencies before they are processed
         /// </summary>
         private class ElementComparer : IComparer<IProcessable>
@@ -202,7 +221,7 @@ namespace UDPipeParsing
                     return 1;
 
                 // Direct object nouns of verbs has to be processed first
-                if ((x is Noun || x is NounSet) && this.DependencyTypeHelper.IsObject(x.DependencyType) 
+                if ((x is Noun || x is NounSet) && this.DependencyTypeHelper.IsObject(x.DependencyType)
                     && (y is Noun || y is NounSet) && this.DependencyTypeHelper.IsObject(y.DependencyType))
                     return x.Id < y.Id ? -1 : 1;
 

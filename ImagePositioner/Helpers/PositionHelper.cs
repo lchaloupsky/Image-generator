@@ -175,7 +175,7 @@ namespace ImagePositioner.Helpers
 
             float firstDist = Math.Abs(firstPos);
             float secondDist = Math.Abs(max - (secondPos + secondDim));
-            float padding = (firstPos > 0 && secondPos + secondDim <= max) ? (firstDist - secondDist) / 2 : (firstDist + secondDist) / 2;
+            float padding = (firstPos > 0 && secondPos + secondDim <= max) ? Math.Abs(firstDist - secondDist) / 2 : (firstDist + secondDist) / 2;
 
             return firstDist > secondDist ? (firstPos < 0 ? padding : -padding) : (secondPos + secondDim > max ? -padding : padding);
         }

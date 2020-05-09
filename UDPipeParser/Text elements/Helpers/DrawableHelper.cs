@@ -105,9 +105,20 @@ namespace UDPipeParsing.Text_elements.Helpers
         {
             float ratio;
             lock (drawable.Image)
-                ratio = drawable.Image.Width * 1f / drawable.Image.Height;
+                ratio = this.GetDimensionsRatio(drawable.Image.Width, drawable.Image.Height);
 
             drawable.Width = (int)(drawable.Height * ratio);
+        }
+
+        /// <summary>
+        /// Gets ration of given dimensions
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Calculated ratio</returns>
+        public float GetDimensionsRatio(int width, int height)
+        {
+            return width * 1f / height;
         }
     }
 }

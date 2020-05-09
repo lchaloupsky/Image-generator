@@ -11,7 +11,12 @@ namespace UDPipeParsing.Text_elements
     {
         public Coordination(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
         {
-            this.CoordinationType = (CoordinationType)Enum.Parse(typeof(CoordinationType), Lemma.ToUpper());
+            var stringEnumValue = Lemma.ToUpper();
+
+            if(Enum.IsDefined(typeof(CoordinationType), stringEnumValue))
+                this.CoordinationType = (CoordinationType)Enum.Parse(typeof(CoordinationType), Lemma.ToUpper());
+            else
+                this.CoordinationType = CoordinationType.DEFAULT;
         }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
@@ -30,6 +35,6 @@ namespace UDPipeParsing.Text_elements
     /// </summary>
     public enum CoordinationType
     {
-        AND, OR, NOR, FOR, SO, YET, BUT, BOTH
+        AND, OR, NOR, FOR, SO, YET, BUT, BOTH, DEFAULT
     }
 }

@@ -136,6 +136,7 @@ namespace ImagePositioner.Factories
                 case "inside":
                 case "within":
                 case "into":
+                case "into to":
                 case "in": return new InEdge();
                 case "at": return new AtEdge();
                 case "below":

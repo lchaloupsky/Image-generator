@@ -3,6 +3,7 @@ using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
 using System.Collections.Generic;
 using System.Linq;
+using UDPipeParsing.Text_elements;
 
 namespace UDPipeParsing
 {
@@ -19,7 +20,7 @@ namespace UDPipeParsing
         // We keep this for resolving(reconnecting) same absolute conflicts in the graphs.
         private List<IAbsolutePositionateEdge> AbsoluteEdges { get; } = new List<IAbsolutePositionateEdge>();
 
-        public IEnumerable<IDrawable> Groups { get; set; }
+        public IEnumerable<IDrawable> Groups { get; set; } = new List<IDrawable>();
         public IEnumerable<IDrawable> Vertices => this.Graph.Keys;
         public IEnumerable<IPositionateEdge> Edges => this.Graph.Values.SelectMany(edge => edge);
         public IEnumerable<IPositionateEdge> this[IDrawable vertex] => this.Graph.ContainsKey(vertex) ? this.Graph[vertex] : null;
@@ -68,6 +69,9 @@ namespace UDPipeParsing
             if (!this.Graph.ContainsKey(vertex))
                 return;
 
+            if (vertex is NounSet ns)
+                ns.Nouns.ForEach(n => this.RemoveVertex(n, removeRecursive));
+
             if (removeRecursive)
             {
                 var vertices = this.Graph[vertex].Select(edge => edge.Right).ToList();
@@ -78,6 +82,8 @@ namespace UDPipeParsing
             this.Graph.Remove(vertex);
             foreach (var edges in this.Graph.Values)
                 edges.RemoveAll(edge => edge.Right == vertex);
+
+            vertex.Dispose();
         }
 
         /// <summary>
@@ -123,6 +129,16 @@ namespace UDPipeParsing
                 if (group.Image != null)
                     group.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Clears whole graph
+        /// </summary>
+        public void Clear()
+        {
+            Dispose();
+            this.Graph.Clear();
+            this.AbsoluteEdges.Clear();
         }
 
         /// <summary>

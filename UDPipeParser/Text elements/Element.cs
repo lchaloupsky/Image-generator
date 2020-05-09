@@ -59,6 +59,9 @@ namespace UDPipeParsing.Text_elements
         /// <returns>Processed element</returns>
         public IProcessable Process(IProcessable element, ISentenceGraph graph)
         {
+            if (element == null)
+                return this;
+
             if (element is Negation)
                 return this.ProcessNegation((Negation)element);
 
@@ -73,6 +76,14 @@ namespace UDPipeParsing.Text_elements
                 this.CoordinationType = CoordinationType.AND;
                 if (element is IDrawable)
                     graph.RemoveVertex((IDrawable)element, true);
+
+                if (element is Verb verb)
+                {
+                    if (verb.Object != null)
+                        graph.RemoveVertex((IDrawable)verb.Object, true);
+
+                    verb.DependingDrawables.ForEach(dd => graph.RemoveVertex((IDrawable)dd, true));
+                }
 
                 return this;
             }

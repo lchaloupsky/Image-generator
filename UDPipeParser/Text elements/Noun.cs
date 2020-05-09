@@ -153,6 +153,7 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsCopula(verb.DependencyType))
                 return this;
 
+            IProcessable processElement = this;
             // Dont process negated verb
             if (!verb.IsNegated)
                 this.Actions.Add(verb);
@@ -160,30 +161,45 @@ namespace UDPipeParsing.Text_elements
             // Process all depending drawables
             if (verb.DependingDrawables.Count != 0)
             {
-                verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
+                verb.DependingDrawables.ForEach(dd => processElement = processElement.Process(dd, graph));
                 verb.DependingDrawables.Clear();
             }
 
             // Process all related actions
-            verb.RelatedActions.ForEach(ra => this.Process(ra, graph));
+            verb.RelatedActions.ForEach(ra => processElement.Process(ra, graph));
             verb.RelatedActions.Clear();
 
             // Process unprocessed adposition
             if (verb.DrawableAdposition != null)
-                this.Process(verb.DrawableAdposition, graph);
+                processElement.Process(verb.DrawableAdposition, graph);
 
             // Replace verb object in the graph
-            if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
-                graph.ReplaceVertex(this, (IDrawable)verb.Object);
+            if (verb.Object != null)
+            {
+                if (verb.Object is NounSet)
+                    ((NounSet)verb.Object).Nouns.ForEach(n =>
+                    {
+                        if (graph.Vertices.Contains(n))
+                            graph.ReplaceVertex((IDrawable)processElement, n);
+                    });
 
-            return this;
+                if (graph.Vertices.Contains((IDrawable)verb.Object))
+                    graph.ReplaceVertex((IDrawable)processElement, (IDrawable)verb.Object);
+            }
+
+            return processElement;
         }
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
             // Process appositinal
             if (this.DependencyHelper.IsAppositional(num.DependencyType))
-                return this.Process(num.DependingDrawable, graph);
+            {
+                IProcessable processElem = this;
+                processElem = processElem.Process(num.DependingDrawable, graph);
+                processElem = processElem.Process(num.DependingAction, graph);
+                return processElem;
+            }
 
             // Process numeral expressing part of noun phrase
             if (this.DependencyHelper.IsNounPhrase(this.DependencyType))

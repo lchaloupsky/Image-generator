@@ -1,4 +1,5 @@
-﻿using ImageGeneratorInterfaces.Graph;
+﻿using System.Collections.Generic;
+using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Parsing;
 
 namespace UDPipeParsing.Text_elements
@@ -11,7 +12,9 @@ namespace UDPipeParsing.Text_elements
         private static readonly int DEFAULT_NUMBER = 3;
 
         // Dependant drawable in the tree
-        public IProcessable DependingDrawable { get; set; }
+        public IProcessable DependingDrawable { get; private set; }
+
+        public IProcessable DependingAction { get; private set; }
 
         public Numeral(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
 
@@ -22,6 +25,7 @@ namespace UDPipeParsing.Text_elements
                 case Noun noun: return this.ProcessElement(noun, graph);
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Coordination cor: return this.ProcessCoordination(cor);
+                case Verb verb: return this.ProcessElement(verb, graph);
                 default: break;
             }
 
@@ -40,6 +44,13 @@ namespace UDPipeParsing.Text_elements
 
             this.DependencyType = "nummod";
             return drawable.Process(this, graph);
+        }
+
+        private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
+        {
+            this.DependingAction = verb;
+
+            return this;
         }
 
         #endregion

@@ -200,8 +200,8 @@ namespace UDPipeParsing.Text_elements
                 (diff == null ?
                     finalPluralForm :
                     $"{finalPluralForm}, " + string.Join(", ", diff)) :
-                this.DependencyTypeHelper.IsObject(this.DependencyType) ? 
-                    string.Join(", ", this.Nouns.Select(n => n.ToString()).Distinct()) : 
+                this.DependencyTypeHelper.IsObject(this.DependencyType) ?
+                    string.Join(", ", this.Nouns.Select(n => n.ToString()).Distinct()) :
                     string.Join(", ", this.Nouns);
         }
 
@@ -226,6 +226,9 @@ namespace UDPipeParsing.Text_elements
         /// <returns>Processed element</returns>
         public IProcessable Process(IProcessable element, ISentenceGraph graph)
         {
+            if (element == null)
+                return this;
+
             if (element is Negation)
                 return this.ProcessNegation((Negation)element);
 
@@ -241,6 +244,14 @@ namespace UDPipeParsing.Text_elements
                 this.CoordinationType = CoordinationType.AND;
                 if (element is IDrawable)
                     graph.RemoveVertex((IDrawable)element, true);
+
+                if (element is Verb verb)
+                {
+                    if (verb.Object != null)
+                        graph.RemoveVertex((IDrawable)verb.Object, true);
+
+                    verb.DependingDrawables.ForEach(dd => graph.RemoveVertex((IDrawable)dd, true));
+                }
 
                 return this;
             }
@@ -274,35 +285,46 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyTypeHelper.IsCopula(verb.DependencyType))
                 return this;
 
+            IProcessable processElement = this;
             // Process all depending drawables of the verb
             if (verb.DependingDrawables.Count != 0)
             {
-                verb.DependingDrawables.ForEach(dd => this.Process(dd, graph));
+                verb.DependingDrawables.ForEach(dd => processElement = processElement.Process(dd, graph));
                 verb.DependingDrawables.Clear();
             }
 
             // Process all related actions
             verb.RelatedActions.ForEach(ra =>
             {
-                ra.DependingDrawables.ForEach(dd => this.Process(ra, graph));
+                ra.DependingDrawables.ForEach(dd => processElement.Process(ra, graph));
                 ra.DependingDrawables.Clear();
             });
             verb.RelatedActions.Clear();
 
             // Process non used adposition
             if (verb.DrawableAdposition != null)
-                this.Process(verb.DrawableAdposition, graph);
+                processElement.Process(verb.DrawableAdposition, graph);
 
             // Replace verb object in the graph
-            if (verb.Object != null && graph.Vertices.Contains((IDrawable)verb.Object))
-                graph.ReplaceVertex(this, (IDrawable)verb.Object);
+            if (verb.Object != null)
+            {
+                if (verb.Object is NounSet)
+                    ((NounSet)verb.Object).Nouns.ForEach(n =>
+                    {
+                        if (graph.Vertices.Contains(n))
+                            graph.ReplaceVertex((IDrawable)processElement, n);
+                    });
+
+                if (graph.Vertices.Contains((IDrawable)verb.Object))
+                    graph.ReplaceVertex((IDrawable)processElement, (IDrawable)verb.Object);
+            }
 
             // Process only non negated verbs
-            if (!verb.IsNegated)
+            if (!verb.IsNegated && processElement == this)
                 foreach (var noun in this.Nouns)
                     noun.Process(verb, graph);
 
-            return this;
+            return processElement;
         }
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
@@ -311,7 +333,10 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyTypeHelper.IsAppositional(num.DependencyType) && num.GetValue() < this.NumberOfInstances)
             {
                 for (int i = this.LastProcessedNoun; i < num.GetValue() - 1 + LastProcessedNoun; i++)
+                {
                     this.Nouns[i].Process(num.DependingDrawable, graph);
+                    this.Nouns[i].Process(num.DependingAction, graph);
+                }
 
                 LastProcessedNoun += num.GetValue();
                 return this;

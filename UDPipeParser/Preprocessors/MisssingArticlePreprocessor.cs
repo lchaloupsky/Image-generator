@@ -168,10 +168,10 @@ namespace UDPipeParsing.Preprocessors
 
             // Go through in original order and build final sentence string
             finalPartsToJoin.Reverse();
-            foreach (var noun in nounsWithArticle)
+            foreach (var noun in finalIndex.OrderByDescending(n => n.Value))
             {
                 // If noun does not have article add it
-                if (!noun.Value)
+                if (nounsWithArticle.ContainsKey(noun.Key) && !nounsWithArticle[noun.Key])
                 {
                     finalPartsToJoin.Insert(finalIndex[noun.Key], ARTICLE);
 

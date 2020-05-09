@@ -12,11 +12,13 @@ namespace UDPipeParsing.Text_elements.Helpers
     {
         // Default scale when placing in row
         private const double ROW_SCALE = 0.75;
-        private const double CIRCLE_SCALE = 0.9;
+        private const double CIRCLE_SCALE = 0.95;
 
         // Minimal object dimension
-        private const int MIN_OBJECT_WIDTH = 34;
-        private const int MIN_OBJECT_HEIGHT = 20;
+        private const int MIN_OBJECT_WIDTH = 50;
+        private const int MIN_OBJECT_HEIGHT = 25;
+
+        private DrawableHelper DrawableHelper { get; } = new DrawableHelper();
 
         /// <summary>
         /// Places images into one row
@@ -110,6 +112,9 @@ namespace UDPipeParsing.Text_elements.Helpers
                 // If element has a group, use the group
                 finalElement = noun.Group ?? noun;
 
+                // element ratio
+                float ratio = this.DrawableHelper.GetDimensionsRatio(finalElement.Width, finalElement.Height);
+
                 // Do scaling of dimensions
                 int finalWidth = (int)(finalElement.Width * scale);
                 int finalHeight = (int)(finalElement.Height * scale);
@@ -117,8 +122,8 @@ namespace UDPipeParsing.Text_elements.Helpers
                 // Preserve ratio
                 if (finalHeight < MIN_OBJECT_HEIGHT)
                 {
-                    finalWidth = (int)(MIN_OBJECT_HEIGHT * ((finalWidth * 1f) / finalHeight));
                     finalHeight = MIN_OBJECT_HEIGHT;
+                    finalWidth = (int)(finalHeight * ratio);                   
                 }
 
                 // Calc new positions -> random positions in circle
