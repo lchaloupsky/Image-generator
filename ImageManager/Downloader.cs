@@ -197,6 +197,7 @@ namespace ImageManagment
                 // Checks total best rating from all captions
                 if (imageRating < bestRating)
                 {
+                    bestImage?.Dispose();
                     bestImage = image;
                     bestRating = imageRating;
                 }

@@ -14,7 +14,7 @@ namespace ImageManagment
     /// </summary>
     public class ImageManager : IImageManager
     {
-        private const int CACHE_LIMIT = 1500;
+        private const int CACHE_LIMIT = 1000;
 
         private Downloader ImageDownloader { get; }
         private FileManager FileManager { get; }

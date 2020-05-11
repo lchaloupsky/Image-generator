@@ -385,7 +385,10 @@ namespace UDPipeParsing.Text_elements
             // Try to create new absolute edge
             newEdge = this.EdgeFactory.Create(this, this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
             if (newEdge != null)
+            {
                 graph.AddEdge(newEdge);
+                this.Adpositions.Clear();
+            }
 
             // Scaling from accumulated scale
             this.Width = (int)(this.Width * this.Scale);

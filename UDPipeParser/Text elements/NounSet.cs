@@ -294,16 +294,15 @@ namespace UDPipeParsing.Text_elements
             }
 
             // Process all related actions
-            verb.RelatedActions.ForEach(ra =>
-            {
-                ra.DependingDrawables.ForEach(dd => processElement.Process(ra, graph));
-                ra.DependingDrawables.Clear();
-            });
+            verb.RelatedActions.ForEach(ra => processElement.Process(ra, graph));
             verb.RelatedActions.Clear();
 
             // Process non used adposition
             if (verb.DrawableAdposition != null)
+            {
                 processElement.Process(verb.DrawableAdposition, graph);
+                verb.DrawableAdposition = null;
+            }
 
             // Replace verb object in the graph
             if (verb.Object != null)
@@ -521,7 +520,10 @@ namespace UDPipeParsing.Text_elements
             // Try to create new absolute edge
             IPositionateEdge newEdge = this.EdgeFactory.Create(this, this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
             if (newEdge != null)
+            {
+                this.Adpositions.Clear();
                 graph.AddEdge(newEdge);
+            }
 
             return this;
         }

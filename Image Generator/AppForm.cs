@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using UDPipeParsing;
@@ -33,6 +34,7 @@ namespace Image_Generator
         private string DatasetFileName { get; set; }
         private string DatasetDestinationDirectory { get; set; }
         private GeneratorState State { get; set; } = GeneratorState.IDLE;
+        private SemaphoreSlim SemaphoreSlim { get; set; }
 
         public AppForm()
         {
@@ -275,6 +277,7 @@ namespace Image_Generator
             this.ProcessedBar.Visible = true;
             this.ProcessedBar.Value = 0;
             this.resolutionBox.Enabled = false;
+            this.SemaphoreSlim = new SemaphoreSlim(64, 64);
 
             // generate all images for descriptions from dataset in independent tasks
             using (StreamReader streamReader = File.OpenText(this.DatasetFileName))
@@ -314,6 +317,7 @@ namespace Image_Generator
             {
                 try
                 {
+                    this.SemaphoreSlim.Wait();
                     var index = str.IndexOf(str.First(c => char.IsWhiteSpace(c)));
                     var strId = str.Substring(0, index);
                     var result = this.GenerateImage(str.Substring(index + 1));
@@ -336,8 +340,9 @@ namespace Image_Generator
                     // update processed image count
                     this.ProcessedImages.BeginInvoke((Action)(() =>
                     {
+                        this.SemaphoreSlim.Release();
                         this.ProcessedBar.Value++;
-                        this.ShowProcessedImagesCount();
+                        this.ShowProcessedImagesCount();                        
                     }));
                 }
             });
@@ -482,7 +487,8 @@ namespace Image_Generator
             {
                 this.State = GeneratorState.IDLE;
                 this.resolutionBox.Enabled = true;
-                System.GC.Collect();
+                this.SemaphoreSlim.Dispose();
+                System.GC.Collect(2);
             }
         }
 
