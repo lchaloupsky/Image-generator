@@ -49,7 +49,7 @@ namespace ImageManagment
             this.IBMCaptioner = new IBMCaptioner();
             this.LDistanceMeter = new LDistanceMeter();
             this.Converter = new ImageFormatConverter();
-            this.Semaphore = new SemaphoreSlim(5, 5);
+            this.Semaphore = new SemaphoreSlim(8, 8);
             this.Location = location;
 
             ServicePointManager.DefaultConnectionLimit = 200;
@@ -203,7 +203,6 @@ namespace ImageManagment
                 }
                 else
                     image.Dispose();
-
             }
 
             // release semaphore
@@ -233,7 +232,7 @@ namespace ImageManagment
 
                 // Normalized Levenshtein distance
                 float rating = (this.LDistanceMeter.CalculateStringDistance(imageTextToCompare, captionToCompare) * 1f)
-                                / Math.Max(imageTextToCompare.Length, captionToCompare.Length) / capt.Probability;
+                               / Math.Max(imageTextToCompare.Length, captionToCompare.Length) / capt.Probability;
 
                 // Choose best actual rating
                 if (rating < bestActualRating)

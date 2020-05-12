@@ -132,32 +132,33 @@ namespace UDPipeParsing.Text_elements
         {
             // initialize needed variables
             Bitmap bitmap = new Bitmap(newWidth, newHeight);
-            Graphics graphics = Graphics.FromImage(bitmap);
-
-            // New positions in image
-            float x1 = drawable1.Position.Value.X - newPosition.X;
-            float x2 = drawable2.Position.Value.X - newPosition.X;
-
-            float y1 = drawable1.Position.Value.Y - newPosition.Y;
-            float y2 = drawable2.Position.Value.Y - newPosition.Y;
-
-            // Locking ONLY ONE BY ONE --> to avoid deadlocks
-            // Deciding which drawable draw first
-            if (drawable1.ZIndex <= drawable2.ZIndex)
+            using (Graphics graphics = Graphics.FromImage(bitmap))
             {
-                lock (drawable1.Image)
-                    graphics.DrawImage(drawable1.Image, x1, y1, drawable1.Width, drawable1.Height);
+                // New positions in image
+                float x1 = drawable1.Position.Value.X - newPosition.X;
+                float x2 = drawable2.Position.Value.X - newPosition.X;
 
-                lock (drawable2.Image)
-                    graphics.DrawImage(drawable2.Image, x2, y2, drawable2.Width, drawable2.Height);
-            }
-            else
-            {
-                lock (drawable2.Image)
-                    graphics.DrawImage(drawable2.Image, x2, y2, drawable2.Width, drawable2.Height);
+                float y1 = drawable1.Position.Value.Y - newPosition.Y;
+                float y2 = drawable2.Position.Value.Y - newPosition.Y;
 
-                lock (drawable1.Image)
-                    graphics.DrawImage(drawable1.Image, x1, y1, drawable1.Width, drawable1.Height);
+                // Locking ONLY ONE BY ONE --> to avoid deadlocks
+                // Deciding which drawable draw first
+                if (drawable1.ZIndex <= drawable2.ZIndex)
+                {
+                    lock (drawable1.Image)
+                        graphics.DrawImage(drawable1.Image, x1, y1, drawable1.Width, drawable1.Height);
+
+                    lock (drawable2.Image)
+                        graphics.DrawImage(drawable2.Image, x2, y2, drawable2.Width, drawable2.Height);
+                }
+                else
+                {
+                    lock (drawable2.Image)
+                        graphics.DrawImage(drawable2.Image, x2, y2, drawable2.Width, drawable2.Height);
+
+                    lock (drawable1.Image)
+                        graphics.DrawImage(drawable1.Image, x1, y1, drawable1.Width, drawable1.Height);
+                }
             }
 
             return bitmap;
@@ -170,6 +171,7 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
+            this.Image?.Dispose();
             this.Image = null;
         }
     }

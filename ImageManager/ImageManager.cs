@@ -14,7 +14,7 @@ namespace ImageManagment
     /// </summary>
     public class ImageManager : IImageManager
     {
-        private const int CACHE_LIMIT = 1000;
+        private const int CACHE_LIMIT = 1024;
 
         private Downloader ImageDownloader { get; }
         private FileManager FileManager { get; }
@@ -64,6 +64,8 @@ namespace ImageManagment
                         // Add only if not already in cache
                         if (!this.Cache.ContainsKey(imageName))
                             this.Cache.Add(imageName, image);
+                        else
+                            image.Dispose();
                     }
                     catch (IOException)
                     {
@@ -106,9 +108,11 @@ namespace ImageManagment
                     // Add only if not downloaded
                     if (!this.Cache.ContainsKey(imageName))
                         this.Cache.Add(imageName, image);
+                    else
+                        image.Dispose();
                 }
 
-                return this.Cache[imageName];
+                return new Bitmap(this.Cache[imageName]);
             }
         }
 
@@ -179,7 +183,7 @@ namespace ImageManagment
 
         public void Add(K key, V value)
         {
-            if (this.Limit == KeyQueue.Count)
+            if (this.Limit <= KeyQueue.Count)
             {
                 KeyQueue.TryDequeue(out K dequeValue);
                 this.Remove(dequeValue);
@@ -202,6 +206,7 @@ namespace ImageManagment
         {
             lock (this.Locks[key])
             {
+                this.Dictionary[key].Dispose();
                 this.Dictionary.TryRemove(key, out _);
             }
 

@@ -3,6 +3,7 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
 using ImageGeneratorInterfaces.Rendering;
+using System;
 using System.Drawing;
 using System.Numerics;
 using UDPipeParsing.Text_elements.Helpers;
@@ -69,7 +70,9 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
+            this.Image?.Dispose();
             this.Image = null;
+            GC.SuppressFinalize(this);
         }
     }
 }

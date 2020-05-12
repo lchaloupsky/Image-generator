@@ -1,6 +1,7 @@
 ﻿using ImageGeneratorInterfaces.Edges;
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.Graph.DrawableElement;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UDPipeParsing.Text_elements;
@@ -129,6 +130,9 @@ namespace UDPipeParsing
                 if (group.Image != null)
                     group.Dispose();
             }
+
+            this.Graph.Clear();
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>

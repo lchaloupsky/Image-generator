@@ -50,19 +50,20 @@ namespace UDPipeParsing.Text_elements.Helpers
 
             // Creates new image with dimensions
             Image image = new Bitmap(width, height);
-            Graphics graphics = Graphics.FromImage(image);
-
-            // Draw all images
-            int LastX = 0;
-            IDrawable finalElement;
-            foreach (IDrawable noun in Nouns)
+            using (Graphics graphics = Graphics.FromImage(image))
             {
-                // If noun has group, draw it with scale
-                finalElement = noun.Group ?? noun;
-                lock (finalElement.Image)
-                    graphics.DrawImage(finalElement.Image, LastX, (int)(height - finalElement.Height * scale), (int)(scale * finalElement.Width), (int)(scale * finalElement.Height));
+                // Draw all images
+                int LastX = 0;
+                IDrawable finalElement;
+                foreach (IDrawable noun in Nouns)
+                {
+                    // If noun has group, draw it with scale
+                    finalElement = noun.Group ?? noun;
+                    lock (finalElement.Image)
+                        graphics.DrawImage(finalElement.Image, LastX, (int)(height - finalElement.Height * scale), (int)(scale * finalElement.Width), (int)(scale * finalElement.Height));
 
-                LastX += (int)(finalElement.Width * scale);
+                    LastX += (int)(finalElement.Width * scale);
+                }
             }
 
             return Tuple.Create(width, height, zIndex, image);
@@ -100,45 +101,46 @@ namespace UDPipeParsing.Text_elements.Helpers
             height = finalDim;
             width = finalDim;
             Image image = new Bitmap(width, height);
-            Graphics graphics = Graphics.FromImage(image);
-
-            // Draw final image
-            int newX = 0;
-            int newY = 0;
-            Random rand = new Random();
-            IDrawable finalElement;
-            foreach (IDrawable noun in Nouns)
+            using (Graphics graphics = Graphics.FromImage(image))
             {
-                // If element has a group, use the group
-                finalElement = noun.Group ?? noun;
-
-                // element ratio
-                float ratio = this.DrawableHelper.GetDimensionsRatio(finalElement.Width, finalElement.Height);
-
-                // Do scaling of dimensions
-                int finalWidth = (int)(finalElement.Width * scale);
-                int finalHeight = (int)(finalElement.Height * scale);
-
-                // Preserve ratio
-                if (finalHeight < MIN_OBJECT_HEIGHT)
+                // Draw final image
+                int newX = 0;
+                int newY = 0;
+                Random rand = new Random();
+                IDrawable finalElement;
+                foreach (IDrawable noun in Nouns)
                 {
-                    finalHeight = MIN_OBJECT_HEIGHT;
-                    finalWidth = (int)(finalHeight * ratio);                   
+                    // If element has a group, use the group
+                    finalElement = noun.Group ?? noun;
+
+                    // element ratio
+                    float ratio = this.DrawableHelper.GetDimensionsRatio(finalElement.Width, finalElement.Height);
+
+                    // Do scaling of dimensions
+                    int finalWidth = (int)(finalElement.Width * scale);
+                    int finalHeight = (int)(finalElement.Height * scale);
+
+                    // Preserve ratio
+                    if (finalHeight < MIN_OBJECT_HEIGHT)
+                    {
+                        finalHeight = MIN_OBJECT_HEIGHT;
+                        finalWidth = (int)(finalHeight * ratio);
+                    }
+
+                    // Calc new positions -> random positions in circle
+                    int distance = rand.Next(finalDim / 2);
+                    double angleInRadians = rand.Next(360) / (2 * Math.PI);
+
+                    newX = (int)(distance * Math.Cos(angleInRadians)) + finalDim / 2;
+                    newY = (int)(distance * Math.Sin(angleInRadians)) + finalDim / 2;
+
+                    newX = Math.Min(newX, finalDim - finalWidth);
+                    newY = Math.Min(newY, finalDim - finalHeight);
+
+                    // Draw image
+                    lock (finalElement.Image)
+                        graphics.DrawImage(finalElement.Image, newX, newY, finalWidth, finalHeight);
                 }
-
-                // Calc new positions -> random positions in circle
-                int distance = rand.Next(finalDim / 2);
-                double angleInRadians = rand.Next(360) / (2 * Math.PI);
-
-                newX = (int)(distance * Math.Cos(angleInRadians)) + finalDim / 2;
-                newY = (int)(distance * Math.Sin(angleInRadians)) + finalDim / 2;
-
-                newX = Math.Min(newX, finalDim - finalWidth);
-                newY = Math.Min(newY, finalDim - finalHeight);
-
-                // Draw image
-                lock (finalElement.Image)
-                    graphics.DrawImage(finalElement.Image, newX, newY, finalWidth, finalHeight);
             }
 
             return Tuple.Create(width, height, zIndex, image);

@@ -36,7 +36,7 @@ namespace UDPipeParsing.Factories
         // Functional adjectives, that are scaling up
         private HashSet<string> DefaultUpScales { get; } = new HashSet<string>()
         {
-            "big", "large", "tall", "great", "widespread", "wide", "grand", "broad"
+            "big", "large", "tall", "great", "widespread", "wide", "grand", "broad", "high"
         };
 
         // Functional adjectives, that are scaling up

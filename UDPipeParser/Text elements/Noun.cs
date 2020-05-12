@@ -5,6 +5,7 @@ using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
 using ImageGeneratorInterfaces.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -122,7 +123,9 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
+            this.Image?.Dispose();
             this.Image = null;
+            GC.SuppressFinalize(this);
         }
 
         #endregion

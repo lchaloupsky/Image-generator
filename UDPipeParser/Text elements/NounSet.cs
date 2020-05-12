@@ -207,11 +207,15 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
-            this.Image = null;
+            this.Image_?.Dispose();
+            this.Image_ = null;
             foreach (var noun in this.Nouns)
             {
                 noun.Dispose();
             }
+
+            this.Nouns.Clear();
+            GC.SuppressFinalize(this);
         }
 
         #endregion

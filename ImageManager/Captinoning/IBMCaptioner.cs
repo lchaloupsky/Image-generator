@@ -15,7 +15,7 @@ namespace ImageManagment.Captioning
     public class IBMCaptioner
     {
         // Base URL of web service
-        private const string BASE_URL = @"http://max-image-caption-generator.max.us-south.containers.appdomain.cloud/model/predict";
+        private const string BASE_URL = @"http://max-image-caption-generator.codait-prod-41208c73af8fca213512856c7a09db52-0000.us-east.containers.appdomain.cloud/model/predict";
 
         /// <summary>
         /// Gets captions for image via REST API call to web service

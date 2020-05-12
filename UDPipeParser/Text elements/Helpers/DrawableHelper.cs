@@ -89,7 +89,9 @@ namespace UDPipeParsing.Text_elements.Helpers
             else
             {
                 group = left.Group;
+                var oldGroup = right.Group;
                 group.CombineIntoGroup(right);
+                right.Group.Dispose();
             }
 
             // Set to both same group
