@@ -5,11 +5,11 @@ using System;
 namespace UDPipeParsing.Text_elements
 {
     /// <summary>
-    /// Represents coordination conjuction in the sentence
+    /// Represents coordination conjunction in the sentence
     /// </summary>
     public class Coordination : Element
     {
-        public Coordination(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        public Coordination(int id, string lemma, string dependency) : base(id, lemma, dependency)
         {
             var stringEnumValue = Lemma.ToUpper();
 

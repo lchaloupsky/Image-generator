@@ -11,12 +11,12 @@ namespace UDPipeParsing.Text_elements
     {
         private static readonly int DEFAULT_NUMBER = 3;
 
-        // Dependant drawable in the tree
+        // Dependent drawable in the tree
         public IProcessable DependingDrawable { get; private set; }
 
         public IProcessable DependingAction { get; private set; }
 
-        public Numeral(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
+        public Numeral(int id, string lemma, string dependency) : base(id, lemma, dependency) { }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {

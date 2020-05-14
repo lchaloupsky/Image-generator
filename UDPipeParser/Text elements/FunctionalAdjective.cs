@@ -14,12 +14,12 @@ namespace UDPipeParsing.Text_elements
         private static HashSet<string> ScaleModifiers { get; } = new HashSet<string>() { "very", "extremely", "quite", "really", "terribly", "too" };
 
         // Change of scale, when if functional adverb is found
-        private const float SCALE_CHANGE = 1.5f;
+        private const float ScaleChange = 1.5f;
 
         // Size scale
         public float Scale { get; set; }
 
-        public FunctionalAdjective(int Id, string Lemma, string Dependency, float scale) : base(Id, Lemma, Dependency)
+        public FunctionalAdjective(int id, string lemma, string dependency, float scale) : base(id, lemma, dependency)
         {
             this.Scale = scale;
         }
@@ -60,7 +60,7 @@ namespace UDPipeParsing.Text_elements
         {
             if (ScaleModifiers.Contains(adv.Lemma))
             {
-                this.Scale = this.Scale > 1 ? this.Scale * SCALE_CHANGE : this.Scale / SCALE_CHANGE;
+                this.Scale = this.Scale > 1 ? this.Scale * ScaleChange : this.Scale / ScaleChange;
                 return true;
             }
 

@@ -12,7 +12,7 @@ namespace ImagePositioner.Helpers
     public class PositionHelper
     {
         // default shift
-        private const int defaultShiftPadding = 60;
+        private const int DefaultShiftPadding = 60;
 
         // Default object dimensions
         private int LastObjectWidth { get; set; }
@@ -41,8 +41,8 @@ namespace ImagePositioner.Helpers
             }
 
             //Stupid move to the right
-            this.NewEmptyPosition += new Vector2(this.LastObjectWidth + Random.Next(0, defaultShiftPadding) + 1,
-                                                 Random.Next(-defaultShiftPadding, defaultShiftPadding));
+            this.NewEmptyPosition += new Vector2(this.LastObjectWidth + Random.Next(0, DefaultShiftPadding) + 1,
+                                                 Random.Next(-DefaultShiftPadding, DefaultShiftPadding));
             // Return new position
             return this.NewEmptyPosition;
         }
@@ -205,9 +205,9 @@ namespace ImagePositioner.Helpers
         /// <summary>
         /// Help function for rescaling vertices
         /// </summary>
-        /// <param name="vertices">Verctices to be scaled</param>
+        /// <param name="vertices">Vertices to be scaled</param>
         /// <param name="total">Total value</param>
-        /// <param name="limit">MAximal allowed value</param>
+        /// <param name="limit">Maximal allowed value</param>
         public void RescaleVertices(IEnumerable<IDrawable> vertices, int total, int limit)
         {
             float factor = GetScaleFactor(limit, total);

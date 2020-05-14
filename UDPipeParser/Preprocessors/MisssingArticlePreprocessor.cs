@@ -12,8 +12,8 @@ namespace UDPipeParsing.Preprocessors
     public class MissingArticlePreprocessor : IPreprocessor
     {
         // default article to fill
-        private const string ARTICLE = "the";
-        private const string FIRST_WORD_ARTICLE = "The";
+        private const string Article = "the";
+        private const string FirstWordArticle = "The";
 
         // Client to downloading UDPipe responses
         private UDPipeClient Client { get; }
@@ -46,7 +46,7 @@ namespace UDPipeParsing.Preprocessors
             {
                 var parts = responseLines[i];
 
-                // If determiner is found, dont add new article
+                // If determiner is found, don't add new article
                 if (wasAdp && this.IsDeterminer(parts[3], parts[7]))
                 {
                     wasAdp = false;
@@ -54,7 +54,7 @@ namespace UDPipeParsing.Preprocessors
                 }
 
                 // Remember last determiner index
-                // in the second part of condition -- "to" is forbiden in other cases
+                // in the second part of condition -- "to" is forbidden in other cases
                 if (this.IsAdposition(parts[3], parts[2], parts[7]) || (i > 0 && parts[2] == "to" && responseLines[i - 1][2] == "next"))
                 {
                     wasAdp = true;
@@ -173,7 +173,7 @@ namespace UDPipeParsing.Preprocessors
                 // If noun does not have article add it
                 if (nounsWithArticle.ContainsKey(noun.Key) && !nounsWithArticle[noun.Key])
                 {
-                    finalPartsToJoin.Insert(finalIndex[noun.Key], ARTICLE);
+                    finalPartsToJoin.Insert(finalIndex[noun.Key], Article);
 
                     // Preserve original form
                     if (finalIndex[noun.Key] == 0)
@@ -191,7 +191,7 @@ namespace UDPipeParsing.Preprocessors
                 var lastPart = finalPartsToJoin.First();
                 finalPartsToJoin.RemoveAt(0);
                 finalPartsToJoin.Insert(0, lastPart.ToLower());
-                finalPartsToJoin.Insert(0, FIRST_WORD_ARTICLE);
+                finalPartsToJoin.Insert(0, FirstWordArticle);
             }
 
             // Return preprocessed text
@@ -199,21 +199,21 @@ namespace UDPipeParsing.Preprocessors
         }
 
         /// <summary>
-        /// Returns new UDPipe like reponse line
+        /// Returns new UDPipe like response line
         /// </summary>
         /// <param name="id">Id of element</param>
         /// <param name="index">Dependency index</param>
         /// <returns>response line</returns>
         private string[] GetNewDeterminerLine(int id, int index)
         {
-            return new string[] { id.ToString(), ARTICLE, ARTICLE, "DET", "DT", "_", index.ToString(), "det", "_", "_" };
+            return new string[] { id.ToString(), Article, Article, "DET", "DT", "_", index.ToString(), "det", "_", "_" };
         }
 
         /// <summary>
         /// Splits response line into string array
         /// </summary>
         /// <param name="lines">Lines to split</param>
-        /// <returns>List of string array splitted reponse lines</returns>
+        /// <returns>List of string array splitted response lines</returns>
         private List<string[]> GetSplittedLines(List<string> lines)
         {
             return lines
@@ -234,13 +234,13 @@ namespace UDPipeParsing.Preprocessors
         /// <summary>
         /// Checks if the first element in the sentence is standalone verb, thus is incorrectly tagged
         /// </summary>
-        /// <param name="partofSpeech">Word part of speech</param>
+        /// <param name="partOfSpeech">Word part of speech</param>
         /// <param name="id">Word id</param>
         /// <param name="verbParams">Other word params from UDPipe</param>
         /// <returns>True if satisfied</returns>
-        private bool IsStandAloneVerb(string partofSpeech, int id, string verbParams)
+        private bool IsStandAloneVerb(string partOfSpeech, int id, string verbParams)
         {
-            return partofSpeech == "VERB" && id == 1 && verbParams.Contains("Mood=Imp");
+            return partOfSpeech == "VERB" && id == 1 && verbParams.Contains("Mood=Imp");
         }
 
         /// <summary>

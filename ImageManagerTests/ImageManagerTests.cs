@@ -1,5 +1,5 @@
-﻿using ImageManagment;
-using ImageManagment.Captioning;
+﻿using ImageManagement;
+using ImageManagement.Captioning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;

@@ -20,7 +20,7 @@ namespace UDPipeParsing.Text_elements.Helpers
         /// <param name="right">right vertex</param>
         /// <param name="leftAdpositions">left adpositions</param>
         /// <param name="rightAdpositions">right adpositions</param>
-        /// <param name="finalAction">Actial to do if "of" is found</param>
+        /// <param name="finalAction">Actual to do if "of" is found</param>
         /// <param name="isRightSubject">Flag if right vertex is subject</param>
         /// <returns>New edge or null</returns>
         public bool ProcessEdge(ISentenceGraph graph, IEdgeFactory edgeFactory, IDrawable left, IDrawable right, List<Adposition> leftAdpositions, List<Adposition> rightAdpositions, bool isRightSubject, Action finalAction)

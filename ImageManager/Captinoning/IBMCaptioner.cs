@@ -7,7 +7,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 
-namespace ImageManagment.Captioning
+namespace ImageManagement.Captioning
 {
     /// <summary>
     /// Class for getting image captions via REST API call to IBM Image Caption Generator service
@@ -15,7 +15,7 @@ namespace ImageManagment.Captioning
     public class IBMCaptioner
     {
         // Base URL of web service
-        private const string BASE_URL = @"http://max-image-caption-generator.codait-prod-41208c73af8fca213512856c7a09db52-0000.us-east.containers.appdomain.cloud/model/predict";
+        private const string BaseUrl = @"http://max-image-caption-generator.codait-prod-41208c73af8fca213512856c7a09db52-0000.us-east.containers.appdomain.cloud/model/predict";
 
         /// <summary>
         /// Gets captions for image via REST API call to web service
@@ -28,7 +28,7 @@ namespace ImageManagment.Captioning
             // Get image byte data
             byte[] imageData = this.GetImageData(image);
 
-            // Creaete request         
+            // Create request         
             var boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", NumberFormatInfo.InvariantInfo);
             HttpWebRequest request = this.CreateRequest(boundary);
             boundary = "--" + boundary;
@@ -100,11 +100,11 @@ namespace ImageManagment.Captioning
         /// <summary>
         /// Creates configured http request object
         /// </summary>
-        /// <param name="boundary">boundary to distiguish between requests</param>
+        /// <param name="boundary">boundary to distinguish between requests</param>
         /// <returns>Configured http web request</returns>
         private HttpWebRequest CreateRequest(string boundary)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BASE_URL);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(BaseUrl);
             request.Timeout = 10000;
             request.ReadWriteTimeout = 32000;
             request.KeepAlive = false;

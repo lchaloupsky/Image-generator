@@ -12,7 +12,7 @@ namespace UDPipeParsing.Text_elements
         // List of extensions to this element
         public List<Element> Extensions { get; }
 
-        public Adjective(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        public Adjective(int id, string lemma, string dependency) : base(id, lemma, dependency)
         {
             this.Extensions = new List<Element>();
         }

@@ -9,10 +9,10 @@ namespace ImagePositioner.Edges
     public class AtBottomEdge : AbsoluteEdge
     {
         // Max width of left vertex
-        private int MaxWidth { get => this.Right.Width / 2; }
+        private int MaxWidth => this.Right.Width / 2;
 
         // Max height of left vertex
-        private int MaxHeight { get => this.Right.Height / 2; }
+        private int MaxHeight => this.Right.Height / 2;
 
         public AtBottomEdge() : base(PlaceType.HORIZONTAL) { }
 

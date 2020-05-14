@@ -12,7 +12,7 @@ namespace ImagePositioner.Helpers
     public class ConflictHelper
     {
         // default shift
-        private const int defaultShiftPadding = 60;
+        private const int DefaultShiftPadding = 60;
 
         /// <summary>
         /// Return vertices of graph that are in conflict
@@ -49,7 +49,7 @@ namespace ImagePositioner.Helpers
         public void ResolveAbsoluteConflict(IDrawable left, IDrawable right, PlaceType leftPlace, PlaceType rightPlace, int width, int height)
         {
             // Resolve conflicts by place type
-            // Corner cofnlicts
+            // Corner conflicts
             if (leftPlace == PlaceType.CORNER)
             {
                 if (rightPlace == PlaceType.CORNER)
@@ -149,7 +149,7 @@ namespace ImagePositioner.Helpers
         /// <returns>Vector that represents the shift</returns>
         public Vector2 GetShift(IDrawable vertex1, IDrawable vertex2)
         {
-            return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding, 0);
+            return new Vector2(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + DefaultShiftPadding, 0);
         }
 
         /// <summary>
@@ -160,7 +160,7 @@ namespace ImagePositioner.Helpers
         /// <returns>Overlap vector</returns>
         public Vector2 GetOverlapX(IDrawable vertex1, IDrawable vertex2)
         {
-            return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + defaultShiftPadding), 0);
+            return new Vector2((float)Math.Ceiling(vertex1.Position.Value.X + vertex1.Width - vertex2.Position.Value.X + DefaultShiftPadding), 0);
         }
 
         /// <summary>

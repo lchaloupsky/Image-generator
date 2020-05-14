@@ -11,8 +11,8 @@ namespace UDPipeParsing.Preprocessors
     /// </summary>
     public class TextToNumberPreprocessor : IPreprocessor
     {
-        private const int MAX_ALLOWED_NUMBER = 1_000_000;
-        private const int MAX_LENGTH_OF_COLLECTION = 4;
+        private const int MaxAllowedNumber = 1_000_000;
+        private const int MaxLengthOfCollection = 4;
 
         private Dictionary<string, long> Units { get; } = new Dictionary<string, long>
         {{"zero",0},{"one",1},{"two",2},{"three",3},{"four",4},
@@ -153,10 +153,10 @@ namespace UDPipeParsing.Preprocessors
                 return true;
             }
 
-            // Finding to the maximal lenght of collection phrase
+            // Finding to the maximal length of collection phrase
             string textToFind = word;
             int indexIncrement = 0;
-            for (int i = 1; i <= MAX_LENGTH_OF_COLLECTION; i++)
+            for (int i = 1; i <= MaxLengthOfCollection; i++)
             {
                 if (index + i >= splittedText.Length)
                     break;
@@ -192,11 +192,11 @@ namespace UDPipeParsing.Preprocessors
         /// <param name="collection">Collection to use</param>
         /// <param name="wasNumber">Flag if already was a number</param>
         /// <param name="scale">Scale to collection</param>
-        /// <param name="Collections">Collection set</param>
+        /// <param name="collections">Collection set</param>
         /// <returns>Number representation</returns>
-        private long GetNumberFromCollection(string collection, bool wasNumber, long scale, Dictionary<string, long> Collections)
+        private long GetNumberFromCollection(string collection, bool wasNumber, long scale, Dictionary<string, long> collections)
         {
-            return wasNumber ? scale * Collections[collection] : this.Random.Next(1, 5) * Collections[collection];
+            return wasNumber ? scale * collections[collection] : this.Random.Next(1, 5) * collections[collection];
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace UDPipeParsing.Preprocessors
         /// <returns>clamped value</returns>
         private long Clamp(long value)
         {
-            return (value < 0) ? 0 : (value > MAX_ALLOWED_NUMBER) ? MAX_ALLOWED_NUMBER : value;
+            return (value < 0) ? 0 : (value > MaxAllowedNumber) ? MaxAllowedNumber : value;
         }
     }
 }

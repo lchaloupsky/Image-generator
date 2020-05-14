@@ -24,7 +24,7 @@ namespace UDPipeParsing.Text_elements
         // Group height
         public int Height { get; set; }
 
-        // Indicator if group is positionated
+        // Indicator if group is positioned
         public bool IsPositioned => true;
 
         // Indicator if group is fixed
@@ -73,8 +73,8 @@ namespace UDPipeParsing.Text_elements
             // Invalidating groups
             if (drawable.Group != null)
                 drawable.Group.IsValid = false;
-            else if (drawable is IDrawableGroup)
-                ((IDrawableGroup)drawable).IsValid = false;
+            else if (drawable is IDrawableGroup group)
+                group.IsValid = false;
             else
                 drawable.Group = this;
 
@@ -124,7 +124,7 @@ namespace UDPipeParsing.Text_elements
         /// </summary>
         /// <param name="drawable1">First drawable</param>
         /// <param name="drawable2">Second drawable</param>
-        /// <param name="newPosition">New osition</param>
+        /// <param name="newPosition">New position</param>
         /// <param name="newWidth">New width</param>
         /// <param name="newHeight">New height</param>
         /// <returns>Combined image</returns>

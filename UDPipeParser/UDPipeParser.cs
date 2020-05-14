@@ -107,7 +107,7 @@ namespace UDPipeParsing
         private List<IPreprocessor> GetPreprocessors()
         {
             return new List<IPreprocessor> {
-                new CaptitalLetterPreprocessor(),
+                new CapitalLetterPreprocessor(),
                 new TextToNumberPreprocessor(),
                 new MissingArticlePreprocessor(this.Client)
             };

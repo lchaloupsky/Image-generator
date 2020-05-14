@@ -8,6 +8,8 @@ namespace UDPipeParsing.Text_elements.Helpers
     /// </summary>
     public class VerbFormHelper
     {
+        private const string IngSuffix = "ing";
+
         private HashSet<char> Vowels { get; }
 
         public VerbFormHelper()
@@ -24,32 +26,31 @@ namespace UDPipeParsing.Text_elements.Helpers
         {
             var suffix = verbLemma.Substring(verbLemma.Length - 2);
             var lemmaWithoutSuffix = verbLemma.Substring(0, verbLemma.Length - 2);
-            var numberofVowels = this.GetNumberOfVowels(verbLemma);
-            var ingSuffix = "ing";
+            var numberOfVowels = this.GetNumberOfVowels(verbLemma);
 
             // Rules for creating past participle tense
             if (suffix == "ie")
-                return lemmaWithoutSuffix + "y" + ingSuffix;
+                return lemmaWithoutSuffix + "y" + IngSuffix;
 
             if (suffix[1] == 'y')
-                return verbLemma + ingSuffix;
+                return verbLemma + IngSuffix;
 
             if (suffix == "ee" || suffix == "ye")
-                return verbLemma + ingSuffix;
+                return verbLemma + IngSuffix;
 
             if (suffix[1] == 'e')
-                return lemmaWithoutSuffix + suffix[0] + ingSuffix;
+                return lemmaWithoutSuffix + suffix[0] + IngSuffix;
 
             if (suffix[0] == suffix[1])
-                return verbLemma + ingSuffix;
+                return verbLemma + IngSuffix;
 
             if (suffix[1] == 'w' || suffix[1] == 'x')
-                return verbLemma + ingSuffix;
+                return verbLemma + IngSuffix;
 
-            if (verbLemma.Length <= 4 && numberofVowels == 1 && this.Vowels.Contains(suffix[0]))
-                return verbLemma + suffix[1] + ingSuffix;
+            if (verbLemma.Length <= 4 && numberOfVowels == 1 && this.Vowels.Contains(suffix[0]))
+                return verbLemma + suffix[1] + IngSuffix;
 
-            return verbLemma + ingSuffix;
+            return verbLemma + IngSuffix;
         }
 
         /// <summary>

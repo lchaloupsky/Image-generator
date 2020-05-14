@@ -8,11 +8,11 @@ namespace UDPipeParsing.Text_elements
     /// </summary>
     public class Negation : Element
     {
-        public Negation(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
+        public Negation(int id, string lemma, string dependency) : base(id, lemma, dependency) { }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
-            // Depending elements are ommited because they are negated
+            // Depending elements are omitted because they are negated
             return this;
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ImageManagment.Captioning
+namespace ImageManagement.Captioning
 {
     /// <summary>
     /// Class for measuring the distance of two strings
@@ -8,11 +8,11 @@ namespace ImageManagment.Captioning
     public class LDistanceMeter
     {
         /// <summary>
-        /// Calculates standard Levenstein distance of two strings with dynamic programming
+        /// Calculates standard Levenshtein distance of two strings with dynamic programming
         /// </summary>
         /// <param name="s1">First string</param>
         /// <param name="s2">Second string</param>
-        /// <returns>Calculated Levenstein distance</returns>
+        /// <returns>Calculated Levenshtein distance</returns>
         public int CalculateStringDistance(string s1, string s2)
         {
             int[,] distances = new int[s1.Length + 1, s2.Length + 1];

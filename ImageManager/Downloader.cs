@@ -1,5 +1,5 @@
 ﻿using FlickrNet;
-using ImageManagment.Captioning;
+using ImageManagement.Captioning;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace ImageManagment
+namespace ImageManagement
 {
     /// <summary>
     /// Class to downloading images, that are not already stored
@@ -17,7 +17,7 @@ namespace ImageManagment
     public class Downloader
     {
         // Limit for tags
-        private const int MAX_NUMBER_OF_TAGS = 20;
+        private const int MaxNumberOfTags = 20;
 
         // Where to save images
         private string Location { get; }
@@ -28,7 +28,7 @@ namespace ImageManagment
         // IBM caption downloader
         private IBMCaptioner IBMCaptioner { get; }
 
-        // Levenstein Distance meter
+        // Levenshtein Distance meter
         private LDistanceMeter LDistanceMeter { get; }
 
         // Format converter
@@ -59,7 +59,9 @@ namespace ImageManagment
         /// <summary>
         /// Method for downloading new image
         /// </summary>
-        /// <param name="imageName"></param>
+        /// <param name="imageName">Image caption to find</param>
+        /// <param name="element">Base element of image caption</param>
+        /// <param name="useImageCaptioning">Flag if image captioning should be used</param>
         /// <returns>New downloaded image</returns>
         public Image DownloadImage(string imageName, string element, bool useImageCaptioning = false)
         {
@@ -105,7 +107,7 @@ namespace ImageManagment
                 }
                 catch (Exception)
                 {
-                    // Try use imagename substring
+                    // Try use image name substring
                     imageFind = this.GetImageNameSubstring(imageFind, element);
                 }
             }
@@ -127,11 +129,11 @@ namespace ImageManagment
             {
                 client.Proxy = null;
                 fileName = imageName.ToLower() + photo.Medium640Url.Substring(photo.Medium640Url.LastIndexOf('.'));
-                client.DownloadFile(new Uri(photo.Medium640Url), ReturnImageAdress(fileName));
+                client.DownloadFile(new Uri(photo.Medium640Url), ReturnImageAddress(fileName));
             }
 
-            // return newly dowloaded image
-            return new Bitmap(ReturnImageAdress(fileName));
+            // return newly downloaded image
+            return new Bitmap(ReturnImageAddress(fileName));
         }
 
         /// <summary>
@@ -209,7 +211,7 @@ namespace ImageManagment
             Semaphore.Release();
 
             // save image
-            bestImage.Save(ReturnImageAdress(imageName + '.' + Converter.ConvertToString(bestImage.RawFormat)));
+            bestImage.Save(ReturnImageAddress(imageName + '.' + Converter.ConvertToString(bestImage.RawFormat)));
 
             // return best image
             return bestImage;
@@ -283,17 +285,17 @@ namespace ImageManagment
         private string GetTags(string imageName)
         {
             var parts = imageName.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-            var tags = parts.Length > MAX_NUMBER_OF_TAGS ? string.Join(",", parts.Take(MAX_NUMBER_OF_TAGS)) : string.Join(",", parts.Take(MAX_NUMBER_OF_TAGS));
+            var tags = parts.Length > MaxNumberOfTags ? string.Join(",", parts.Take(MaxNumberOfTags)) : string.Join(",", parts);
 
             return tags;
         }
 
         /// <summary>
-        /// Auxiliary method for creating image adress to store
+        /// Auxiliary method for creating image address to store
         /// </summary>
         /// <param name="fileName">Name of an image to download</param>
-        /// <returns>Created image adress</returns>
-        private string ReturnImageAdress(string fileName)
+        /// <returns>Created image address</returns>
+        private string ReturnImageAddress(string fileName)
         {
             return Location + System.IO.Path.DirectorySeparatorChar + fileName;
         }

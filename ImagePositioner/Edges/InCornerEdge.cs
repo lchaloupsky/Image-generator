@@ -11,15 +11,15 @@ namespace ImagePositioner.Edges
     public class InCornerEdge : AbsoluteEdge
     {
         // Max left width
-        private int MaxWidth { get => this.Right.Width / 2; }
+        private int MaxWidth => this.Right.Width / 2;
 
         // Max left height
-        private int MaxHeight { get => this.Right.Height / 2; }
+        private int MaxHeight => this.Right.Height / 2;
 
         // Enum helper
         private EnumHelper EnumHelper { get; } = new EnumHelper();
 
-        // Vertical position tyoe
+        // Vertical position type
         public VerticalPlace Vertical { get; }
 
         // Horizontal position type
@@ -69,12 +69,12 @@ namespace ImagePositioner.Edges
             this.PlaceLeft(this.Right.Width, this.Right.Height);
         }
 
-        private void PlaceLeft(int RightWidth, int RightHeight)
+        private void PlaceLeft(int rightWidth, int rightHeight)
         {
             // Place it in the middle
             var rightPos = this.Right?.Position ?? new Vector2(0, 0);
-            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(RightWidth, this.Left.Width),
-                                                        this.PositionHelper.GetShiftToCenterVertex(RightHeight, this.Left.Height));
+            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(rightWidth, this.Left.Width),
+                                                        this.PositionHelper.GetShiftToCenterVertex(rightHeight, this.Left.Height));
 
             // Do shift to the right side
             Vector2 shift = (Vector2)(this.Left.Position - rightPos);

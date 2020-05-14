@@ -30,10 +30,10 @@ namespace UDPipeParsing.Text_elements
         // Noun extensions
         public List<IProcessable> Extensions { get; }
 
-        // suffix extensions of noun (some numerals, propernouns..)
+        // suffix extensions of noun (some numerals, proper nouns..)
         public List<Element> Suffixes { get; }
 
-        // Flag idicating if noun is plural or not
+        // Flag indicating if noun is plural or not
         public bool IsPlural { get; set; } = false;
 
         // Scale of Noun
@@ -66,7 +66,7 @@ namespace UDPipeParsing.Text_elements
 
         // -------Private properties--------
         // Default number for plurals
-        private const int NUMBER_OF_INSTANCES = 3;
+        private const int NumberOfInstances = 3;
 
         // Factory for creating edges
         private IEdgeFactory EdgeFactory { get; }
@@ -79,7 +79,7 @@ namespace UDPipeParsing.Text_elements
 
         private DrawableHelper DrawableHelper { get; }
 
-        public Noun(int Id, string Lemma, string Dependency, IEdgeFactory factory, ElementFactory elementFactory, IImageManager manager, int width, int height) : base(Id, Lemma, Dependency)
+        public Noun(int id, string lemma, string dependency, IEdgeFactory factory, ElementFactory elementFactory, IImageManager manager, int width, int height) : base(id, lemma, dependency)
         {
             this.Extensions = new List<IProcessable>();
             this.Suffixes = new List<Element>();
@@ -157,7 +157,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
 
             IProcessable processElement = this;
-            // Dont process negated verb
+            // Don't process negated verb
             if (!verb.IsNegated)
                 this.Actions.Add(verb);
 
@@ -179,8 +179,8 @@ namespace UDPipeParsing.Text_elements
             // Replace verb object in the graph
             if (verb.Object != null)
             {
-                if (verb.Object is NounSet)
-                    ((NounSet)verb.Object).Nouns.ForEach(n =>
+                if (verb.Object is NounSet ns)
+                    ns.Nouns.ForEach(n =>
                     {
                         if (graph.Vertices.Contains(n))
                             graph.ReplaceVertex((IDrawable)processElement, n);
@@ -195,7 +195,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
-            // Process appositinal
+            // Process appositional
             if (this.DependencyHelper.IsAppositional(num.DependencyType))
             {
                 IProcessable processElem = this;
@@ -211,7 +211,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            // We dont process time
+            // We don't process time
             if (this.DependencyHelper.IsTime(num.DependencyType))
                 return this;
 
@@ -247,8 +247,8 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Adjective adj, ISentenceGraph graph)
         {
             // Use the scale of the functional adjective
-            if (adj is FunctionalAdjective)
-                this.Scale *= ((FunctionalAdjective)adj).Scale;
+            if (adj is FunctionalAdjective funcAdj)
+                this.Scale *= funcAdj.Scale;
 
             this.Extensions.Add(adj);
             return this;
@@ -282,7 +282,7 @@ namespace UDPipeParsing.Text_elements
                     return this;
                 }
 
-                // If no edge was found create new nounset
+                // If no edge was found create new noun set
                 return this.ElementFactory.Create(this, noun, graph);
             }
 
@@ -293,7 +293,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            // Skip possesive relation
+            // Skip possessive relation
             if (this.DependencyHelper.IsPossesive(noun.DependencyType))
                 return this;
 
@@ -301,7 +301,7 @@ namespace UDPipeParsing.Text_elements
             if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return noun;
 
-            // Processing relationship between nounset and this
+            // Processing relationship between noun set and this
             this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, noun, this.Adpositions, noun.Adpositions, this.DependencyHelper.IsSubject(noun.DependencyType), () =>
              {
                  // Add to extensions
@@ -336,7 +336,7 @@ namespace UDPipeParsing.Text_elements
                     return this;
                 }
 
-                // If no edge was found insert this noun into the nounset
+                // If no edge was found insert this noun into the noun set
                 nounSet.DependencyType = this.DependencyType;
                 nounSet.Nouns.Insert(0, this);
                 nounSet.Adpositions.AddRange(this.Adpositions);
@@ -356,7 +356,7 @@ namespace UDPipeParsing.Text_elements
             if (this.IsNegated && this.DependencyHelper.IsObject(this.DependencyType))
                 return nounSet;
 
-            // Processing relationship between nounset and this
+            // Processing relationship between noun set and this
             this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, this.DependencyHelper.IsSubject(nounSet.DependencyType), () =>
             {
                 // Add to extensions
@@ -376,11 +376,11 @@ namespace UDPipeParsing.Text_elements
 
             this.GetImage();
 
-            // If this is plural finalize wih nounset
+            // If this is plural finalize wih noun set
             IPositionateEdge newEdge;
             if (this.IsPlural)
             {
-                var finalizingElement = new NounSet(this.ElementFactory, this.EdgeFactory, this, NUMBER_OF_INSTANCES);
+                var finalizingElement = new NounSet(this.ElementFactory, this.EdgeFactory, this, NumberOfInstances);
                 newEdge = this.EdgeFactory.Create(finalizingElement, this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 return finalizingElement;
             }
@@ -422,7 +422,7 @@ namespace UDPipeParsing.Text_elements
         }
 
         /// <summary>
-        /// Gets final string word seuqence
+        /// Gets final string word sequence
         /// </summary>
         /// <returns>String representation</returns>
         private string GetFinalWordSequence()

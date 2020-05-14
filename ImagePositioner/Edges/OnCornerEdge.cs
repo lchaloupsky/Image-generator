@@ -9,10 +9,10 @@ namespace ImagePositioner.Edges
     public class OnCornerEdge : Edge
     {
         // Max left width
-        private int MaxWidth { get => (int)(this.Right.Width * 0.75); }
+        private int MaxWidth => (int)(this.Right.Width * 0.75);
 
         // Max left height
-        private int MaxHeight { get => (int)(this.Right.Height * 0.75); }
+        private int MaxHeight => (int)(this.Right.Height * 0.75);
 
         // Enum helper
         private EnumHelper EnumHelper { get; } = new EnumHelper();
@@ -61,12 +61,12 @@ namespace ImagePositioner.Edges
             this.PlaceLeft(this.Right.Width, this.Right.Height);
         }
 
-        private void PlaceLeft(int RightWidth, int RightHeight)
+        private void PlaceLeft(int rightWidth, int rightHeight)
         {
             // Place it in the middle
             var rightPos = this.Right?.Position ?? new Vector2(0, 0);
-            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(RightWidth, this.Left.Width),
-                                                        this.PositionHelper.GetShiftToCenterVertex(RightHeight, this.Left.Height));
+            this.Left.Position = rightPos + new Vector2(this.PositionHelper.GetShiftToCenterVertex(rightWidth, this.Left.Width),
+                                                        this.PositionHelper.GetShiftToCenterVertex(rightHeight, this.Left.Height));
 
             // Do shift to the right side
             Vector2 shift = (Vector2)(this.Left.Position - rightPos + new Vector2(this.Left.Width, this.Left.Height) / 2);

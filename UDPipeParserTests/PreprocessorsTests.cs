@@ -8,14 +8,14 @@ namespace UDPipeParserTests
     public class PreprocessorsTests
     {
         private MissingArticlePreprocessor MissingArticlePreprocessor { get; }
-        private CaptitalLetterPreprocessor CaptitalLetterPreprocessor { get; }
+        private CapitalLetterPreprocessor CaptitalLetterPreprocessor { get; }
         private TextToNumberPreprocessor TextToNumberPreprocessor { get; }
 
         public PreprocessorsTests()
         {
             this.MissingArticlePreprocessor = new MissingArticlePreprocessor(new UDPipeClient("english-ud-1.2-160523"));
             this.TextToNumberPreprocessor = new TextToNumberPreprocessor();
-            this.CaptitalLetterPreprocessor = new CaptitalLetterPreprocessor();
+            this.CaptitalLetterPreprocessor = new CapitalLetterPreprocessor();
 
         }
 

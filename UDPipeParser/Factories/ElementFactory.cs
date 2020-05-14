@@ -13,9 +13,9 @@ namespace UDPipeParsing.Factories
     /// </summary>
     public class ElementFactory
     {
-        private const string ADJECTIVE_NEGATION = "no";
-        private const float UP_SCALE = 1.5f;
-        private const float DOWN_SCALE = 0.75f;
+        private const string AdjectiveNegation = "no";
+        private const float UpScale = 1.5f;
+        private const float DownScale = 0.75f;
 
         private IEdgeFactory EdgeFactory { get; }
         private IImageManager Manager { get; }
@@ -183,17 +183,17 @@ namespace UDPipeParsing.Factories
         {
             // Check upscales adjectives
             if (this.DefaultUpScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], UP_SCALE);
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], UpScale);
 
             if (this.LargeUpScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 2 * UP_SCALE);
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], 2 * UpScale);
 
             // Check downscales adjectives
             if (this.DefaultDownScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DOWN_SCALE);
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DownScale);
 
             if (this.TinyDownScales.Contains(parts[2].ToLower()))
-                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DOWN_SCALE / 2);
+                return new FunctionalAdjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7], DownScale / 2);
 
             // return default adjective
             return new Adjective(int.Parse(parts[0]), parts[1].ToLower(), parts[7]);
@@ -213,7 +213,7 @@ namespace UDPipeParsing.Factories
                 type = "ADP";
 
             // Check adjective
-            if (lemmaToFind == ADJECTIVE_NEGATION)
+            if (lemmaToFind == AdjectiveNegation)
                 type = "ADJ";
 
             // Map negations

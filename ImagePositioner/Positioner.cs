@@ -41,7 +41,7 @@ namespace ImagePositioner
             // Resolving final conflicts
             this.ResolveConflicts(graph, width, height);
 
-            // Final not abolute positioned vertices centering
+            // Final not absolute positioned vertices centering
             this.PositionHelper.CenterVertices(graph.Groups.Where(g => !g.IsFixed), width, height);
 
             // OPT 1. ?

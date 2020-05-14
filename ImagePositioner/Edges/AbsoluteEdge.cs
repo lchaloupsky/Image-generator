@@ -6,7 +6,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Abstract class for all possibly absolute edges.
     /// </summary>
-    abstract public class AbsoluteEdge : Edge, IAbsolutePositionateEdge
+    public abstract class AbsoluteEdge : Edge, IAbsolutePositionateEdge
     {
         // Absolute edge place type
         public PlaceType Type { get; }
@@ -14,7 +14,7 @@ namespace ImagePositioner.Edges
         // Last connected element
         protected IDrawable LastElement { get; set; }
 
-        public AbsoluteEdge(PlaceType type)
+        protected AbsoluteEdge(PlaceType type)
         {
             this.Type = type;
         }
@@ -26,21 +26,21 @@ namespace ImagePositioner.Edges
         /// <returns>New edge connecting elements</returns>
         public abstract IPositionateEdge ResolveConflict(IAbsolutePositionateEdge edge);
 
-        protected override abstract void PositionateLeft(int maxWidth, int maxHeight);
+        protected abstract override void PositionateLeft(int maxWidth, int maxHeight);
 
-        protected override abstract void PositionateRight(int maxWidth, int maxHeight);
+        protected abstract override void PositionateRight(int maxWidth, int maxHeight);
 
         /// <summary>
         /// Connects element to the given edge
         /// </summary>
-        /// <param name="ElementToConnect">Element to connect</param>
+        /// <param name="elementToConnect">Element to connect</param>
         /// <param name="newEdge">Edge to fill</param>
         /// <returns>Filled edge</returns>
-        protected IPositionateEdge ResolveConflictWithGivenEdge(IDrawable ElementToConnect, Edge newEdge)
+        protected IPositionateEdge ResolveConflictWithGivenEdge(IDrawable elementToConnect, Edge newEdge)
         {
             this.LastElement = this.LastElement ?? this.Left;
-            newEdge.Add(this.LastElement, ElementToConnect);
-            this.LastElement = ElementToConnect;
+            newEdge.Add(this.LastElement, elementToConnect);
+            this.LastElement = elementToConnect;
 
             return newEdge;
         }

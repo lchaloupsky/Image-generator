@@ -8,10 +8,10 @@ namespace ImagePositioner.Edges
     public class AtEdge : Edge
     {
         // Max left width
-        private int MaxWidth { get => this.Right.Width / 2; }
+        private int MaxWidth => this.Right.Width / 2;
 
         // Max left height
-        private int MaxHeight { get => this.Right.Height / 2; }
+        private int MaxHeight => this.Right.Height / 2;
 
         protected override void PositionateRight(int maxWidth, int maxHeight)
         {

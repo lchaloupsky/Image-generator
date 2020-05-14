@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace ImageGeneratorInterfaces.Graph
 {
     /// <summary>
-    /// Inteface describing the sentence graph
+    /// Interface describing the sentence graph
     /// </summary>
     public interface ISentenceGraph : IDisposable
     {
@@ -49,7 +49,7 @@ namespace ImageGeneratorInterfaces.Graph
         /// Method for removing vertex from the graph
         /// </summary>
         /// <param name="vertex">Vertex to be removed</param>
-        /// <param name="removeRecursive">Flag if recursive dependendent vertices should be removed too</param>
+        /// <param name="removeRecursive">Flag if recursive dependent vertices should be removed too</param>
         void RemoveVertex(IDrawable vertex, bool removeRecursive);
 
         /// <summary>

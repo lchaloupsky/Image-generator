@@ -43,7 +43,7 @@ namespace UDPipeParsing.Text_elements
         // Helper for constructing final verb form
         private VerbFormHelper VerbFormHelper { get; }
 
-        public Verb(int Id, string Lemma, string Dependency, VerbForm form, string word) : base(Id, Lemma, Dependency)
+        public Verb(int id, string lemma, string dependency, VerbForm form, string word) : base(id, lemma, dependency)
         {
             this.VerbFormHelper = new VerbFormHelper();
             this.RelatedActions = new List<Verb>();

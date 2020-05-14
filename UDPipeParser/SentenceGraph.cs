@@ -65,6 +65,7 @@ namespace UDPipeParsing
         /// Removes vertex and all its edges from graph
         /// </summary>
         /// <param name="vertex">Vertex to remove</param>
+        /// <param name="removeRecursive">Flag if vertex dependencies should be removed too</param>
         public void RemoveVertex(IDrawable vertex, bool removeRecursive = false)
         {
             if (!this.Graph.ContainsKey(vertex))

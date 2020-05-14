@@ -15,7 +15,7 @@ namespace ImageGeneratorInterfaces.ImageManager
         bool UseImageCaptioning { get; set; }
 
         /// <summary>
-        /// Method for checking if image already exists in the manageer
+        /// Method for checking if image already exists in the manager
         /// </summary>
         /// <param name="imageName">Image name to find</param>
         /// <returns>True if exists</returns>

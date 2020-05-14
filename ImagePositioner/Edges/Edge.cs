@@ -7,7 +7,7 @@ namespace ImagePositioner.Edges
     /// <summary>
     /// Abstract edge as base class for all edges
     /// </summary>
-    abstract public class Edge : IPositionateEdge
+    public abstract class Edge : IPositionateEdge
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -117,7 +117,7 @@ namespace ImagePositioner.Edges
         /// <summary>
         /// Overrides standard ToString method
         /// </summary>
-        /// <returns>String represenatation</returns>
+        /// <returns>String representation</returns>
         public override string ToString()
         {
             return $"{this.GetType().Name} --> positioning: \n     Left: {this.Left} \n    Right: {this.Right}";

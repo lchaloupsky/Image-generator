@@ -9,7 +9,7 @@ namespace ImageGeneratorInterfaces.Edges.Factory
     public interface IEdgeFactory
     {
         /// <summary>
-        /// Method for creating abosolute positioning edges from adpositions.
+        /// Method for creating absolute positioning edges from adpositions.
         /// </summary>
         /// <param name="left">Vertex to be positioned</param>
         /// <param name="adpositions">List of adpositions</param>

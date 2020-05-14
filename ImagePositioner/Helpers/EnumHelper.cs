@@ -5,7 +5,7 @@ namespace ImagePositioner.Helpers
     /// <summary>
     /// Class for helping with enum operation
     /// </summary>
-    class EnumHelper
+    internal class EnumHelper
     {
         /// <summary>
         /// Gets random enum value

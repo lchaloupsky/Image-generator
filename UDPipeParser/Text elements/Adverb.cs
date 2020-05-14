@@ -12,7 +12,7 @@ namespace UDPipeParsing.Text_elements
         // Extending adverbs
         public List<Adverb> ExtendingAdverbs { get; }
 
-        public Adverb(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        public Adverb(int id, string lemma, string dependency) : base(id, lemma, dependency)
         {
             this.ExtendingAdverbs = new List<Adverb>();
         }

@@ -27,13 +27,13 @@ namespace ImagePositioner.Factories
             {
                 if (isRightSubject)
                 {
-                    edge = this.Create(left, right, leftAdpositions, isRightSubject);
+                    edge = this.Create(left, right, leftAdpositions, true);
                     if (edge != null)
                         leftAdpositions.Clear();
                 }
                 else
                 {
-                    edge = this.Create(left, right, rightAdpositions, isRightSubject);
+                    edge = this.Create(left, right, rightAdpositions, false);
                     if (edge != null)
                         rightAdpositions.Clear();
                 }
@@ -122,7 +122,7 @@ namespace ImagePositioner.Factories
         /// Creates two sided edge if exists
         /// </summary>
         /// <param name="edgeType">adposition or adpositional phrase</param>
-        /// <returns>Edge coresponding to edgeType</returns>
+        /// <returns>Edge corresponding to edgeType</returns>
         private Edge GetEdge(string edgeType)
         {
             switch (edgeType)

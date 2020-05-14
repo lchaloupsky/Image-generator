@@ -5,21 +5,21 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 
-namespace ImageManagment
+namespace ImageManagement
 {
     /// <summary>
-    /// Class for stored images managment
+    /// Class for stored images management
     /// </summary>
     public class FileManager
     {
         // lock file
-        private const string LOCKFILENAME = ".lockfile";
+        private const string LockFileName = ".lockfile";
 
         // Location to manage
         private string Location { get; }
 
         // allowed image extensions
-        private HashSet<string> AllowedExtenstions { get; } = new HashSet<string>() { ".jpg", ".jpeg", ".png", ".gif" };
+        private HashSet<string> AllowedExtensions { get; } = new HashSet<string>() { ".jpg", ".jpeg", ".png", ".gif" };
 
         // lockfile stream
         private FileStream FileStream { get; set; }
@@ -29,7 +29,7 @@ namespace ImageManagment
             this.Location = location;
             this.CreateFolderIfNotExists();
             if (!this.CreateLockFileIfNotExists())
-                this.FileStream = File.OpenWrite(Path.Combine(this.Location, LOCKFILENAME));
+                this.FileStream = File.OpenWrite(Path.Combine(this.Location, LockFileName));
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace ImageManagment
         public bool CheckImageExistence(string imageName)
         {
             return Directory.EnumerateFiles(this.Location, imageName + "." + "*")
-                .Where(file => this.AllowedExtenstions.Contains(Path.GetExtension(file).ToLower()))
+                .Where(file => this.AllowedExtensions.Contains(Path.GetExtension(file).ToLower()))
                 .Any();
         }
 
@@ -53,7 +53,7 @@ namespace ImageManagment
         {
             return new Bitmap(
                 Directory.EnumerateFiles(this.Location, imageName + "." + "*").
-                    Where(file => this.AllowedExtenstions.Contains(Path.GetExtension(file).ToLower())).
+                    Where(file => this.AllowedExtensions.Contains(Path.GetExtension(file).ToLower())).
                     Last()
                 );
         }
@@ -96,7 +96,7 @@ namespace ImageManagment
         /// </summary>
         public void DeleteAll()
         {
-            foreach (var image in new DirectoryInfo(this.Location).GetFiles().Where(file => file.Name != LOCKFILENAME))
+            foreach (var image in new DirectoryInfo(this.Location).GetFiles().Where(file => file.Name != LockFileName))
             {
                 image.Delete();
             }
@@ -126,7 +126,7 @@ namespace ImageManagment
         /// <returns>True if lockfile was created</returns>
         private bool CreateLockFileIfNotExists()
         {
-            var lockFilePath = Path.Combine(this.Location, LOCKFILENAME);
+            var lockFilePath = Path.Combine(this.Location, LockFileName);
             if (!File.Exists(lockFilePath))
             {
                 this.FileStream = File.Create(lockFilePath);

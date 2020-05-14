@@ -7,14 +7,14 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 
-namespace ImageManagment
+namespace ImageManagement
 {
     /// <summary>
-    /// Class for image managment for image generation
+    /// Class for image management for image generation
     /// </summary>
     public class ImageManager : IImageManager
     {
-        private const int CACHE_LIMIT = 1024;
+        private const int CacheLimit = 1024;
 
         private Downloader ImageDownloader { get; }
         private FileManager FileManager { get; }
@@ -29,7 +29,7 @@ namespace ImageManagment
             this.ImageDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.FileManager = new FileManager(location);
             this.Locks = new Dictionary<string, object>();
-            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
+            this.Cache = new LimitedDictionary<string, Image>(CacheLimit, this.Locks);
         }
 
         public ImageManager(string location)
@@ -37,7 +37,7 @@ namespace ImageManagment
             this.ImageDownloader = new Downloader(ConfigurationManager.AppSettings["apiKey"], ConfigurationManager.AppSettings["secret"], location);
             this.FileManager = new FileManager(location);
             this.Locks = new Dictionary<string, object>();
-            this.Cache = new LimitedDictionary<string, Image>(CACHE_LIMIT, this.Locks);
+            this.Cache = new LimitedDictionary<string, Image>(CacheLimit, this.Locks);
         }
 
         /// <summary>
@@ -89,7 +89,8 @@ namespace ImageManagment
         /// <summary>
         /// Return image for drawing
         /// </summary>
-        /// <param name="imageName"></param>
+        /// <param name="imageName">image caption to get</param>
+        /// <param name="element">base element if image caption to get</param>
         /// <returns>Wanted image</returns>
         public Image GetImage(string imageName, string element = null)
         {

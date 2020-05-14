@@ -1,12 +1,11 @@
 ﻿using Image_Generator.Models;
 using ImageGeneratorInterfaces.Graph;
 using ImageGeneratorInterfaces.ImageManager;
-using ImageManagment;
+using ImageManagement;
 using ImagePositioner;
 using ImagePositioner.Factories;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -79,7 +78,7 @@ namespace Image_Generator
         {
             if (this.State != GeneratorState.IDLE)
             {
-                ShowErrorMessage("You have wait until generetaion completes.");
+                ShowErrorMessage("You have wait until generation completes.");
                 return;
             }
 
@@ -229,7 +228,7 @@ namespace Image_Generator
         /// <summary>
         /// Starts image generation process
         /// </summary>
-        /// <param name="generateAction">Action genenerating images</param>
+        /// <param name="generateAction">Action generating images</param>
         private void StartGeneration(Action generateAction)
         {
             if (this.State != GeneratorState.IDLE)
@@ -308,8 +307,6 @@ namespace Image_Generator
         /// Method that creates new thread Task for generating image
         /// </summary>
         /// <param name="str">Description of image</param>
-        /// <param name="directory">Directory to save</param>
-        /// <param name="counter">Dataset image number</param>
         private void CreateImageGeneratingTask(string str)
         {
             // Create new task, that will be running in background
@@ -349,7 +346,7 @@ namespace Image_Generator
         }
 
         /// <summary>
-        /// Function to image generation for formdoes 
+        /// Function to image generation for form 
         /// </summary>
         private void GenerateImageForView()
         {
@@ -382,7 +379,7 @@ namespace Image_Generator
                         this.generatedImage.Image = Renderer.GetImage();
                     }));
 
-                    this.SetProcessStatus("Image succesfully generated");
+                    this.SetProcessStatus("Image successfully generated");
                 }
                 catch (Exception ex)
                 {
@@ -477,11 +474,11 @@ namespace Image_Generator
         }
 
         /// <summary>
-        /// Auxiliray method for showing actual count of processed images
+        /// Auxiliary method for showing actual count of processed images
         /// </summary>
         private void ShowProcessedImagesCount()
         {
-            this.ProcessedImages.Text = "Processed " + this.ProcessedBar.Value + " / " + this.ProcessedBar.Maximum + " images";
+            this.ProcessedImages.Text = $"Processed {this.ProcessedBar.Value} / {this.ProcessedBar.Maximum} images";
 
             if (this.ProcessedBar.Value == this.ProcessedBar.Maximum)
             {
@@ -506,7 +503,7 @@ namespace Image_Generator
         #region Help_Functions
 
         /// <summary>
-        /// Help method for checking internet connectin
+        /// Help method for checking internet connection
         /// </summary>
         /// <returns>True if connected to internet</returns>
         private bool CheckConnection()

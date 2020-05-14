@@ -34,7 +34,7 @@ namespace ImageGeneratorInterfaces.Parsing
         /// Method for finalizing processing of the element
         /// </summary>
         /// <param name="graph">Sentence graph</param>
-        /// <returns>Element given after finaling</returns>
+        /// <returns>Element given after finalizing</returns>
         IProcessable FinalizeProcessing(ISentenceGraph graph);
     }
 }

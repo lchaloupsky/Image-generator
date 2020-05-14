@@ -27,11 +27,11 @@ namespace UDPipeParsing.Text_elements
         // Helper for resolving coordination types
         protected CoordinationTypeHelper CoordinationTypeHelper { get; }
 
-        public Element(int Id, string Lemma, string DependencyType)
+        protected Element(int id, string lemma, string dependencyType)
         {
-            this.Id = Id;
-            this.Lemma = Lemma;
-            this.DependencyType = DependencyType;
+            this.Id = id;
+            this.Lemma = lemma;
+            this.DependencyType = dependencyType;
             this.DependencyHelper = new DependencyTypeHelper();
             this.CoordinationTypeHelper = new CoordinationTypeHelper();
         }
@@ -74,8 +74,8 @@ namespace UDPipeParsing.Text_elements
             if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
-                if (element is IDrawable)
-                    graph.RemoveVertex((IDrawable)element, true);
+                if (element is IDrawable drawable)
+                    graph.RemoveVertex(drawable, true);
 
                 if (element is Verb verb)
                 {
@@ -93,7 +93,7 @@ namespace UDPipeParsing.Text_elements
         }
 
         /// <summary>
-        /// Each child of this class processes element by themself.
+        /// Each child of this class processes element by itself.
         /// </summary>
         /// <param name="element">Element to process</param>
         /// <param name="graph">Sentence graph</param>

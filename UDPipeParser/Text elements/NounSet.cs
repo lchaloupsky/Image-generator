@@ -16,8 +16,8 @@ using UDPipeParsing.Text_elements.Helpers;
 namespace UDPipeParsing.Text_elements
 {
     /// <summary>
-    /// Represents set of nouns, that semanticly belongs together.
-    /// Älso represents plural form of nouns.
+    /// Represents set of nouns, that semantically belongs together.
+    /// Also represents plural form of nouns.
     /// </summary>
     public class NounSet : IDrawable, IProcessable
     {
@@ -29,11 +29,11 @@ namespace UDPipeParsing.Text_elements
                 if (!IsFinalized)
                     this.FinalizeSet();
 
-                return this.Position_;
+                return this._position;
             }
             set
             {
-                this.Position_ = value;
+                this._position = value;
             }
         }
         public int ZIndex
@@ -43,11 +43,11 @@ namespace UDPipeParsing.Text_elements
                 if (!IsFinalized)
                     this.FinalizeSet();
 
-                return this.ZIndex_;
+                return this._zIndex;
             }
             set
             {
-                this.ZIndex_ = value;
+                this._zIndex = value;
             }
         }
         public int Width
@@ -57,11 +57,11 @@ namespace UDPipeParsing.Text_elements
                 if (!IsFinalized)
                     this.FinalizeSet();
 
-                return this.Width_;
+                return this._width;
             }
             set
             {
-                this.Width_ = value;
+                this._width = value;
             }
         }
         public int Height
@@ -71,11 +71,11 @@ namespace UDPipeParsing.Text_elements
                 if (!IsFinalized)
                     this.FinalizeSet();
 
-                return this.Height_;
+                return this._height;
             }
             set
             {
-                this.Height_ = value;
+                this._height = value;
             }
         }
         public Image Image
@@ -85,11 +85,11 @@ namespace UDPipeParsing.Text_elements
                 if (!IsFinalized)
                     this.FinalizeSet();
 
-                return this.Image_;
+                return this._image;
             }
             set
             {
-                this.Image_ = value;
+                this._image = value;
             }
         }
         public bool IsPositioned => this.Position != null;
@@ -103,7 +103,6 @@ namespace UDPipeParsing.Text_elements
 
         // ---- Rest of public properties ----
         public List<Noun> Nouns { get; }
-        public List<Verb> Actions { get; }
         public List<Adposition> Adpositions { get; set; }
 
         // ---- Private properties -----
@@ -123,15 +122,15 @@ namespace UDPipeParsing.Text_elements
         private DrawableHelper DrawableHelper { get; }
 
         // ---- Private fields for properties ----
-        private int ZIndex_;
-        private int Width_;
-        private int Height_;
-        private Image Image_;
-        private Vector2? Position_;
+        private int _zIndex;
+        private int _width;
+        private int _height;
+        private Image _image;
+        private Vector2? _position;
 
         #region Constructors
 
-        // Private constructor to initilize object
+        // Private constructor to initialize object
         private NounSet(ElementFactory elementFactory, IEdgeFactory edgeFactory)
         {
             this.Nouns = new List<Noun>();
@@ -174,7 +173,10 @@ namespace UDPipeParsing.Text_elements
             {
                 var edge = this.EdgeFactory.Create(this, this.Adpositions.SelectMany(a => a.GetAdpositions()).Select(a => a.ToString()).ToList());
                 if (edge != null)
+                {
                     graph.AddEdge(edge);
+                    this.Adpositions.Clear();
+                }
                 else
                     this.Adpositions.AddRange(noun.Adpositions);
 
@@ -207,8 +209,8 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
-            this.Image_?.Dispose();
-            this.Image_ = null;
+            this._image?.Dispose();
+            this._image = null;
             foreach (var noun in this.Nouns)
             {
                 noun.Dispose();
@@ -233,8 +235,8 @@ namespace UDPipeParsing.Text_elements
             if (element == null)
                 return this;
 
-            if (element is Negation)
-                return this.ProcessNegation((Negation)element);
+            if (element is Negation neg)
+                return this.ProcessNegation(neg);
 
             if (element.IsNegated && !(element is Verb))
                 return this;
@@ -242,12 +244,12 @@ namespace UDPipeParsing.Text_elements
             if (this.IsNegated && this.DependencyTypeHelper.IsSubject(element.DependencyType))
                 return element;
 
-            // Check if cooridination type is allowed
+            // Check if coordination type is allowed
             if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyTypeHelper.IsConjuction(element.DependencyType))
             {
                 this.CoordinationType = CoordinationType.AND;
-                if (element is IDrawable)
-                    graph.RemoveVertex((IDrawable)element, true);
+                if (element is IDrawable vertex)
+                    graph.RemoveVertex(vertex, true);
 
                 if (element is Verb verb)
                 {
@@ -270,7 +272,7 @@ namespace UDPipeParsing.Text_elements
             switch (element)
             {
                 case Noun noun: return this.ProcessElement(noun, graph);
-                case NounSet nounset: return this.ProcessElement(nounset, graph);
+                case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Adjective adj: return this.ProcessElement(adj, graph);
                 case Adposition adp: return this.ProcessElement(adp, graph);
                 case Numeral num: return this.ProcessElement(num, graph);
@@ -345,7 +347,7 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            // We dont process time
+            // We don't process time
             if (this.DependencyTypeHelper.IsTime(num.DependencyType))
                 return this;
 
@@ -393,11 +395,11 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            // If this element is possesive return depending element
+            // If this element is possessive return depending element
             if (this.DependencyTypeHelper.IsPossesive(noun.DependencyType))
                 return this;
 
-            // Let each noun process nounphrase
+            // Let each noun process noun phrase
             if (this.DependencyTypeHelper.IsNounPhrase(noun.DependencyType) || this.DependencyTypeHelper.IsCompound(noun.DependencyType) || this.DependencyTypeHelper.IsName(noun.DependencyType))
             {
                 this.Nouns.ForEach(n => n.Process(noun, graph));
@@ -424,7 +426,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(NounSet nounSet, ISentenceGraph graph)
         {
-            // If nouset is in coordination relation
+            // If noun set is in coordination relation
             if (this.DependencyTypeHelper.IsConjuction(nounSet.DependencyType)
                 && this.CoordinationTypeHelper.IsMergingCoordination(this.CoordinationType))
             {
@@ -453,11 +455,11 @@ namespace UDPipeParsing.Text_elements
                 return this;
             }
 
-            // Return nounset if this is negated
+            // Return noun set if this is negated
             if (this.IsNegated && this.DependencyTypeHelper.IsObject(this.DependencyType))
                 return nounSet;
 
-            // Processing relationship between nounset and this
+            // Processing relationship between noun set and this
             this.DrawableHelper.ProcessEdge(graph, this.EdgeFactory, this, nounSet, this.Adpositions, nounSet.Adpositions, this.DependencyTypeHelper.IsSubject(nounSet.DependencyType), () =>
             {
                 // Add to extensions
@@ -514,8 +516,8 @@ namespace UDPipeParsing.Text_elements
 
         public IProcessable FinalizeProcessing(ISentenceGraph graph)
         {
-            // Dont create image if already is created
-            if (this.Image_ != null)
+            // Don't create image if already is created
+            if (this._image != null)
                 return this;
 
             // Finalize all nouns
@@ -561,10 +563,10 @@ namespace UDPipeParsing.Text_elements
         /// <param name="dimTuple">Tuple containing width, height, zindex, image</param>
         private void SetProperties(Tuple<int, int, int, Image> dimTuple)
         {
-            this.Width_ = dimTuple.Item1;
-            this.Height_ = dimTuple.Item2;
-            this.ZIndex_ = dimTuple.Item3;
-            this.Image_ = dimTuple.Item4;
+            this._width = dimTuple.Item1;
+            this._height = dimTuple.Item2;
+            this._zIndex = dimTuple.Item3;
+            this._image = dimTuple.Item4;
         }
 
         /// <summary>

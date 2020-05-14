@@ -15,14 +15,14 @@ namespace UDPipeParsing.Text_elements
         // List of extensions
         private List<Adjective> Extensions { get; }
 
-        public Adposition(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency)
+        public Adposition(int id, string lemma, string dependency) : base(id, lemma, dependency)
         {
             this.Extensions = new List<Adjective>();
             this.DependingAdpositions = new List<Adposition>();
         }
 
         /// <summary>
-        /// Returns collection of all dependending (even recursively depending) adpositions
+        /// Returns collection of all depending (even recursively depending) adpositions
         /// </summary>
         /// <returns>Collection of adpositions</returns>
         public IEnumerable<Adposition> GetAdpositions()

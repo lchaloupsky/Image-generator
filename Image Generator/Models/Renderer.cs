@@ -39,6 +39,10 @@ namespace Image_Generator.Models
         /// Function to draw single image to current draw field
         /// </summary>
         /// <param name="image">Image to draw</param>
+        /// <param name="x">x coordinate</param>
+        /// <param name="y">y coordinate</param>
+        /// <param name="width">image width to be drawn</param>
+        /// <param name="height">image height to be drawn</param>
         public void DrawImage(Image image, int x, int y, int width, int height)
         {
             // Finally drawing of the current image

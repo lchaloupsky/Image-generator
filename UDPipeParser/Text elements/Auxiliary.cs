@@ -8,7 +8,7 @@ namespace UDPipeParsing.Text_elements
     /// </summary>
     public class Auxiliary : Element
     {
-        public Auxiliary(int Id, string Lemma, string Dependency) : base(Id, Lemma, Dependency) { }
+        public Auxiliary(int id, string lemma, string dependency) : base(id, lemma, dependency) { }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
