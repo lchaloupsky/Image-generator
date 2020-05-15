@@ -12,7 +12,7 @@ namespace UDPipeParsing.Text_elements.Helpers
     {
         // Default scale when placing in row
         private const double RowScale = 0.75;
-        private const double CircleScale = 0.95;
+        private const double CircleScale = 0.9;
 
         // Minimal object dimension
         private const int MinObjectWidth = 50;

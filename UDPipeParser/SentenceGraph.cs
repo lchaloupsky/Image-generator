@@ -112,6 +112,7 @@ namespace UDPipeParsing
 
             // Take its edges as edges from this vertex
             this.RemoveVertex(vertexToReplace);
+            this.AddVertex(vertex);
             newEdges.ForEach(e => this.AddEdge(e));
         }
 

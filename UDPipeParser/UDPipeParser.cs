@@ -5,9 +5,9 @@ using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Parsing;
 using System;
 using System.Collections.Generic;
+using UDPipeParsing.Preprocessors;
 using UDPipeParsing.Factories;
 using UDPipeParsing.Interfaces;
-using UDPipeParsing.Preprocessors;
 using UDPipeParsing.Text_elements;
 using UDPipeParsing.Text_elements.Helpers;
 
@@ -18,8 +18,8 @@ namespace UDPipeParsing
     /// </summary>
     public class UDPipeParser
     {
-        private static readonly char[] UNSUPPORTED_CHARS = new char[] { '\'', '\"', '`','\\', '/', '>', '<', '|' };
-        private static readonly int MAX_SENTENCE_LENGTH = 1500;
+        private static readonly char[] UnsupportedChars = new char[] { '\'', '\"', '`','\\', '/', '>', '<', '|' };
+        private static readonly int MaxSentenceLength = 1500;
 
         private ElementFactory ElementFactory { get; }
         private ElementComparer Comparer { get; }
@@ -36,9 +36,11 @@ namespace UDPipeParsing
 
         /// <summary>
         /// Parses sentence given by user
-        /// Creates for each word in sentence class that correspondonds to its part of speech
+        /// Creates for each word in sentence class that corresponds to its part of speech
         /// </summary>
         /// <param name="text">Sentence given by user</param>
+        /// <param name="width">Canvas width</param>
+        /// <param name="height">Canvas height</param>
         public List<ISentenceGraph> ParseText(string text, int width, int height)
         {
             var parts = new List<ISentenceGraph>();
@@ -48,8 +50,8 @@ namespace UDPipeParsing
                 if (line.Trim() == string.Empty)
                     continue;
 
-                if (line.Length > MAX_SENTENCE_LENGTH)
-                    throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MAX_SENTENCE_LENGTH} characters.");
+                if (line.Length > MaxSentenceLength)
+                    throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MaxSentenceLength} characters.");
 
                 parts.Add(ParseSentence(PreprocessText($"{line}.")));
             }
@@ -67,7 +69,7 @@ namespace UDPipeParsing
             Dictionary<int, List<IProcessable>> dependencyTree;
             SentenceGraph graph = new SentenceGraph();
 
-            // recreating dependency tree given as RESTAPI reponse from UDPipe
+            // recreating dependency tree given as REST API response from UDPipe
             var validLines = this.Client.GetResponse(sentence);
             dependencyTree = GetDependencyTree(validLines);
 
@@ -78,13 +80,13 @@ namespace UDPipeParsing
             this.Comparer.Tree = dependencyTree;
             IProcessable element = CompressDependencyTree(dependencyTree, graph, root).FinalizeProcessing(graph);
 
-            // Clear grapg if nothing were found for safety
+            // Clear graph if nothing were found for safety
             if (element is Root)
                 graph.Clear();
 
             // Adding last processed vertex (is added only if its only vertex in sentence)
-            if (element is IDrawable)
-                graph.AddVertex((IDrawable)element);
+            if (element is IDrawable drawable)
+                graph.AddVertex(drawable);
 
             return graph;
         }
@@ -108,6 +110,7 @@ namespace UDPipeParsing
         {
             return new List<IPreprocessor> {
                 new CapitalLetterPreprocessor(),
+                new DeterminerPreprocessor(),
                 new TextToNumberPreprocessor(),
                 new MissingArticlePreprocessor(this.Client)
             };
@@ -191,7 +194,7 @@ namespace UDPipeParsing
         /// <returns>Modified string</returns>
         private string RemoveUnsupportedCharsFromSentence(string sentence)
         {
-            return string.Join(string.Empty, sentence.Split(UNSUPPORTED_CHARS, StringSplitOptions.RemoveEmptyEntries));
+            return string.Join(string.Empty, sentence.Split(UnsupportedChars, StringSplitOptions.RemoveEmptyEntries));
         }
 
         /// <summary>
@@ -213,7 +216,7 @@ namespace UDPipeParsing
             /// <returns>Order of given elements</returns>
             public int Compare(IProcessable x, IProcessable y)
             {
-                // Numerals modificating number of elements are a priority 
+                // Numerals modifying number of elements are a priority 
                 if (x is Numeral && this.DependencyTypeHelper.IsNumeralModifier(x.DependencyType))
                     return -1;
 

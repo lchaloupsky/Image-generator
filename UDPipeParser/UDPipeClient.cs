@@ -72,7 +72,7 @@ namespace UDPipeParsing
 
             return JsonObject["result"]
                 .ToString()
-                .Split(new string[] { Environment.NewLine + Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)[0]
+                .Split(new string[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries)[0]
                 .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(line => !line[0].Equals('#'))
                 .ToList();

@@ -159,7 +159,10 @@ namespace UDPipeParsing.Text_elements
 
             // Add depending drawables from dependency tree to future processing
             if (verb.DependingDrawables.Count != 0)
-                this.DependingDrawables = verb.DependingDrawables;
+            {
+                this.DependingDrawables.AddRange(verb.DependingDrawables);
+                verb.DependingDrawables.Clear();
+            }
 
             return this;
         }
@@ -185,7 +188,7 @@ namespace UDPipeParsing.Text_elements
             var obj = this.Object;
             this.Object = null;
 
-            return obj.Process(this, graph);
+            return obj?.Process(this, graph);
         }
 
         /// <summary>

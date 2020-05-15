@@ -199,13 +199,13 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsAppositional(num.DependencyType))
             {
                 IProcessable processElem = this;
-                processElem = processElem.Process(num.DependingDrawable, graph);
-                processElem = processElem.Process(num.DependingAction, graph);
+                num.DependingDrawables.ForEach(dd => processElem = processElem.Process(dd, graph));
+                num.DependingActions.ForEach(da => processElem = processElem.Process(da, graph));
                 return processElem;
             }
 
             // Process numeral expressing part of noun phrase
-            if (this.DependencyHelper.IsNounPhrase(this.DependencyType))
+            if (this.DependencyHelper.IsNounPhrase(this.DependencyType) || this.DependencyHelper.IsCompound(this.DependencyType))
             {
                 this.Extensions.Add(num);
                 return this;
@@ -290,6 +290,8 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsCompound(noun.DependencyType) || this.DependencyHelper.IsNounPhrase(noun.DependencyType) || this.DependencyHelper.IsName(noun.DependencyType))
             {
                 this.Extensions.Add(noun);
+                graph.ReplaceVertex(this, noun);
+
                 return this;
             }
 
@@ -349,6 +351,8 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyHelper.IsCompound(nounSet.DependencyType) || this.DependencyHelper.IsNounPhrase(nounSet.DependencyType) || this.DependencyHelper.IsName(nounSet.DependencyType))
             {
                 this.Extensions.Add(nounSet);
+                graph.ReplaceVertex(this, nounSet);
+
                 return this;
             }
 

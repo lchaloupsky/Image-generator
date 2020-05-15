@@ -12,11 +12,15 @@ namespace UDPipeParsing.Text_elements
         private static readonly int DEFAULT_NUMBER = 3;
 
         // Dependent drawable in the tree
-        public IProcessable DependingDrawable { get; private set; }
+        public List<IProcessable> DependingDrawables { get; private set; }
 
-        public IProcessable DependingAction { get; private set; }
+        public List<IProcessable> DependingActions { get; private set; }
 
-        public Numeral(int id, string lemma, string dependency) : base(id, lemma, dependency) { }
+        public Numeral(int id, string lemma, string dependency) : base(id, lemma, dependency)
+        {
+            this.DependingDrawables = new List<IProcessable>();
+            this.DependingActions = new List<IProcessable>();
+        }
 
         protected override IProcessable ProcessElement(IProcessable element, ISentenceGraph graph)
         {
@@ -38,7 +42,7 @@ namespace UDPipeParsing.Text_elements
         {
             if (this.DependencyHelper.IsAppositional(this.DependencyType))
             {
-                this.DependingDrawable = drawable;
+                this.DependingDrawables.Add(drawable);
                 return this;
             }
 
@@ -48,7 +52,7 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
-            this.DependingAction = verb;
+            this.DependingActions.Add(verb);
 
             return this;
         }

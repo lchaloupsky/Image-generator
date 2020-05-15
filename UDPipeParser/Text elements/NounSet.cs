@@ -337,10 +337,10 @@ namespace UDPipeParsing.Text_elements
             // Appositinal represents offset to nouns in the set
             if (this.DependencyTypeHelper.IsAppositional(num.DependencyType) && num.GetValue() < this.NumberOfInstances)
             {
-                for (int i = this.LastProcessedNoun; i < num.GetValue() - 1 + LastProcessedNoun; i++)
+                for (int i = this.LastProcessedNoun; i <= num.GetValue() - 1 + LastProcessedNoun; i++)
                 {
-                    this.Nouns[i].Process(num.DependingDrawable, graph);
-                    this.Nouns[i].Process(num.DependingAction, graph);
+                    num.DependingDrawables.ForEach(dd => this.Nouns[i].Process(dd, graph));
+                    num.DependingActions.ForEach(da => this.Nouns[i].Process(da, graph));
                 }
 
                 LastProcessedNoun += num.GetValue();
@@ -403,6 +403,8 @@ namespace UDPipeParsing.Text_elements
             if (this.DependencyTypeHelper.IsNounPhrase(noun.DependencyType) || this.DependencyTypeHelper.IsCompound(noun.DependencyType) || this.DependencyTypeHelper.IsName(noun.DependencyType))
             {
                 this.Nouns.ForEach(n => n.Process(noun, graph));
+                graph.ReplaceVertex(this, noun);
+
                 return this;
             }
 

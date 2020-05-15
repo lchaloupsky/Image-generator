@@ -49,6 +49,7 @@
     <Compile Include="Factories\ElementFactory.cs" />
     <Compile Include="Interfaces\IPreprocessor.cs" />
     <Compile Include="Preprocessors\CapitalLetterPreprocessor.cs" />
+    <Compile Include="Preprocessors\DeterminerPreprocessor.cs" />
     <Compile Include="Preprocessors\MisssingArticlePreprocessor.cs" />
     <Compile Include="Preprocessors\TextToNumberPreprocessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

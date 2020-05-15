@@ -16,6 +16,9 @@ namespace ImageManagement
     /// </summary>
     public class Downloader
     {
+        // Limit for number of tries
+        private const int MaxNumberOfTries = 25;
+
         // Limit for tags
         private const int MaxNumberOfTags = 20;
 
@@ -76,6 +79,10 @@ namespace ImageManagement
             {
 
                 tryCount++;
+
+                // Throw exception if maximum number of tries was exceeded
+                if (tryCount > MaxNumberOfTries)
+                    throw new ArgumentException($"There is no image existing on Flickr with description: {imageName}");
 
                 // throw away tags, if Flickr cannot find and image after some number of trials
                 if (tryCount > tags.Length)
@@ -268,7 +275,7 @@ namespace ImageManagement
         private string GetImageNameSubstring(string imageName, string element)
         {
             if (!imageName.Contains(' '))
-                return imageName;
+                return element;
 
             var lastCut = imageName.Substring(Math.Max(0, imageName.LastIndexOf(' ')));
             if (lastCut == element)
