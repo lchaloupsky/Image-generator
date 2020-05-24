@@ -335,6 +335,8 @@ namespace UDPipeParsing.Text_elements
             // Appositinal represents offset to nouns in the set
             if (this.DependencyTypeHelper.IsAppositional(num.DependencyType) && num.GetValue() < this.NumberOfInstances)
             {
+                this.GetAllNouns();
+
                 for (int i = this.LastProcessedNoun; i <= num.GetValue() - 1 + LastProcessedNoun; i++)
                 {
                     num.DependingDrawables.ForEach(dd => this.Nouns[i].Process(dd, graph));
