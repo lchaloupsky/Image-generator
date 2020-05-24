@@ -1,4 +1,5 @@
-﻿using ImageGeneratorInterfaces.Graph.DrawableElement;
+﻿using System;
+using ImageGeneratorInterfaces.Graph.DrawableElement;
 using ImageGeneratorInterfaces.ImageManager;
 using ImageGeneratorInterfaces.Rendering;
 using System.Drawing;
@@ -17,7 +18,16 @@ namespace UDPipeParserTests.Mocks
         public bool IsPositioned => this.Position != null;
         public bool IsFixed { get; set; }
         public void CombineIntoGroup(IDrawable drawable) { }
-        public void Dispose() { }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
         public void Draw(IRenderer renderer, IImageManager manager) { }
+
+        private void Dispose(bool disposing)
+        {
+            this.Image?.Dispose();
+        }
     }
 }

@@ -123,11 +123,9 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
-            this.Image?.Dispose();
-            this.Image = null;
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
-
         #endregion
 
         #region Processing elements
@@ -445,6 +443,15 @@ namespace UDPipeParsing.Text_elements
             return final;
         }
 
+        /// <summary>
+        /// Disposes managed objects
+        /// </summary>
+        /// <param name="disposing"></param>
+        private void Dispose(bool disposing)
+        {
+            this.Image?.Dispose();
+            this.Image = null;
+        }
         #endregion
     }
 }

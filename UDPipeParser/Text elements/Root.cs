@@ -70,9 +70,14 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
             this.Image?.Dispose();
             this.Image = null;
-            GC.SuppressFinalize(this);
         }
     }
 }

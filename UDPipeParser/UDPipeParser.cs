@@ -47,13 +47,15 @@ namespace UDPipeParsing
             text = this.RemoveUnsupportedCharsFromSentence(text);
             foreach (var line in text.Split(new char[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (line.Trim() == string.Empty)
+                var trimmed = line.Trim();
+
+                if (trimmed == string.Empty || trimmed.Length <= 1)
                     continue;
 
-                if (line.Length > MaxSentenceLength)
+                if (trimmed.Length > MaxSentenceLength)
                     throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MaxSentenceLength} characters.");
 
-                parts.Add(ParseSentence(PreprocessText($"{line}.")));
+                parts.Add(ParseSentence(PreprocessText($"{trimmed}.")));
             }
 
             return parts;

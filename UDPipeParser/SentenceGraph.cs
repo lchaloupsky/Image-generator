@@ -121,6 +121,15 @@ namespace UDPipeParsing
         /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if(this.Graph.Count == 0)
+                return;
+
             foreach (var vertex in this.Vertices)
             {
                 if (vertex.Image != null)
@@ -134,7 +143,6 @@ namespace UDPipeParsing
             }
 
             this.Graph.Clear();
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>

@@ -152,6 +152,9 @@ namespace UDPipeParsing.Text_elements
             this.DependencyType = noun.DependencyType;
             this.Nouns.Add(noun);
             this.GenerateNouns(numberOfInstances);
+            this.NumberOfInstances = numberOfInstances;
+            this.PluralForm = noun.Lemma;
+            this.BaseNoun = noun;
         }
 
         // Constructs noun set of noun plural form with default number of instances
@@ -211,14 +214,7 @@ namespace UDPipeParsing.Text_elements
 
         public void Dispose()
         {
-            this._image?.Dispose();
-            this._image = null;
-            foreach (var noun in this.Nouns)
-            {
-                noun.Dispose();
-            }
-
-            this.Nouns.Clear();
+            Dispose(true);   
             GC.SuppressFinalize(this);
         }
 
@@ -602,6 +598,25 @@ namespace UDPipeParsing.Text_elements
                 this.GenerateNouns(this.NumberOfInstances);
 
             return Nouns;
+        }
+
+        /// <summary>
+        /// Disposes managed objects
+        /// </summary>
+        /// <param name="disposing"></param>
+        private void Dispose(bool disposing)
+        {
+            if (this.Nouns.Count == 0)
+                return;
+
+            this._image?.Dispose();
+            this._image = null;
+            foreach (var noun in this.Nouns)
+            {
+                noun.Dispose();
+            }
+
+            this.Nouns.Clear();
         }
 
         #endregion
