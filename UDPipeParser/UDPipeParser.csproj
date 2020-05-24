@@ -65,6 +65,7 @@
     <Compile Include="Text elements\Helpers\DependencyTypeHelper.cs" />
     <Compile Include="Text elements\Helpers\DrawableHelper.cs" />
     <Compile Include="Text elements\Helpers\ImageCombineHelper.cs" />
+    <Compile Include="Text elements\Helpers\ProcessableHelper.cs" />
     <Compile Include="Text elements\Helpers\VerbFormHelper.cs" />
     <Compile Include="Text elements\MetaNoun.cs" />
     <Compile Include="Text elements\Negation.cs" />

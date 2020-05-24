@@ -195,25 +195,24 @@ namespace UDPipeParsing.Text_elements
 
         private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
         {
+            IProcessable processElem = this;
+            num.DependingDrawables.ForEach(dd => processElem = processElem.Process(dd, graph));
+            num.DependingActions.ForEach(da => processElem = processElem.Process(da, graph));
+
             // Process appositional
             if (this.DependencyHelper.IsAppositional(num.DependencyType))
-            {
-                IProcessable processElem = this;
-                num.DependingDrawables.ForEach(dd => processElem = processElem.Process(dd, graph));
-                num.DependingActions.ForEach(da => processElem = processElem.Process(da, graph));
                 return processElem;
-            }
 
             // Process numeral expressing part of noun phrase
             if (this.DependencyHelper.IsNounPhrase(this.DependencyType) || this.DependencyHelper.IsCompound(this.DependencyType))
             {
                 this.Extensions.Add(num);
-                return this;
+                return processElem;
             }
 
             // We don't process time
             if (this.DependencyHelper.IsTime(num.DependencyType))
-                return this;
+                return processElem;
 
             // Add extension if numeral is not modifying number of instances
             if (!this.DependencyHelper.IsNumeralModifier(num.DependencyType))
@@ -223,12 +222,12 @@ namespace UDPipeParsing.Text_elements
                 else
                     this.Extensions.Add(num);
 
-                return this;
+                return processElem;
             }
 
             // no need to create noun set
             if (num.GetValue() <= 1)
-                return this;
+                return processElem;
 
             // Create new noun with given number of values
             return new NounSet(this.ElementFactory, this.EdgeFactory, this, num.GetValue());

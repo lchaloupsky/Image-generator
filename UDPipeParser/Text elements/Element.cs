@@ -27,6 +27,9 @@ namespace UDPipeParsing.Text_elements
         // Helper for resolving coordination types
         protected CoordinationTypeHelper CoordinationTypeHelper { get; }
 
+        // Helper for processable elements
+        protected ProcessableHelper ProcessableHelper { get; }
+
         protected Element(int id, string lemma, string dependencyType)
         {
             this.Id = id;
@@ -34,6 +37,7 @@ namespace UDPipeParsing.Text_elements
             this.DependencyType = dependencyType;
             this.DependencyHelper = new DependencyTypeHelper();
             this.CoordinationTypeHelper = new CoordinationTypeHelper();
+            this.ProcessableHelper = new ProcessableHelper();
         }
 
         public override string ToString()
@@ -66,7 +70,12 @@ namespace UDPipeParsing.Text_elements
                 return this.ProcessNegation((Negation)element);
 
             if (element.IsNegated && !(this is Noun) && !(element is Verb))
+            {
+                if (element is IDrawable drawable)
+                    graph.RemoveVertex(drawable, true);
+
                 return this;
+            }
 
             if (this.IsNegated && this.DependencyHelper.IsSubject(element.DependencyType))
                 return element;
@@ -78,12 +87,7 @@ namespace UDPipeParsing.Text_elements
                     graph.RemoveVertex(drawable, true);
 
                 if (element is Verb verb)
-                {
-                    if (verb.Object != null)
-                        graph.RemoveVertex((IDrawable)verb.Object, true);
-
-                    verb.DependingDrawables.ForEach(dd => graph.RemoveVertex((IDrawable)dd, true));
-                }
+                    this.ProcessableHelper.RemoveVerbFromGraph(verb, graph);
 
                 return this;
             }

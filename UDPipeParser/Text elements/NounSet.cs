@@ -120,6 +120,7 @@ namespace UDPipeParsing.Text_elements
         private DependencyTypeHelper DependencyTypeHelper { get; }
         private CoordinationTypeHelper CoordinationTypeHelper { get; }
         private DrawableHelper DrawableHelper { get; }
+        private ProcessableHelper ProcessableHelper { get; }
 
         // ---- Private fields for properties ----
         private int _zIndex;
@@ -141,6 +142,7 @@ namespace UDPipeParsing.Text_elements
             this.DependencyTypeHelper = new DependencyTypeHelper();
             this.CoordinationTypeHelper = new CoordinationTypeHelper();
             this.DrawableHelper = new DrawableHelper();
+            this.ProcessableHelper = new ProcessableHelper();
         }
 
         // Constructs noun set with given noun and given number of instances
@@ -239,7 +241,12 @@ namespace UDPipeParsing.Text_elements
                 return this.ProcessNegation(neg);
 
             if (element.IsNegated && !(element is Verb))
+            {
+                if(element is IDrawable drawable)
+                    graph.RemoveVertex(drawable, true);
+
                 return this;
+            }
 
             if (this.IsNegated && this.DependencyTypeHelper.IsSubject(element.DependencyType))
                 return element;
@@ -252,12 +259,7 @@ namespace UDPipeParsing.Text_elements
                     graph.RemoveVertex(vertex, true);
 
                 if (element is Verb verb)
-                {
-                    if (verb.Object != null)
-                        graph.RemoveVertex((IDrawable)verb.Object, true);
-
-                    verb.DependingDrawables.ForEach(dd => graph.RemoveVertex((IDrawable)dd, true));
-                }
+                    this.ProcessableHelper.RemoveVerbFromGraph(verb, graph);
 
                 return this;
             }
@@ -454,6 +456,15 @@ namespace UDPipeParsing.Text_elements
                 this.Nouns.AddRange(nounSet.GetAllNouns());
                 nounSet.Nouns.Clear();
                 graph.ReplaceVertex(this, nounSet);
+                return this;
+            }
+
+            // Part of this noun
+            if (this.DependencyTypeHelper.IsCompound(nounSet.DependencyType) || this.DependencyTypeHelper.IsNounPhrase(nounSet.DependencyType) || this.DependencyTypeHelper.IsName(nounSet.DependencyType))
+            {
+                this.Nouns.ForEach(n => n.Process(nounSet, graph));
+                graph.ReplaceVertex(this, nounSet);
+
                 return this;
             }
 

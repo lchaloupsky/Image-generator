@@ -10,7 +10,7 @@ namespace UDPipeParsing.Preprocessors
     /// <summary>
     /// Checks all determiners in sentence are lower case, they are doing mess if they are not
     /// </summary>
-    internal class DeterminerPreprocessor : IPreprocessor
+    public class DeterminerPreprocessor : IPreprocessor
     {
         // Set of english determiners
         private static readonly HashSet<string> Determiners = new HashSet<string>() { "a", "an", "the" };

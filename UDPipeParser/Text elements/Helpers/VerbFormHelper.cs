@@ -24,6 +24,9 @@ namespace UDPipeParsing.Text_elements.Helpers
         /// <returns>Past participle form of verb</returns>
         public string CreatePastParticipleTense(string verbLemma)
         {
+            if (verbLemma.Length < 3)
+                return $"{verbLemma}ing";
+
             var suffix = verbLemma.Substring(verbLemma.Length - 2);
             var lemmaWithoutSuffix = verbLemma.Substring(0, verbLemma.Length - 2);
             var numberOfVowels = this.GetNumberOfVowels(verbLemma);

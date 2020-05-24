@@ -11,7 +11,7 @@ namespace UDPipeParsing.Preprocessors
     /// </summary>
     public class TextToNumberPreprocessor : IPreprocessor
     {
-        private const int MaxAllowedNumber = 1_000_000;
+        private const int MaxAllowedNumber = 1_000;
         private const int MaxLengthOfCollection = 4;
 
         private Dictionary<string, long> Units { get; } = new Dictionary<string, long>

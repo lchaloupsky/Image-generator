@@ -8,29 +8,30 @@ namespace UDPipeParserTests
     public class PreprocessorsTests
     {
         private MissingArticlePreprocessor MissingArticlePreprocessor { get; }
-        private CapitalLetterPreprocessor CaptitalLetterPreprocessor { get; }
+        private CapitalLetterPreprocessor CapitalLetterPreprocessor { get; }
         private TextToNumberPreprocessor TextToNumberPreprocessor { get; }
+        private DeterminerPreprocessor DeterminerPreprocessor { get; }
 
         public PreprocessorsTests()
         {
             this.MissingArticlePreprocessor = new MissingArticlePreprocessor(new UDPipeClient("english-ud-1.2-160523"));
             this.TextToNumberPreprocessor = new TextToNumberPreprocessor();
-            this.CaptitalLetterPreprocessor = new CapitalLetterPreprocessor();
-
+            this.CapitalLetterPreprocessor = new CapitalLetterPreprocessor();
+            this.DeterminerPreprocessor = new DeterminerPreprocessor();
         }
 
         [TestMethod]
         public void CapitalLetterConvertTest()
         {
             string text = "lower text";
-            var preprocessed = this.CaptitalLetterPreprocessor.Preprocess(text);
+            var preprocessed = this.CapitalLetterPreprocessor.Preprocess(text);
 
             Assert.IsTrue(char.IsUpper(preprocessed[0]));
             Assert.AreEqual(preprocessed[0], char.ToUpper(text[0]));
             Assert.AreEqual(preprocessed.Substring(1), text.Substring(1));
 
             text = "Upper text";
-            preprocessed = this.CaptitalLetterPreprocessor.Preprocess(text);
+            preprocessed = this.CapitalLetterPreprocessor.Preprocess(text);
             Assert.AreEqual(text, preprocessed);
         }
 
@@ -57,7 +58,7 @@ namespace UDPipeParserTests
 
             number = "21312412";
             preprocessed = this.TextToNumberPreprocessor.Preprocess(number);
-            Assert.AreEqual("1000000", preprocessed);
+            Assert.AreEqual("1000", preprocessed);
 
             number = "one hundred and forty two";
             preprocessed = this.TextToNumberPreprocessor.Preprocess(number);
@@ -81,7 +82,7 @@ namespace UDPipeParserTests
 
             number = "Twenty-two thousand one hundred and thirty nine";
             preprocessed = this.TextToNumberPreprocessor.Preprocess(number);
-            Assert.AreEqual("22139", preprocessed);
+            Assert.AreEqual("1000", preprocessed);
 
             number = "several";
             preprocessed = this.TextToNumberPreprocessor.Preprocess(number);
@@ -173,6 +174,42 @@ namespace UDPipeParserTests
             textToPreprocess = "Some men are playing sports";
             correctText = "Some men are playing sports";
             preprocessedText = this.MissingArticlePreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+        }
+
+        [TestMethod]
+        public void DeterminerPreprocessTest()
+        {
+            string textToPreprocess, correctText, preprocessedText;
+
+            textToPreprocess = "A big woman on table";
+            correctText = "A big woman on table";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+
+            textToPreprocess = "The woman on table in room";
+            correctText = "The woman on table in room";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+
+            textToPreprocess = "woman on A table in a room";
+            correctText = "woman on a table in a room";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+
+            textToPreprocess = "Very large woman is playing with ball on top of The mountain";
+            correctText =  "Very large woman is playing with ball on top of the mountain";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+
+            textToPreprocess = "Women are painting A picture";
+            correctText = "Women are painting a picture";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
+            Assert.AreEqual(correctText, preprocessedText);
+
+            textToPreprocess = "Some men are playing sports A";
+            correctText = "Some men are playing sports a";
+            preprocessedText = this.DeterminerPreprocessor.Preprocess(textToPreprocess);
             Assert.AreEqual(correctText, preprocessedText);
         }
     }
