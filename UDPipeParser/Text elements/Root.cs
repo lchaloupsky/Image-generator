@@ -46,8 +46,11 @@ namespace UDPipeParsing.Text_elements
             // Resize to fit preserve width/height ratio
             this.DrawableHelper.ResizeToImage(this);
 
+            // Set centered position
+            this.Position = new Vector2((renderer.Width - this.Width) / 2, 0);
+
             // Draw image across whole canvas
-            renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, renderer.Width, renderer.Height);
+            renderer.DrawImage(this.Image, (int)this.Position.Value.X, (int)this.Position.Value.Y, this.Width, this.Height);
         }
 
         public void CombineIntoGroup(IDrawable drawable)

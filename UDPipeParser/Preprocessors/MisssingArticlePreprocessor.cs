@@ -138,7 +138,7 @@ namespace UDPipeParsing.Preprocessors
                         finalIndex[index] = i;
 
                 // Register that noun has already determiner
-                if (this.IsDeterminer(parts[3], parts[7]))
+                if (this.IsDeterminer(parts[3], parts[7]) && index > 0)
                 {
                     if (this.DependencyTypeHelper.IsPossesive(responseLines[index - 1][7]))
                         index = int.Parse(responseLines[index - 1][6]);

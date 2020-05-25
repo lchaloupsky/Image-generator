@@ -55,7 +55,7 @@ namespace UDPipeParsing
                 if (trimmed.Length > MaxSentenceLength)
                     throw new ArgumentException($"Sentence is too long. Maximal length of sentence is {MaxSentenceLength} characters.");
 
-                parts.Add(ParseSentence(PreprocessText($"{trimmed}.")));
+                parts.Add(ParseSentence(PreprocessText($"{trimmed} .")));
             }
 
             return parts;
