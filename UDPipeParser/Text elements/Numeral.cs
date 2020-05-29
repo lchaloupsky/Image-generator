@@ -16,6 +16,8 @@ namespace UDPipeParsing.Text_elements
 
         public List<IProcessable> DependingActions { get; private set; }
 
+        public IProcessable DependingNumeral { get; private set; }
+
         public Numeral(int id, string lemma, string dependency) : base(id, lemma, dependency)
         {
             this.DependingDrawables = new List<IProcessable>();
@@ -30,6 +32,7 @@ namespace UDPipeParsing.Text_elements
                 case NounSet nounSet: return this.ProcessElement(nounSet, graph);
                 case Coordination cor: return this.ProcessCoordination(cor);
                 case Verb verb: return this.ProcessElement(verb, graph);
+                case Numeral num: return this.ProcessElement(num, graph);
                 default: break;
             }
 
@@ -53,6 +56,14 @@ namespace UDPipeParsing.Text_elements
         private IProcessable ProcessElement(Verb verb, ISentenceGraph graph)
         {
             this.DependingActions.Add(verb);
+
+            return this;
+        }
+
+        private IProcessable ProcessElement(Numeral num, ISentenceGraph graph)
+        {
+            num.DependencyType = this.DependencyType;
+            this.DependingNumeral = num;
 
             return this;
         }

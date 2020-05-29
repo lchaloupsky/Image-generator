@@ -3,5 +3,4 @@ C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\bin\Debug\I
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Debug\ImageGeneratorInterfaces.csproj.CoreCompileInputs.cache
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Debug\ImageGeneratorInterfaces.dll
 C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Debug\ImageGeneratorInterfaces.pdb
-C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\bin\Debug\ImageGeneratorInterfaces.dll.CodeAnalysisLog.xml
-C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\bin\Debug\ImageGeneratorInterfaces.dll.lastcodeanalysissucceeded
+C:\Users\lukas\source\repos\Image Generator\ImageGeneratorInterfaces\obj\Debug\ImageGeneratorInterfaces.csprojAssemblyReference.cache

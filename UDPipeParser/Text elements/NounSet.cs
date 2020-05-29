@@ -344,6 +344,7 @@ namespace UDPipeParsing.Text_elements
                 }
 
                 LastProcessedNoun += num.GetValue();
+                this.Process(num.DependingNumeral, graph);
                 return this;
             }
 

@@ -85,7 +85,7 @@ namespace ImageManagement
                     throw new ArgumentException($"There is no image existing on Flickr with description: {imageName}");
 
                 // throw away tags, if Flickr cannot find and image after some number of trials
-                if (tryCount > tags.Length)
+                if (tryCount > MaxNumberOfTags)
                     tags = "";
 
                 try

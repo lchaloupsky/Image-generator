@@ -196,6 +196,7 @@ namespace UDPipeParsing.Text_elements
             IProcessable processElem = this;
             num.DependingDrawables.ForEach(dd => processElem = processElem.Process(dd, graph));
             num.DependingActions.ForEach(da => processElem = processElem.Process(da, graph));
+            this.Process(num.DependingNumeral, graph);
 
             // Process appositional
             if (this.DependencyHelper.IsAppositional(num.DependencyType))

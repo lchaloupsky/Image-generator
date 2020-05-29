@@ -18,7 +18,7 @@ namespace UDPipeParsing
     /// </summary>
     public class UDPipeParser
     {
-        private static readonly char[] UnsupportedChars = new char[] { '\'', '\"', '`','\\', '/', '>', '<', '|' };
+        private static readonly char[] UnsupportedChars = new char[] { '\"', '`','\\', '/', '>', '<', '|' };
         private static readonly int MaxSentenceLength = 1500;
 
         private ElementFactory ElementFactory { get; }
