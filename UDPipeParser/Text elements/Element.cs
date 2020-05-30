@@ -78,7 +78,13 @@ namespace UDPipeParsing.Text_elements
             }
 
             if (this.IsNegated && this.DependencyHelper.IsSubject(element.DependencyType))
+            {
+                if(this is Verb verb)
+                    this.ProcessableHelper.RemoveVerbFromGraph(verb, graph);
+
                 return element;
+            }
+
 
             if (!this.CoordinationTypeHelper.IsAllowedCoordination(this.CoordinationType) && this.DependencyHelper.IsConjuction(element.DependencyType))
             {
