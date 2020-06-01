@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -111,11 +112,18 @@ namespace ImageManagement
                     // Not connected to the internet
                     if (ex.Status == WebExceptionStatus.NameResolutionFailure)
                         throw;
+
+                    // Reserved file names
+                    if (ex.InnerException != null && ex.InnerException is ArgumentException)
+                        imageName = $"#{imageName}";
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // Try use image name substring
                     imageFind = this.GetImageNameSubstring(imageFind, element);
+
+                    if (ex is ExternalException)
+                        imageName = $"#{imageName}";
                 }
             }
 
