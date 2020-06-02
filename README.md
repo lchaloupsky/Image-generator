@@ -1,7 +1,7 @@
 ﻿# Image Generator
 
 ## Overview
-Image Generator is a tool for generating synthetic images for english text description. Principle of this tool is based on rules, relations and patterns between objects in text and not on the more widely used way with machine learning using GANs.
+Image Generator is a tool for generating synthetic images for natural language text descriptions in English. Principle of this tool is based on rules, relations and patterns between objects in text and not on the more widely used way with machine learning using GANs.
 
 ## Instalation
 ### Requirements
@@ -31,7 +31,8 @@ This usage shows result right in the application. Simply enter image description
 After the process finishes, you can download generated image in the location you specify.
 
 ### Dataset usage
-Second option is loading a dataset for which you want to generate images. Supported file types are:
+Second option is loading a dataset for which you want to generate images. Each description should be on separate line. 
+First column should be identificator of the image. Supported file types are:
 * `.txt`
 * `.token`
 
